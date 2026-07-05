@@ -11,6 +11,7 @@ CPMAddPackage("gh:catchorg/Catch2@3.15.1")
 add_subdirectory(${ROOT_DIR}/src coap)
 
 set(SOURCE_FILES
+    header-test.cpp
     uint-test.cpp
 )
 
