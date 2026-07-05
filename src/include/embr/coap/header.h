@@ -3,6 +3,7 @@
 #include "header/codes.h"
 #include "fwd.h"
 
+#include <estd/bit.h>
 #include <estd/cstdint.h>
 #include <estd/optional.h>
 
@@ -33,6 +34,14 @@ public:
         return 0x40 | (type << 4) | tkl;
     }
 
+    static constexpr uint16_t swap(uint16_t v)
+    {
+        if constexpr(estd::endian::native == estd::endian::little)
+            return estd::byteswap(v);
+        else
+            return v;
+    }
+
     header() = default;
     constexpr explicit header(estd::nullopt_t) :
         ver_t_tkl_{0x40},
@@ -43,14 +52,18 @@ public:
     constexpr explicit header(types type, uint8_t code, unsigned tkl, uint16_t mid) :
         ver_t_tkl_{ver_t_tkl(type, tkl)},
         code_{code},
-        mid_{mid}
+        mid_{swap(mid)}
     {}
 
     constexpr explicit header(types type, uint8_t code, uint16_t mid = 0) :
         ver_t_tkl_{ver_t_tkl(type, 0)},
         code_{code},
-        mid_{mid}
+        mid_{swap(mid)}
     {}
+
+    constexpr uint16_t mid() const { return swap(mid_); }
+
+    constexpr void mid(uint16_t v) { mid_ = swap(v); }
 
     void tkl(unsigned v)
     {
