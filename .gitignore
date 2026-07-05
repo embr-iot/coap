@@ -1,0 +1,5 @@
+# CMake general
+build/
+
+# Qt Creator
+*.user
