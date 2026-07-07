@@ -28,12 +28,11 @@ inline Return uint_get(const uint8_t* value, const unsigned len)
     return v;
 }
 
-// Encode an integer in big endian/network order.
+/// Encode an integer in big endian/network order (low level call).
+/// @param out = begin + len - 1
 template <typename Integer>
-constexpr uint8_t* uint_encode(const uint8_t* const begin, uint8_t* end, Integer value)
+constexpr void uint_encode(const uint8_t* const begin, uint8_t* out, Integer value)
 {
-    uint8_t* out = end - 1;
-
     while(out > begin)
     {
         *out-- = value & 0xFF;
@@ -41,8 +40,6 @@ constexpr uint8_t* uint_encode(const uint8_t* const begin, uint8_t* end, Integer
     }
 
     *out = value & 0xFF;
-
-    return end;
 }
 
 }
@@ -50,7 +47,9 @@ constexpr uint8_t* uint_encode(const uint8_t* const begin, uint8_t* end, Integer
 template <typename Integer>
 constexpr uint8_t* uint_encode(uint8_t* out, Integer value, const unsigned len)
 {
-    return internal::uint_encode(out, out + len, value);
+    uint8_t* end = out + len;
+    internal::uint_encode(out, end - 1, value);
+    return end;
 }
 
 template <typename Integer>

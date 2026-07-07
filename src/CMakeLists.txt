@@ -10,7 +10,9 @@ include(../tools/cmake/setvars.cmake)
 CPMAddPackage("gh:malachi-iot/estdlib@0.8.12-alpha3")
 
 set(INTERFACE_NAME ${PROJECT_NAME})
-set(SOURCE_FILES encode.cpp)
+set(SOURCE_FILES
+    decode.cpp
+    encode.cpp)
 
 add_library(${INTERFACE_NAME} INTERFACE)
 add_library(embr::coap ALIAS ${INTERFACE_NAME})
