@@ -14,5 +14,5 @@ TEST_CASE("header")
     h1.code(coap::header::PUT);
     h1.mid(1);
 
-    constexpr coap::header h2{codes::ACK, codes::CONTENT, 0};
+    constexpr coap::header h2{codes::ACK, codes::Content, 0};
 }

@@ -7,6 +7,7 @@ namespace embr::coap::internal {
 // DEBT: Enums here have convention discrepency with header codes
 struct option_enum_base
 {
+    // https://datatracker.ietf.org/doc/html/rfc7252#section-3.1
     enum extended_modes : uint8_t
     {
         Extended8Bit = 13,

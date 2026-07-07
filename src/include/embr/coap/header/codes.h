@@ -11,16 +11,17 @@ struct header_base
         GET = 1,
         POST,
         PUT,
-        DELETE
+        DELETE,
     };
 
     enum response_codes
     {
-        CREATED                 = EMBR_COAP_RESPONSE_CODE(2, 01),
-        CONTENT                 = EMBR_COAP_RESPONSE_CODE(2, 05),
-        NOT_FOUND               = EMBR_COAP_RESPONSE_CODE(4, 04),
-        UNSUPPORTED_CONTENT_FORMAT  = EMBR_COAP_RESPONSE_CODE(4, 15),
-        INTERNAL_SERVER_ERROR   = EMBR_COAP_RESPONSE_CODE(5, 00),
+        OK                      = EMBR_COAP_RESPONSE_CODE(2, 00),
+        Created                 = EMBR_COAP_RESPONSE_CODE(2, 01),
+        Content                 = EMBR_COAP_RESPONSE_CODE(2, 05),
+        NotFound                = EMBR_COAP_RESPONSE_CODE(4, 04),
+        UnsupportedContentFormat    = EMBR_COAP_RESPONSE_CODE(4, 15),
+        InternalServerError     = EMBR_COAP_RESPONSE_CODE(5, 00),
     };
 };
 

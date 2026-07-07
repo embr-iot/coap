@@ -12,6 +12,7 @@ add_subdirectory(${ROOT_DIR}/src coap)
 
 set(SOURCE_FILES
     header-test.cpp
+    options-decode-test.cpp
     options-encode-test.cpp
     uint-test.cpp
 )
