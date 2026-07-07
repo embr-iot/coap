@@ -4,4 +4,8 @@
 
 TEST_CASE("options encoding", "[encode][options]")
 {
+    SECTION("numbers")
+    {
+
+    }
 }
