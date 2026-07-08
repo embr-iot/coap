@@ -11,18 +11,17 @@ namespace embr::coap {
 
 namespace internal {
 
-template <typename Return>
-inline Return uint_get(const uint8_t* value, const unsigned len)
+template <typename Integer>
+constexpr Integer uint_decode(const uint8_t* in, const uint8_t* end)
 {
-    // coap cleverly allows 0-length integer buffers, which means value=0
-    if(len == 0) return 0;
+    // since CoAP uints have an implicit value of 0 (when len == 0), proactively
+    // init to 0 rather than doing an len == 0 check every time
+    Integer v{0};
 
-    Return v = *value;
-
-    for(unsigned i = 1; i < len; i++)
+    for(;in < end; ++in)
     {
         v <<= 8;
-        v |= value[i];
+        v |= *in;
     }
 
     return v;
@@ -43,6 +42,13 @@ constexpr void uint_encode(const uint8_t* const begin, uint8_t* out, Integer val
 }
 
 }
+
+template <typename Integer = unsigned>
+constexpr Integer uint_decode(const uint8_t* in, const unsigned len)
+{
+    return internal::uint_decode<Integer>(in, in + len);
+}
+
 
 template <typename Integer>
 constexpr uint8_t* uint_encode(uint8_t* out, Integer value, const unsigned len)

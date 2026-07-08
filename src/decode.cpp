@@ -1,6 +1,7 @@
 #include "assert.h"
 
 #include "embr/coap/options/decode.h"
+#include "embr/coap/uint.h"
 
 namespace embr::coap {
 
@@ -22,10 +23,13 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
         {
             delta = 13 + *in;
             *number = static_cast<numbers>(number_current + delta);
+            ++in;
             break;
         }
 
         case modes::Extended16Bit:
+            *number = static_cast<numbers>(number_current + 269 + uint_decode(in, 2));
+            in += 2;
             break;
 
         case modes::Reserved:
@@ -40,9 +44,12 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
     {
         case modes::Extended8Bit:
             *length = 13 + *in;
+            ++in;
             break;
 
         case modes::Extended16Bit:
+            *length = 269 + uint_decode(in, 2);
+            in += 2;
             break;
 
         case modes::Reserved:
