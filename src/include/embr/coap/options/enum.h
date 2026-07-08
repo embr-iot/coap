@@ -81,6 +81,15 @@ struct option_enum_base
         Echo = 252,
         RequestTag = 292
     };
+
+    // https://datatracker.ietf.org/doc/html/rfc7252#section-3.2
+    enum value_formats
+    {
+        Empty,
+        Opaque,
+        Uint,
+        String
+    };
 };
 
 }
@@ -89,5 +98,6 @@ namespace embr::coap::options {
 
 using content_formats = internal::option_enum_base::content_formats;
 using numbers = internal::option_enum_base::numbers;
+using value_formats = internal::option_enum_base::value_formats;
 
 }

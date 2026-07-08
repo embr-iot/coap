@@ -35,4 +35,28 @@ TEST_CASE("options encoding", "[encode][options]")
             REQUIRE_THAT(estd::span(out, 5), Catch::Matchers::RangeEquals(expected));
         }
     }
+    SECTION("encoder")
+    {
+        using encoder_type = coap::options::encoder<estd::detail::basic_ospanbuf<uint8_t>>;
+
+        encoder_type encoder(out);
+
+        // DEBT: Use pubseekoff reporting since it's more standard
+        auto out_size = [&] { return encoder.out().pos(); };
+
+        SECTION("basic uri")
+        {
+            encoder << coap::options::uri_path << "Hello";
+
+            REQUIRE(out_size() == 6);
+        }
+        SECTION("complex uri + host")
+        {
+            encoder <<
+                coap::options::uri_host << "host" <<
+                coap::options::uri_path << "v1" << "thing";
+
+            REQUIRE(out_size() == 14);
+        }
+    }
 }
