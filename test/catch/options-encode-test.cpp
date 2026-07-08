@@ -8,7 +8,11 @@ using namespace embr;
 
 TEST_CASE("options encoding", "[encode][options]")
 {
-    uint8_t out[32]{};
+    union
+    {
+        uint8_t out[32]{};
+        char char_out[32];
+    };
 
     using numbers = coap::options::numbers;
 
@@ -37,9 +41,10 @@ TEST_CASE("options encoding", "[encode][options]")
     }
     SECTION("encoder")
     {
-        using encoder_type = coap::options::encoder<estd::detail::basic_ospanbuf<uint8_t>>;
+        //using encoder_type = coap::options::encoder<estd::detail::basic_ospanbuf<uint8_t>>;
+        using encoder_type = coap::options::encoder<estd::ospanbuf>;
 
-        encoder_type encoder(out);
+        encoder_type encoder(char_out);
 
         // DEBT: Use pubseekoff reporting since it's more standard
         auto out_size = [&] { return encoder.out().pos(); };
@@ -57,6 +62,18 @@ TEST_CASE("options encoding", "[encode][options]")
                 coap::options::uri_path << "v1" << "thing";
 
             REQUIRE(out_size() == 14);
+
+            SECTION("then payload")
+            {
+                // accepting rvalue as lhs isn't yet supported
+                //encoder << coap::payload << "xyz";
+                auto test = encoder << coap::payload;
+
+                test.write("123", 3);
+                test << "xyz";
+
+                REQUIRE(out_size() == 21);
+            }
         }
     }
 }

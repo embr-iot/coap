@@ -3,3 +3,7 @@ build/
 
 # Qt Creator
 *.user
+
+# CLion
+# Sorry buddy, your own .gitignore has burnt me in the past
+.idea/
