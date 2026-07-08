@@ -22,6 +22,15 @@ struct string_traits_base
 };
 
 template <numbers n>
+struct uint_traits_base
+{
+    static constexpr numbers number = n;
+    static constexpr auto format = value_formats::Uint;
+    static constexpr const char* name = "N/A";
+    static constexpr bool multi = false;
+};
+
+template <numbers n>
 struct option_traits;
 
 template <>
@@ -99,7 +108,7 @@ class single_encoder
 public:
     using traits = option_traits<n>;
     using encoder_type = encoder<Streambuf>;
-    using char_type = typename Streambuf::char_type;
+    using char_type = typename estd::remove_reference_t<Streambuf>::char_type;
     using const_pointer = const char_type*;
 
     encoder_type* parent_;
@@ -150,7 +159,7 @@ public:
     friend class payload_encoder;
 
 public:
-    using char_type = typename Streambuf::char_type;
+    using char_type = typename estd::remove_reference_t<Streambuf>::char_type;
     using const_pointer = const char_type*;
 
     static_assert(sizeof(char_type) == 1);
