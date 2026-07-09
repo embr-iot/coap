@@ -156,6 +156,8 @@ public:
 
         end = delta_length_encode(out, current_number_, number, length);
 
+        current_number_ = number;
+
         out_.pubseekoff(end - out, estd::ios_base::cur);
     }
 
@@ -183,14 +185,26 @@ class child_encoder : public encoder<Streambuf&>
     using base_type = encoder<Streambuf&>;
     using parent_type = coap::encoder<Streambuf>;
 
+    // We encounter a chicken-and-the-egg dependency issue here.  I didn't anticipate that.
+    // top-level encoder tries to consume child_encoder and that creates an unresolvable
+    // circular dependency here.
+    //using payload_type = typename parent_type::payload_type;
+
     parent_type* parent_;
 
 public:
-    child_encoder(parent_type* parent) : base_type(parent->out_) {}
+    child_encoder(parent_type* parent) :
+        base_type(parent->out_),
+        parent_{parent}
+    {
+    }
 
     using base_type::operator <<;
 
-    typename parent_type::payload_type& operator <<(payload_marker)
+    using payload_type = estd::detail::basic_ostream<Streambuf&>;
+
+    //typename parent_type::payload_type& operator <<(payload_marker)
+    payload_type& operator <<(payload_marker)
     {
         return *parent_ << payload_marker{};
     }

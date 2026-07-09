@@ -6,27 +6,10 @@
 
 namespace embr::coap {
 
-template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
-class encoder
+namespace internal {
+
+struct encoder_base
 {
-    // DEBT: Temporarily exposing these guys
-public:
-    using options_encoder_type = options::child_encoder<Streambuf>;
-
-    Streambuf out_;
-    using streambuf_type = Streambuf;
-
-    // FIX: Needs to be child_encoder
-    options::encoder<Streambuf&> options_{out_};
-    //options_encoder_type options_;
-
-    //using payload_type = options::payload_encoder<Streambuf&>;
-    using payload_type = estd::detail::basic_ostream<Streambuf&>;
-
-    payload_type payload_{out_};
-
-    unsigned token_length_{};
-
     enum States
     {
         Header,
@@ -35,7 +18,36 @@ public:
         Payload
     };
 
+#if !UNIT_TESTING
+protected:
+#endif
+
     States state_{Header};
+
+public:
+    constexpr States state() const { return state_; }
+};
+
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+class encoder : public internal::encoder_base
+{
+    // DEBT: Temporarily exposing these guys
+public:
+    using options_encoder_type = options::child_encoder<Streambuf>;
+
+    Streambuf out_;
+    using streambuf_type = Streambuf;
+
+    options_encoder_type options_;
+
+    //using payload_type = options::payload_encoder<Streambuf&>;
+    using payload_type = estd::detail::basic_ostream<Streambuf&>;
+
+    payload_type payload_{out_};
+
+    unsigned token_length_{};
 
 public:
     using char_type = typename streambuf_type::char_type;
@@ -43,8 +55,8 @@ public:
 
     template <class ...Args>
     constexpr explicit encoder(Args&&... args) :
-        out_(std::forward<Args>(args)...)
-        //,options_(this)
+        out_(std::forward<Args>(args)...),
+        options_(this)
     {}
 
     encoder& operator<<(const header& v)

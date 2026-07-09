@@ -58,11 +58,15 @@ TEST_CASE("options encoding", "[encode][options]")
         }
         SECTION("complex uri + host")
         {
+            constexpr uint8_t expected[] = { 0x34, 'h', 'o', 's', 't', 0x82, 'v', '1', 0x05, 't' };
+
             encoder <<
                 coap::options::uri_host << "host" <<
                 coap::options::uri_path << "v1" << "thing";
 
             REQUIRE(out_size() == 14);
+
+            REQUIRE_THAT(estd::span(out, sizeof(expected)), Catch::Matchers::RangeEquals(estd::span(expected)));
 
             /* temporarily disabled, needs 'child_encoder'
             SECTION("then payload")
@@ -81,10 +85,25 @@ TEST_CASE("options encoding", "[encode][options]")
     }
     SECTION("child_encoder")
     {
+        using namespace coap;
+        namespace o = options;
+
         using encoder_type = coap::encoder<estd::ospanbuf>;
         using options_encoder_type = typename encoder_type::options_encoder_type;
 
         encoder_type encoder(char_out);
+
+        // Synthetically brute force top-level encoder into options mode to satisfy
+        // state machine validation
+        encoder.state_ = encoder_type::Options;
+
         options_encoder_type options_encoder(&encoder);
+
+        options_encoder << o::uri_host << "host" << o::uri_path << "v1" << "t";
+        options_encoder << payload << "x";
+
+        constexpr uint8_t expected[] = { 0x34, 'h', 'o', 's', 't', 0x82, 'v', '1', 0x01, 't', 0xFF, 'x'};
+
+        REQUIRE_THAT(estd::span(out, sizeof(expected)), Catch::Matchers::RangeEquals(estd::span(expected)));
     }
 }
