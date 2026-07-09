@@ -1,3 +1,5 @@
+#include "test-data.h"
+
 #include <embr/coap/encode.h>
 #include <embr/coap/options/encode.h>
 
@@ -102,8 +104,6 @@ TEST_CASE("options encoding", "[encode][options]")
         options_encoder << o::uri_host << "host" << o::uri_path << "v1" << "t";
         options_encoder << payload << "x";
 
-        constexpr uint8_t expected[] = { 0x34, 'h', 'o', 's', 't', 0x82, 'v', '1', 0x01, 't', 0xFF, 'x'};
-
-        REQUIRE_THAT(estd::span(out, sizeof(expected)), Catch::Matchers::RangeEquals(estd::span(expected)));
+        REQUIRE_THAT(estd::span(out, sizeof(test::data1)), Catch::Matchers::RangeEquals(estd::span(test::data1)));
     }
 }

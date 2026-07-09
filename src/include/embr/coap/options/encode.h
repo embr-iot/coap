@@ -5,12 +5,10 @@
 
 #include "fwd.h"
 #include "../fwd.h"
+#include "markers.h"
 #include "traits.h"
 
 namespace embr::coap::options {
-
-template <numbers n>
-struct option_marker {};
 
 template <numbers n>
 struct option
@@ -32,19 +30,6 @@ constexpr option<numbers::UriPath> uri_path(const char* path)
     return { .length = (unsigned)estd::char_traits<char>::length(path), .string = path };
 }
 */
-
-// Operate like std cout manipulators
-inline namespace markers {
-
-inline constexpr option_marker<numbers::ContentFormat> content_format;
-inline constexpr option_marker<numbers::UriHost> uri_host;
-inline constexpr option_marker<numbers::UriPath> uri_path;
-inline constexpr option_marker<numbers::UriQuery> uri_query;
-inline constexpr option_marker<numbers::Observe> observe;
-inline constexpr option_marker<numbers::Echo> echo;
-inline constexpr option_marker<numbers::ProxyUri> proxy_uri;
-
-}
 
 /* Not ready yet
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
