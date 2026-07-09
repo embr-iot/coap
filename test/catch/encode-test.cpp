@@ -4,7 +4,7 @@
 
 #include <estd/span.h>
 
-using namespace embr;
+using namespace embr::coap;
 
 TEST_CASE("top-level encoding", "[encode]")
 {
@@ -14,13 +14,15 @@ TEST_CASE("top-level encoding", "[encode]")
         char char_out[32];
     };
 
-    using encoder_type = coap::encoder<estd::ospanbuf>;
+    using encoder_type = encoder<estd::ospanbuf>;
 
     encoder_type encoder(char_out);
 
-    encoder << coap::header(coap::header::NON, coap::header::PUT);
-    encoder << coap::options::uri_path << "Hello";
-    encoder << coap::payload << "x";
+    encoder << header(header::NON, header::PUT);
+    encoder << options::uri_path << "Hello";
+    encoder << payload << "x";
 
-    constexpr uint8_t expected[] {};
+    constexpr uint8_t expected[] { 0x50, 3, 0, 0, 0xB5, 'H', 'e', 'l', 'l', 'o', 0xFF, 'x'};
+
+    REQUIRE_THAT(estd::span(out, 12), Catch::Matchers::RangeEquals(estd::span(expected)));
 }

@@ -9,12 +9,21 @@ namespace embr::coap {
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
 class encoder
 {
+    // DEBT: Temporarily exposing these guys
+public:
+    using options_encoder_type = options::child_encoder<Streambuf>;
+
     Streambuf out_;
     using streambuf_type = Streambuf;
+
+    // FIX: Needs to be child_encoder
     options::encoder<Streambuf&> options_{out_};
+    //options_encoder_type options_;
 
     //using payload_type = options::payload_encoder<Streambuf&>;
     using payload_type = estd::detail::basic_ostream<Streambuf&>;
+
+    payload_type payload_{out_};
 
     unsigned token_length_{};
 
@@ -33,7 +42,10 @@ public:
     using const_pointer = const char_type*;
 
     template <class ...Args>
-    constexpr explicit encoder(Args&&... args) : out_(std::forward<Args>(args)...) {}
+    constexpr explicit encoder(Args&&... args) :
+        out_(std::forward<Args>(args)...)
+        //,options_(this)
+    {}
 
     encoder& operator<<(const header& v)
     {
@@ -70,7 +82,8 @@ public:
     {
         assert(state_ == Options);
         state_ = Payload;
-        return options_ << payload_marker{};
+        out_.sputc(0xFF);
+        return payload_;
     }
 };
 

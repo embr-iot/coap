@@ -1,3 +1,4 @@
+#include <embr/coap/encode.h>
 #include <embr/coap/options/encode.h>
 
 #include <catch2/catch_all.hpp>
@@ -63,6 +64,7 @@ TEST_CASE("options encoding", "[encode][options]")
 
             REQUIRE(out_size() == 14);
 
+            /* temporarily disabled, needs 'child_encoder'
             SECTION("then payload")
             {
                 encoder_type::payload_type test = encoder << coap::payload;
@@ -74,7 +76,15 @@ TEST_CASE("options encoding", "[encode][options]")
 
                 REQUIRE(out_size() == 22);
                 REQUIRE(std::string_view(char_out + 15, 7) == "123xyzF");
-            }
+            }   */
         }
+    }
+    SECTION("child_encoder")
+    {
+        using encoder_type = coap::encoder<estd::ospanbuf>;
+        using options_encoder_type = typename encoder_type::options_encoder_type;
+
+        encoder_type encoder(char_out);
+        options_encoder_type options_encoder(&encoder);
     }
 }

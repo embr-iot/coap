@@ -63,12 +63,15 @@ public:
     {}
 };  */
 
-template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf, bool has_grandparent = false>
 class single_encoder
 {
 public:
     using traits = option_traits<n>;
-    using encoder_type = encoder<Streambuf>;
+    using encoder_type = estd::conditional_t<
+        has_grandparent,
+        child_encoder<Streambuf>,
+        encoder<Streambuf>>;
     using streambuf_type = typename estd::remove_reference_t<Streambuf>;
     using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
@@ -101,9 +104,12 @@ public:
 
     encoder_type& operator<<(payload_marker)
     {
-        return *parent_;
+        static_assert(has_grandparent, "Payload marker only supported in full-encoder mode");
+
+        return *parent_ << payload_marker{};
     }
 };
+
 
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
 class encoder
@@ -116,7 +122,7 @@ public:
 
     using streambuf_type = typename estd::remove_reference_t<Streambuf>;
 
-    template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2>
+    template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2, bool has_grandparent>
     friend class single_encoder;
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2>
@@ -124,9 +130,6 @@ public:
 
     //using payload_type = payload_encoder<Streambuf&>;
     using payload_type = estd::detail::basic_ostream<Streambuf&>;
-
-    // NOTE: This guy MAY want to live out in parent encoder.  Remains to be seen
-    payload_type payload_{out_};
 
 public:
     using char_type = typename streambuf_type::char_type;
@@ -164,17 +167,34 @@ public:
         return *this;
     }
 
-    payload_type& operator <<(payload_marker)
-    {
-        out_.sputc(0xFF);
-        return payload_;
-    }
-
     template <numbers n>
     single_encoder<n, Streambuf> operator<<(option_marker<n>)
     {
         return { this };
     }
+
+    // child_encoder needed for this
+    encoder& operator<<(payload_marker) = delete;
+};
+
+template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+class child_encoder : public encoder<Streambuf&>
+{
+    using base_type = encoder<Streambuf&>;
+    using parent_type = coap::encoder<Streambuf>;
+
+    parent_type* parent_;
+
+public:
+    child_encoder(parent_type* parent) : base_type(parent->out_) {}
+
+    using base_type::operator <<;
+
+    typename parent_type::payload_type& operator <<(payload_marker)
+    {
+        return *parent_ << payload_marker{};
+    }
+
 };
 
 }
