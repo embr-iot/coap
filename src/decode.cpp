@@ -8,12 +8,22 @@ namespace embr::coap {
 
 namespace options {
 
+//namespace internal {
+
+inline void delta_length_decode_number(const uint8_t* in)
+{
+
+}
+
+//}
+
 const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, numbers* number, unsigned* length)
 {
     using modes = internal::option_enum_base::extended_modes;
 
     unsigned delta = *in >> 4;
     unsigned length_raw = *in & 0x0F;
+    const uint8_t* end = in + *length;
 
     ++in;
 
@@ -23,13 +33,20 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
         {
             delta = 13 + *in;
             *number = static_cast<numbers>(number_current + delta);
+
             ++in;
+            if(in > end)   return nullptr;
+
             break;
         }
 
         case modes::Extended16Bit:
+
             *number = static_cast<numbers>(number_current + 269 + uint_decode(in, 2));
+
             in += 2;
+            if(in > end)   return nullptr;
+
             break;
 
         case modes::Reserved:
@@ -45,12 +62,13 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
         case modes::Extended8Bit:
             *length = 13 + *in;
             ++in;
+            if(in > end)   return nullptr;
             break;
 
         case modes::Extended16Bit:
             *length = 269 + uint_decode(in, 2);
             in += 2;
-            break;
+            return in > end ? nullptr : in;
 
         case modes::Reserved:
             return nullptr;
@@ -62,6 +80,28 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
 
     return in;
 }
+
+void delta_length_decoder::decode_byte(uint8_t c)
+{
+    switch(state_)
+    {
+        case Header:
+            break;
+
+        case Delta1:
+            break;
+
+        case Delta2:
+            break;
+
+        case Length1:
+            break;
+
+        case Length2:
+            break;
+    }
+}
+
 
 }
 

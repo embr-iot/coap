@@ -15,7 +15,23 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
 // https://datatracker.ietf.org/doc/html/rfc7252#section-3.1
 class delta_length_decoder
 {
+    enum states
+    {
+        Header,
+        Delta1,
+        Delta2,
+        Length1,
+        Length2
+    };
 
+    states state_{Header};
+
+    // Technically CoAP supports delta/length > 65536 - but that isn't happening
+    uint16_t delta_{};
+    uint16_t length_{};
+
+public:
+    void decode_byte(uint8_t c);
 };
 
 /*
@@ -51,7 +67,13 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F>
 void decoder<Streambuf>::decode(F&& f)
 {
+    uint8_t buf[5];
 
+    int read = in_.sgetn(buf, 5);
+
+    if(read > 0)
+    {
+    }
 }
 
 
