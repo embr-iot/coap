@@ -18,6 +18,9 @@ TEST_CASE("top-level encoding", "[encode]")
 
     encoder_type encoder(char_out);
 
+    encoder << coap::header(coap::header::NON, coap::header::PUT);
     encoder << coap::options::uri_path << "Hello";
     encoder << coap::payload << "x";
+
+    constexpr uint8_t expected[] {};
 }

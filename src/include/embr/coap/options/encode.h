@@ -5,53 +5,12 @@
 
 #include "fwd.h"
 #include "../fwd.h"
+#include "traits.h"
 
 namespace embr::coap::options {
 
-// One-shot flavor
-// https://datatracker.ietf.org/doc/html/rfc7252#section-3.1
-uint8_t* delta_length_encode(uint8_t* out, unsigned current_number, numbers number, unsigned length);
-
 template <numbers n>
-struct string_traits_base
-{
-    static constexpr numbers number = n;
-    static constexpr auto format = value_formats::String;
-    static constexpr const char* name = "N/A";
-    static constexpr bool multi = false;
-};
-
-template <numbers n>
-struct uint_traits_base
-{
-    static constexpr numbers number = n;
-    static constexpr auto format = value_formats::Uint;
-    static constexpr const char* name = "N/A";
-    static constexpr bool multi = false;
-};
-
-template <numbers n>
-struct option_traits;
-
-template <>
-struct option_traits<numbers::UriPath> : string_traits_base<numbers::UriPath>
-{
-    static constexpr const char* name = "UriPath";
-
-    static constexpr bool multi = true;
-};
-
-template <>
-struct option_traits<numbers::UriHost> : string_traits_base<numbers::UriHost>
-{
-    static constexpr const char* name = "UriHost";
-};
-
-template <numbers n>
-struct option_marker
-{
-
-};
+struct option_marker {};
 
 template <numbers n>
 struct option
@@ -80,12 +39,12 @@ inline namespace markers {
 inline constexpr option_marker<numbers::ContentFormat> content_format;
 inline constexpr option_marker<numbers::UriHost> uri_host;
 inline constexpr option_marker<numbers::UriPath> uri_path;
+inline constexpr option_marker<numbers::UriQuery> uri_query;
 inline constexpr option_marker<numbers::Observe> observe;
+inline constexpr option_marker<numbers::Echo> echo;
+inline constexpr option_marker<numbers::ProxyUri> proxy_uri;
 
 }
-
-template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
-class encoder;
 
 /* Not ready yet
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>

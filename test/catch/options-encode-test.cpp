@@ -23,7 +23,7 @@ TEST_CASE("options encoding", "[encode][options]")
             // Upper part = 11 (Uri) lower part = 10 (length)
             static constexpr uint8_t expected[] = { 0xBA };
 
-            uint8_t* out2 = coap::options::delta_length_encode(out, (numbers)0, numbers::UriPath, 10);
+            uint8_t* out2 = coap::options::delta_length_encode(out, 0, numbers::UriPath, 10);
 
             REQUIRE(out2 == out + 1);
             REQUIRE(*out == expected[0]);
