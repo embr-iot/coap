@@ -29,6 +29,7 @@ public:
         RST
     };
 
+private:
     static constexpr uint8_t ver_t_tkl(types type, unsigned tkl)
     {
         return 0x40 | (type << 4) | tkl;
@@ -42,6 +43,7 @@ public:
             return v;
     }
 
+public:
     header() = default;
     constexpr explicit header(estd::nullopt_t) :
         ver_t_tkl_{0x40},
@@ -69,22 +71,22 @@ public:
     {
         assert(v <= 8);
 
-        ver_t_tkl_ = (ver_t_tkl_ & TKL_MASK) | v;
+        ver_t_tkl_ = (ver_t_tkl_ & ~TKL_MASK) | v;
     }
 
     constexpr unsigned tkl() const
     {
-        return ver_t_tkl_ & ~TKL_MASK;
+        return ver_t_tkl_ & TKL_MASK;
     }
 
     constexpr void type(types v)
     {
-        ver_t_tkl_ = (ver_t_tkl_ & TYPE_MASK) | (v << 4);
+        ver_t_tkl_ = (ver_t_tkl_ & ~TYPE_MASK) | (v << 4);
     }
 
     constexpr types type() const
     {
-        return static_cast<types>((ver_t_tkl_ & ~TYPE_MASK) >> 4);
+        return static_cast<types>((ver_t_tkl_ & TYPE_MASK) >> 4);
     }
 
     constexpr void code(request_codes r) { code_ = r; }

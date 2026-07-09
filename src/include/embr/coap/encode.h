@@ -62,12 +62,14 @@ public:
     template <options::numbers n>
     options::single_encoder<n, Streambuf&> operator<<(options::option_marker<n>)
     {
-        //assert(state_ == Options);
+        assert(state_ == Options);
         return { &options_ };
     }
 
     payload_type& operator<<(payload_marker)
     {
+        assert(state_ == Options);
+        state_ = Payload;
         return options_ << payload_marker{};
     }
 };

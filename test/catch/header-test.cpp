@@ -10,9 +10,12 @@ TEST_CASE("header")
 
     coap::header h1{};
 
+    h1.tkl(1);
     h1.type(coap::header::NON);
     h1.code(coap::header::PUT);
     h1.mid(1);
 
-    constexpr coap::header h2{codes::ACK, codes::Content, 0};
+    constexpr coap::header h2{codes::ACK, codes::Content};
+
+    REQUIRE(h1.tkl() == 1);
 }
