@@ -87,11 +87,13 @@ inline constexpr option_marker<numbers::Observe> observe;
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
 class encoder;
 
+/* Not ready yet
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
-class payload_encoder : public estd::detail::basic_ostream<Streambuf&>
+class payload_encoder : public estd::detail::basic_ostream<Streambuf>
 {
-    using base_type = estd::detail::basic_ostream<Streambuf&>;
-    using encoder_type = encoder<Streambuf>;
+    using base_type = estd::detail::basic_ostream<Streambuf>;
+    using streambuf_type = typename estd::remove_reference_t<Streambuf>;
+    using encoder_type = encoder<streambuf_type>;
 
     encoder_type* parent_;
 
@@ -100,7 +102,7 @@ public:
         base_type{parent->out_},
         parent_{parent}
     {}
-};
+};  */
 
 template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
 class single_encoder
@@ -108,7 +110,8 @@ class single_encoder
 public:
     using traits = option_traits<n>;
     using encoder_type = encoder<Streambuf>;
-    using char_type = typename estd::remove_reference_t<Streambuf>::char_type;
+    using streambuf_type = typename estd::remove_reference_t<Streambuf>;
+    using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
 
     encoder_type* parent_;
@@ -152,14 +155,22 @@ public:
     unsigned current_number_{};
     Streambuf out_;
 
+    using streambuf_type = typename estd::remove_reference_t<Streambuf>;
+
     template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2>
     friend class single_encoder;
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2>
     friend class payload_encoder;
 
+    //using payload_type = payload_encoder<Streambuf&>;
+    using payload_type = estd::detail::basic_ostream<Streambuf&>;
+
+    // NOTE: This guy MAY want to live out in parent encoder.  Remains to be seen
+    payload_type payload_{out_};
+
 public:
-    using char_type = typename estd::remove_reference_t<Streambuf>::char_type;
+    using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
 
     static_assert(sizeof(char_type) == 1);
@@ -194,13 +205,12 @@ public:
         return *this;
     }
 
-    payload_encoder<Streambuf> operator <<(payload_marker)
+    payload_type& operator <<(payload_marker)
     {
         out_.sputc(0xFF);
-        return { this };
+        return payload_;
     }
 
-    // DEBT: If we can, take this into mutator category so we can get rid of trailing ()
     template <numbers n>
     single_encoder<n, Streambuf> operator<<(option_marker<n>)
     {

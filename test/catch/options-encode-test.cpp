@@ -65,14 +65,15 @@ TEST_CASE("options encoding", "[encode][options]")
 
             SECTION("then payload")
             {
-                // accepting rvalue as lhs isn't yet supported
-                //encoder << coap::payload << "xyz";
-                auto test = encoder << coap::payload;
+                encoder_type::payload_type test = encoder << coap::payload;
 
+                // DEBT: https://github.com/malachi-iot/estdlib/issues/218 poop
+                test.setf(estd::ios_base::uppercase);
                 test.write("123", 3);
-                test << "xyz";
+                test << "xyz" << estd::hex << 15;
 
-                REQUIRE(out_size() == 21);
+                REQUIRE(out_size() == 22);
+                REQUIRE(std::string_view(char_out + 15, 7) == "123xyzF");
             }
         }
     }
