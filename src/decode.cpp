@@ -83,9 +83,15 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
 
 void delta_length_decoder::decode_byte(uint8_t c)
 {
+    using modes = internal::option_enum_base::extended_modes;
+
     switch(state_)
     {
         case Header:
+            delta_ = c >> 4;
+            length_ = c & 0x0F;
+            //if(delta_ == modes::Extended8Bit)
+
             break;
 
         case Delta1:
