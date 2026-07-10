@@ -1,8 +1,7 @@
 #pragma once
 
-#include "decode/fwd.h"
 #include "decode/decoder.hpp"
-#include "decode/delta_length_decoder.h"
+#include "decode/stateful.hpp"
 
 #include "fwd.h"
 #include "markers.h"

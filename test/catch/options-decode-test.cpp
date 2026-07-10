@@ -75,4 +75,16 @@ TEST_CASE("options decoding", "[decode][options]")
         REQUIRE(err == estd::errc{});
         REQUIRE(counter == 3);
     }
+    SECTION("stateful decoder")
+    {
+        using namespace coap::options;
+
+        estd::detail::basic_ispanbuf<const uint8_t> in(test::data1);
+        stateful_decoder decoder;
+
+        estd::errc err = decoder.decode(in, [](option2 o)
+            {
+
+            });
+    }
 }

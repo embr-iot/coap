@@ -8,6 +8,8 @@ namespace embr::coap::options {
 // https://datatracker.ietf.org/doc/html/rfc7252#section-3.1
 class delta_length_decoder
 {
+    friend class stateful_decoder;
+
     enum states : uint8_t
     {
         Header,

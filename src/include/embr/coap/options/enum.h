@@ -47,7 +47,7 @@ struct option_enum_base
 
 
     // https://datatracker.ietf.org/doc/html/rfc7252#section-12.2
-    enum numbers
+    enum numbers : uint16_t
     {
         /// format: opaque
         IfMatch = 1,

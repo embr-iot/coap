@@ -57,6 +57,9 @@ struct option2 : option_base
 {
     numbers number;
 
+    // only used by stateful decoder
+    bool end;
+
     option2() = default;
 
     // Skirts type-punning issue since technically the last-assigned union member is
