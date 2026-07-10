@@ -43,8 +43,26 @@ TEST_CASE("options decoding", "[decode][options]")
 
         using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
 
+        int counter = 0;
+
         decoder_type decoder(test::data1);
 
-        decoder.decode([] {});
+        decoder.decode([&](auto o)
+        {
+            if constexpr(o.number == numbers::UriHost)
+            {
+                ++counter;
+                REQUIRE(o.string() == "host");
+            };
+            if constexpr(o.number == numbers::UriPath)
+            {
+                if(++counter == 2)
+                    REQUIRE(o.string() == "v1");
+                else
+                    REQUIRE(o.string() == "t");
+            };
+        });
+
+        REQUIRE(counter == 3);
     }
 }
