@@ -45,24 +45,34 @@ TEST_CASE("options decoding", "[decode][options]")
 
         int counter = 0;
 
+        estd::detail::basic_ispanbuf<const uint8_t> in(test::data1);
         decoder_type decoder(test::data1);
 
-        decoder.decode([&](auto o)
+        // compiles, but doesn't seem to call f()
+        //decode_exp(in, [&](const auto& o)
+        //estd::errc err = decode(estd::span(test::data1), [&](const auto& o)
+        estd::errc err = decoder.decode([&](const auto& o)
         {
             if constexpr(o.number == numbers::UriHost)
             {
                 ++counter;
                 REQUIRE(o.string() == "host");
-            };
-            if constexpr(o.number == numbers::UriPath)
+            }
+            else if constexpr(o.number == numbers::UriPath)
             {
                 if(++counter == 2)
                     REQUIRE(o.string() == "v1");
                 else
                     REQUIRE(o.string() == "t");
-            };
+            }
+            else
+            {
+                // NOTE: Just a sanity check that this compiles.  Otherwise not needed
+                option2 o2 = o;
+            }
         });
 
         REQUIRE(counter == 3);
+        REQUIRE(err == estd::errc{});
     }
 }

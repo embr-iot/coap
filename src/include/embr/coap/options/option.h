@@ -33,7 +33,22 @@ struct option : option_base
     {
         static_assert(traits::format == value_formats::String);
 
-        return { option_base::string_, length };
+        return { string_, length };
+    }
+
+    constexpr estd::span<const uint8_t> opaque() const
+    {
+        static_assert(traits::format == value_formats::Opaque);
+
+        return { opaque_, length };
+    }
+
+    constexpr unsigned uint() const
+    {
+        static_assert(traits::format == value_formats::Uint);
+
+        return uint_;
+
     }
 };
 
@@ -41,6 +56,8 @@ struct option : option_base
 struct option2 : option_base
 {
     numbers number;
+
+    option2() = default;
 
     // Skirts type-punning issue since technically the last-assigned union member is
     // still active.  Plus, our targets are generally gcc or llvm which type pun anyway

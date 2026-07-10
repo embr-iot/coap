@@ -153,6 +153,11 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
     return More;
 }
 
+void delta_length_decoder::reset()
+{
+    state_ = Header;
+}
+
 
 }
 
