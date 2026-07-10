@@ -15,13 +15,13 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
 // https://datatracker.ietf.org/doc/html/rfc7252#section-3.1
 class delta_length_decoder
 {
-    enum states
+    enum states : uint8_t
     {
         Header,
         Delta1,
         Delta2,
         Length1,
-        Length2
+        Length2,
     };
 
     states state_{Header};
@@ -31,7 +31,20 @@ class delta_length_decoder
     uint16_t length_{};
 
 public:
-    void decode_byte(uint8_t c);
+    enum codes
+    {
+        Done,
+        More,
+        Bad
+    };
+
+    codes decode_length();  // DEBT: Make internal
+    codes decode_byte(uint8_t c);
+
+    using modes = internal::option_enum_base::extended_modes;
+
+    constexpr unsigned delta() const { return delta_; }
+    constexpr unsigned length() const { return length_; }
 };
 
 /*

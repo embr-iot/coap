@@ -14,11 +14,28 @@ TEST_CASE("options decoding", "[decode][options]")
         coap::options::numbers number;
         unsigned length{3};
 
-        const uint8_t* out1 = coap::options::delta_length_decode(val1, 0, &number, &length);
+        SECTION("direct")
+        {
+            const uint8_t* out1 = coap::options::delta_length_decode(val1, 0, &number, &length);
 
-        REQUIRE(out1 == val1 + 3);
-        REQUIRE(number == 1);
-        REQUIRE(length == 0x1234 + 269);
+            REQUIRE(out1 == val1 + 3);
+            REQUIRE(number == 1);
+            REQUIRE(length == 0x1234 + 269);
+        }
+        SECTION("state machine")
+        {
+            coap::options::delta_length_decoder d;
+
+            bool b = d.decode_byte(val1[0]);
+            REQUIRE(b);
+            b = d.decode_byte(val1[1]);
+            REQUIRE(b);
+            b = d.decode_byte(val1[2]);
+            REQUIRE(!b);
+
+            REQUIRE(d.delta() == 1);
+            REQUIRE(d.length() == 0x1234 + 269);
+        }
     }
     SECTION("decoder")
     {

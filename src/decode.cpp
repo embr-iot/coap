@@ -81,7 +81,27 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
     return in;
 }
 
-void delta_length_decoder::decode_byte(uint8_t c)
+auto delta_length_decoder::decode_length() -> codes
+{
+    if(length_ == modes::Extended8Bit)
+    {
+        length_ = 13;
+        state_ = Length1;
+        return More;
+    }
+    else if(length_ == modes::Extended16Bit)
+    {
+        length_ = 269;
+        state_ = Length2;
+        return More;
+    }
+    else if(length_ == modes::Reserved)
+        return Bad;
+
+    return Done;
+}
+
+auto delta_length_decoder::decode_byte(uint8_t c) -> codes
 {
     using modes = internal::option_enum_base::extended_modes;
 
@@ -90,22 +110,47 @@ void delta_length_decoder::decode_byte(uint8_t c)
         case Header:
             delta_ = c >> 4;
             length_ = c & 0x0F;
-            //if(delta_ == modes::Extended8Bit)
+
+            if(delta_ == modes::Extended8Bit)
+            {
+                delta_ = 13;
+                state_ = Delta1;
+            }
+            else if(delta_ == modes::Extended16Bit)
+            {
+                delta_ = 269;
+                state_ = Delta2;
+            }
+            else if(delta_ == modes::Reserved)
+                return Bad;
+            else
+            {
+                delta_ = c >> 4;
+                return decode_length();
+            }
 
             break;
 
         case Delta1:
-            break;
+            delta_ += c;
+            return decode_length();
 
         case Delta2:
+            delta_ += c << 8;
+            state_ = Delta1;
             break;
 
         case Length1:
-            break;
+            length_ += c;
+            return Done;
 
         case Length2:
+            length_ += c << 8;
+            state_ = Length1;
             break;
     }
+
+    return More;
 }
 
 
