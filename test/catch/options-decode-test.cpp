@@ -72,7 +72,7 @@ TEST_CASE("options decoding", "[decode][options]")
             }
         });
 
-        REQUIRE(counter == 3);
         REQUIRE(err == estd::errc{});
+        REQUIRE(counter == 3);
     }
 }

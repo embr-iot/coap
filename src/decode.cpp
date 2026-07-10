@@ -125,7 +125,6 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
                 return Bad;
             else
             {
-                delta_ = c >> 4;
                 return decode_length();
             }
 
