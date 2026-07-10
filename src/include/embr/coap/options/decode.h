@@ -80,12 +80,40 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F>
 void decoder<Streambuf>::decode(F&& f)
 {
-    uint8_t buf[5];
+    delta_length_decoder dlc;
 
-    int read = in_.sgetn(buf, 5);
+    using r = delta_length_decoder::codes;
 
-    if(read > 0)
+    for(;;)
     {
+        int c = in_.sbumpc();
+
+        // Payload or end of stream
+        // DEBT: EOS not same as EOL or maybe EOF
+        if(c == 0xFF || c == -1)
+        {
+            return;
+        }
+
+        r ret = dlc.decode_byte(c);
+
+        if(ret == r::Done)
+        {
+            f();
+        }
+        else if(ret != r::Done)
+        {
+            return;
+        }
+
+        /*
+        uint8_t buf[5];
+
+        int read = in_.sgetn(buf, 5);
+
+        if(read > 0)
+        {
+        }   */
     }
 }
 

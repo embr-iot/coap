@@ -5,24 +5,11 @@
 
 #include "fwd.h"
 #include "../fwd.h"
+#include "option.h"
 #include "markers.h"
 #include "traits.h"
 
 namespace embr::coap::options {
-
-template <numbers n>
-struct option
-{
-    static constexpr numbers number = n;
-
-    unsigned length;
-    union
-    {
-        const uint8_t* opaque;
-        unsigned uint;
-        const char* string;
-    };
-};
 
 /*
 constexpr option<numbers::UriPath> uri_path(const char* path)
