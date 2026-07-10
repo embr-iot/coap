@@ -1,6 +1,7 @@
 #pragma once
 
 #include "decoder.h"
+#include "../numbers.h"
 #include "delta-length-decoder.h"
 
 #include "../traits.h"
