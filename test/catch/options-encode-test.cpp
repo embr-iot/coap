@@ -114,9 +114,19 @@ TEST_CASE("options encoding", "[encode][options]")
 
         stateful_encoder encoder(estd::nullopt);
 
-        encoder.number_and_length(out, numbers::UriPath, 10);
+        bool b = encoder.number_and_length(out, numbers::UriPath, 8);
 
+        REQUIRE(b);
         REQUIRE(encoder.temp_.size() == 1);
         REQUIRE(out.pos() == 1);
+
+        out.sputn("pathname", 8);
+
+        REQUIRE(out.pos() == 9);
+
+        b = encoder.number_and_uint(out, numbers::MaxAge, 0x123);
+
+        REQUIRE(b);
+        REQUIRE(out.pos() == 12);
     }
 }

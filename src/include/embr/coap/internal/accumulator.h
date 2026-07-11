@@ -19,6 +19,7 @@ class out_accumulator
 public:
     uint8_t buf_[N];
 
+    constexpr int pos() const { return pos_; }
     constexpr int remaining() const { return size_ - pos_; }
     constexpr int size() const { return size_; }
 

@@ -27,6 +27,12 @@ auto dispatch_number(numbers number, Ret no_match, F&& f, Args&&...args)
         case n::ContentFormat:
             return f(number_constant<n::ContentFormat>{}, std::forward<Args>(args)...);
 
+        case n::ETag:
+            return f(number_constant<n::ETag>{}, std::forward<Args>(args)...);
+
+        case n::MaxAge:
+            return f(number_constant<n::MaxAge>{}, std::forward<Args>(args)...);
+
         case n::UriHost:
             return f(number_constant<n::UriHost>{}, std::forward<Args>(args)...);
 

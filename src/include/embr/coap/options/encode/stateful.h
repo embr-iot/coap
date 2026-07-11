@@ -3,12 +3,18 @@
 #include "fwd.h"
 
 #include "../../internal/accumulator.h"
+#include "../../uint.h"
 
 #include <estd/cstdint.h>
 #include <estd/optional.h>
 
 namespace embr::coap::options {
 
+/// @brief The stateful_encoder class
+/// Usage by format:
+/// 1. empty:           number_and_length with 0 length
+/// 2. opaque/string:   number_and_length with manual subsequent streambuf calls
+/// 3. uint:            number_and_uint (auto populates length)
 class stateful_encoder
 {
 #if UNIT_TESTING
@@ -32,6 +38,27 @@ public:
         number_and_length(n, length);
         return temp_.sputn(out);
     }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf, class Unsigned>
+    bool number_and_uint(Streambuf& out, numbers n, Unsigned v)
+    {
+        // We cleverly cheat and stuff in a 0, knowing that we can rewrite
+        // without a complex re-encode since no uint options are more than 4.
+        // this also means our current temp buffer of 5 is always big enough
+        number_and_length(n, 0);
+
+        if(v == 0) return true;
+
+        const uint8_t* end = uint_encode(temp_.buf_ + temp_.size(), v);
+        // resize up accumulator to include encoded uint
+        temp_.init(end - temp_.buf_);
+        // update option header length portion with discovered size
+        temp_.buf_[0] |= temp_.size();
+        return temp_.sputn(out);
+    }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf, class Unsigned>
+    bool number_and_uint(Streambuf& out)   { return temp_.sputn(out); }
 };
 
 }

@@ -66,11 +66,28 @@ struct option_traits<numbers::ContentFormat> : uint_traits_base<numbers::Content
 };
 
 template <>
+struct option_traits<numbers::ETag> : opaque_traits_base<numbers::ETag>
+{
+    static constexpr const char* name = "ETag";
+
+    static constexpr unsigned min_length = 1;
+    static constexpr unsigned max_length = 8;
+};
+
+template <>
+struct option_traits<numbers::MaxAge> : uint_traits_base<numbers::MaxAge>
+{
+    static constexpr const char* name = "Max-Age";
+
+    static constexpr unsigned max_length = 4;
+};
+
+
+template <>
 struct option_traits<numbers::Size1> : uint_traits_base<numbers::Size1>
 {
     static constexpr const char* name = "Size1";
 };
-
 
 template <>
 struct option_traits<numbers::UriPath> : string_traits_base<numbers::UriPath>
