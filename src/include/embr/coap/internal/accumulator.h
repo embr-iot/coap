@@ -9,19 +9,41 @@ namespace embr::coap::internal {
 
 // Dead-simple output cache.  Should we consider an array out streambuf?  That is probably overkill.
 // There's a complicated wrapped/cache ostreambuf if we really want to go that route.
-template <unsigned N>
-class out_accumulator
+template <unsigned N, unsigned width = 8, bool with_ext = false>
+class __attribute__((packed)) out_accumulator
 {
     // No default initialization so we can live comfortably inside a union
 
-    uint8_t pos_, size_;
+    // with_ext & ext_mask are EXPERIMENTAL
+    static constexpr unsigned ext_mask = with_ext ?
+        (1 << (width - 1)) : 0;
+
+    unsigned
+        pos_ : width,
+        size_ : width;
 
 public:
-    uint8_t buf_[N];
+    union
+    {
+        uint8_t buf_[N];
+        const uint8_t* ext_;
+    };
 
     constexpr int pos() const { return pos_; }
     constexpr int remaining() const { return size_ - pos_; }
-    constexpr int size() const { return size_; }
+    constexpr unsigned size() const
+    {
+        return size_ & ~ext_mask;
+    }
+
+    static constexpr unsigned max_size() { return N; }
+
+    constexpr bool is_ext() const
+    {
+        static_assert(with_ext);
+
+        return size_ >> (width - 1);
+    }
 
     void init(unsigned sz = 0)
     {
@@ -46,10 +68,15 @@ public:
         int written = out.sputn((const char_type*)buf_ + pos_, remaining());
         // DEBT: IIRC written can return -1 on error here, account for that
         pos_ += written;
-        assert(pos_ <= size_);
-        return pos_ == size_;
+        assert(pos_ <= size());
+        return pos_ == size();
     }
 };
+
+static_assert(sizeof(out_accumulator<8>) == 10);
+
+static_assert(sizeof(out_accumulator<8, 4>) == 9);
+static_assert(sizeof(out_accumulator<8, 16>) == 12);
 
 
 }

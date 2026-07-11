@@ -39,6 +39,20 @@ public:
         return temp_.sputn(out);
     }
 
+    // EXPERIMENTAL, UNFINISHED
+    // Depends on the 'ext' buffer of accumulator, meaning 's' lifetime
+    // must last the duration of this option output (like string literals)
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool number_and_string(Streambuf& out, numbers n, estd::string_view s)
+    {
+        number_and_length(n, s.size());
+        if(temp_.sputn(out))
+        {
+            // move straight to ext buffer portion
+        }
+        return false;
+    }
+
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf, class Unsigned>
     bool number_and_uint(Streambuf& out, numbers n, Unsigned v)
     {

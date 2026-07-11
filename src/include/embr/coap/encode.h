@@ -173,7 +173,13 @@ public:
         return temp_.sputn(out);
     }
 
-    options::stateful_encoder& options() { return options_; }
+    options::stateful_encoder& options()
+    {
+        // FIX: Init this once on a state change, options() accessor
+        // might be called many times
+        new (&options_) options::stateful_encoder(estd::nullopt);
+        return options_;
+    }
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool payload(Streambuf& out)
