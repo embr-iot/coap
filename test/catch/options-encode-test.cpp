@@ -106,4 +106,17 @@ TEST_CASE("options encoding", "[encode][options]")
 
         REQUIRE_THAT(estd::span(out, sizeof(test::data1)), Catch::Matchers::RangeEquals(estd::span(test::data1)));
     }
+    SECTION("stateful")
+    {
+        using namespace coap::options;
+
+        estd::ospanbuf out(char_out);
+
+        stateful_encoder encoder;
+
+        encoder.number_and_length(out, numbers::UriPath, 10);
+
+        REQUIRE(encoder.temp_.size_ == 1);
+        REQUIRE(out.pos() == 1);
+    }
 }

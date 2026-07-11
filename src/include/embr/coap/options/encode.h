@@ -1,16 +1,17 @@
 #pragma once
 
-#include <estd/ostream.h>
-#include <estd/string_view.h>
-
-#include "../internal/streambuf.h"
-#include "encode/stateful.h"
-
 #include "fwd.h"
 #include "../fwd.h"
 #include "option.h"
 #include "markers.h"
 #include "traits.h"
+
+#include "../internal/streambuf.h"
+#include "encode/fwd.h"
+#include "encode/stateful.h"
+
+#include <estd/ostream.h>
+#include <estd/string_view.h>
 
 namespace embr::coap::options {
 

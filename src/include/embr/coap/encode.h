@@ -125,4 +125,50 @@ public:
     }
 };
 
+
+class stateful_encoder
+{
+    // For header, then token
+    options::out_accumulator<8> temp_;
+
+    options::stateful_encoder options_;
+
+public:
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool header(Streambuf& out, const coap::header& v)
+    {
+        using char_type = typename Streambuf::char_type;
+        auto data = (const char_type*)&v;
+        int written = out.sputn(data, sizeof(v));
+        if(written == sizeof(v))    return true;
+        temp_.init(data, sizeof(v) - written);
+        return false;
+    }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool token(Streambuf& out, const uint8_t* v, unsigned sz)
+    {
+        using char_type = typename Streambuf::char_type;
+        auto data = (const char_type*)&v;
+        int written = out.sputn(data, sz);
+        if(written == sz)    return true;
+        temp_.init(data, sz - written);
+        return false;
+    }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool header(Streambuf& out)
+    {
+        return temp_.sputn(out);
+    }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool token(Streambuf& out)
+    {
+        return temp_.sputn(out);
+    }
+
+    options::stateful_encoder& options() { return options_; }
+};
+
 }

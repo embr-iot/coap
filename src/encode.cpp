@@ -49,6 +49,13 @@ uint8_t* delta_length_encode(uint8_t* out, unsigned current, numbers number, uns
     return delta_length_encode<false>(first, out, length);
 }
 
+void stateful_encoder::number_and_length(numbers n, unsigned length)
+{
+    const uint8_t* end = delta_length_encode(temp_.buf_, current_number_, n, length);
+    current_number_ = n;
+    temp_.size_ = end - temp_.buf_;
+}
+
 }
 
 }
