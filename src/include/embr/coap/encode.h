@@ -130,6 +130,16 @@ public:
 /// @remarks this may be useful to feed into above regular encoder for Retry flavor
 class stateful_encoder
 {
+    enum states
+    {
+        Header,
+        Token,
+        Options,
+        Payload
+    };
+
+    states state_{Header};
+
     // For header, then token
     union
     {
@@ -138,39 +148,56 @@ class stateful_encoder
     };
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
-    bool sputn(Streambuf& out, const void* data, unsigned sz)
+    bool sputn(Streambuf& out, const void* data, unsigned sz, states transition_to)
     {
         using char_type = typename Streambuf::char_type;
 
         int written = out.sputn((const char_type*)data, sz);
-        if(written == sz)    return true;
+        if(written == sz)
+        {
+            state_ = transition_to;
+            return true;
+        }
         temp_.init(data, sz - written);
         return false;
+    }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool sputn(Streambuf& out, states transition_to)
+    {
+        if(!temp_.sputn(out))   return false;
+
+        state_ = transition_to;
+        return true;
     }
 
 public:
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool header(Streambuf& out, const coap::header& v)
     {
-        return sputn(out, &v, sizeof(v));
-    }
+        assert(state_ == Header);
 
-    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
-    bool token(Streambuf& out, const uint8_t* v, unsigned sz)
-    {
-        return sputn(out, v, sz);
+        return sputn(out, &v, sizeof(v), v.tkl() > 0 ? Token : Options);
     }
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool header(Streambuf& out)
     {
-        return temp_.sputn(out);
+        assert(state_ == Header);
+
+        return sputn(out, Token);
+    }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool token(Streambuf& out, const uint8_t* v, unsigned sz)
+    {
+        return sputn(out, v, sz, Options);
     }
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool token(Streambuf& out)
     {
-        return temp_.sputn(out);
+        return sputn(out, Options);
     }
 
     options::stateful_encoder& options()
