@@ -6,6 +6,7 @@
 #include "markers.h"
 #include "traits.h"
 
+#include "../internal/policies.h"
 #include "../internal/streambuf.h"
 #include "encode/fwd.h"
 #include "encode/stateful.h"

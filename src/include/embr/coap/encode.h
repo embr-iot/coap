@@ -126,12 +126,14 @@ public:
 };
 
 
+/// @brief all-conditions-handled non blocking encoder
+/// @remarks this may be useful to feed into above regular encoder for Retry flavor
 class stateful_encoder
 {
     // For header, then token
     union
     {
-        options::out_accumulator<8> temp_;
+        internal::out_accumulator<8> temp_;
         options::stateful_encoder options_;
     };
 
@@ -172,6 +174,16 @@ public:
     }
 
     options::stateful_encoder& options() { return options_; }
+
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool payload(Streambuf& out)
+    {
+        using traits = typename Streambuf::traits_type;
+
+        return traits::not_eof(out.sputc(0xFF));
+    }
+
+    // You're on your own for payload content, friend
 };
 
 }

@@ -46,5 +46,10 @@ TEST_CASE("top-level encoding", "[encode]")
 
         REQUIRE(r);
         REQUIRE(out.pos() == 10);
+
+        r = encoder.payload(out);
+
+        REQUIRE(r);
+        REQUIRE(out.pos() == 11);
     }
 }

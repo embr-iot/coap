@@ -1,3 +1,5 @@
+#pragma once
+
 #include <estd/type_traits.h>
 
 namespace embr::coap::internal {
