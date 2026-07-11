@@ -44,23 +44,23 @@ class encoder :
 
     // DEBT: Temporarily exposing these guys
 public:
-    using typename base_type::char_type;
+    using typename base_type::const_pointer;
+
+    //using payload_type = options::payload_encoder<Streambuf&>;
+    using payload_type = estd::detail::basic_ostream<Streambuf&>;
 
     class options_encoder_type : public options::encoder_ll<this_type&>
     {
         using base_type = options::encoder_ll<this_type&>;
 
     public:
-        options_encoder_type(this_type& parent) :
+        constexpr explicit options_encoder_type(this_type& parent) :
             base_type(parent)
         {
         }
 
         using base_type::operator <<;
 
-        using payload_type = estd::detail::basic_ostream<Streambuf&>;
-
-        //typename parent_type::payload_type& operator <<(payload_marker)
         payload_type& operator <<(payload_marker)
         {
             return base_type::provider_ << payload_marker{};
@@ -68,21 +68,17 @@ public:
 
     };
 
-    template <options::numbers n>
-    using options_single_encoder_type = options::single_encoder<n, options_encoder_type>;
-
     options_encoder_type options_;
 
-    //using payload_type = options::payload_encoder<Streambuf&>;
-    using payload_type = estd::detail::basic_ostream<Streambuf&>;
-
     payload_type payload_{out_};
+
+    // DEBT: Once estd 0.8.12 is fully available use this variant in place of the freestanding members
+    using storage_type = estd::variant<
+        estd::monostate, header, options_encoder_type, payload_type>;
 
     unsigned token_length_{};
 
 public:
-    using const_pointer = const char_type*;
-
     template <class ...Args>
     constexpr explicit encoder(Args&&... args) :
         base_type(std::forward<Args>(args)...),
@@ -114,7 +110,7 @@ public:
     }
 
     template <options::numbers n>
-    options_single_encoder_type<n> operator<<(options::option_marker<n>)
+    options::single_encoder<n, options_encoder_type> operator<<(options::option_marker<n>)
     {
         assert(state_ == Options);
         return { &options_ };

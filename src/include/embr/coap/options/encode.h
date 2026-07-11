@@ -104,11 +104,8 @@ public:
     template <numbers n, class Parent>
     friend class single_encoder;
 
-    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2>
-    friend class payload_encoder;
-
-    //using payload_type = payload_encoder<Streambuf&>;
-    using payload_type = estd::detail::basic_ostream<streambuf_type&>;
+    //template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2>
+    //friend class payload_encoder;
 
 public:
     using char_type = typename streambuf_type::char_type;
@@ -121,11 +118,14 @@ public:
 
     const streambuf_type& out() const { return provider_.out(); }
 
+protected:
     template <class ...Args>
     explicit constexpr encoder_ll(Args&&...args) :
         provider_{std::forward<Args>(args)...}
     {}
 
+
+public:
     void write_header(numbers number, unsigned length)
     {
         auto out = reinterpret_cast<uint8_t*>(provider_.out().pptr());
@@ -157,9 +157,6 @@ public:
     {
         return { this };
     }
-
-    // child_encoder needed for this
-    encoder_ll& operator<<(payload_marker) = delete;
 };
 
 // Specifically NOT using alias to help slightly tidy up C++ error volume
@@ -173,6 +170,11 @@ public:
     constexpr explicit encoder(Args&&...args) :
         base_type(std::forward<Args>(args)...)
     {}
+
+    using base_type::operator <<;
+
+    // child_encoder needed for this
+    encoder& operator<<(payload_marker) = delete;
 };
 
 }
