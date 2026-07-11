@@ -28,17 +28,23 @@ public:
     constexpr States state() const { return state_; }
 };
 
+
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
-class encoder : public internal::encoder_base
+class encoder : public internal::encoder_base, internal::streambuf_provider<Streambuf>
 {
+    using base_type = internal::streambuf_provider<Streambuf>;
+
     // DEBT: Temporarily exposing these guys
 public:
+    using base_type::out_;
+    using typename base_type::char_type;
+
     using options_encoder_type = options::child_encoder<Streambuf>;
 
-    Streambuf out_;
-    using streambuf_type = Streambuf;
+    template <options::numbers n>
+    using options_single_encoder_type = options::single_encoder<n, Streambuf, true>;
 
     options_encoder_type options_;
 
@@ -50,12 +56,11 @@ public:
     unsigned token_length_{};
 
 public:
-    using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
 
     template <class ...Args>
     constexpr explicit encoder(Args&&... args) :
-        out_(std::forward<Args>(args)...),
+        base_type(std::forward<Args>(args)...),
         options_(this)
     {}
 
@@ -84,7 +89,7 @@ public:
     }
 
     template <options::numbers n>
-    options::single_encoder<n, Streambuf&> operator<<(options::option_marker<n>)
+    options_single_encoder_type<n> operator<<(options::option_marker<n>)
     {
         assert(state_ == Options);
         return { &options_ };

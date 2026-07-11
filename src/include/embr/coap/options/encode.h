@@ -3,6 +3,9 @@
 #include <estd/ostream.h>
 #include <estd/string_view.h>
 
+#include "../internal/streambuf.h"
+#include "encode/stateful.h"
+
 #include "fwd.h"
 #include "../fwd.h"
 #include "option.h"
@@ -35,16 +38,19 @@ public:
     {}
 };  */
 
+// DEBT: Operating in Presumptive mode all the time.  Import in and add support for
+// NonContiguous and Retry mode
+
 template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf, bool has_grandparent = false>
 class single_encoder
 {
 public:
     using traits = option_traits<n>;
+    using streambuf_type = typename estd::remove_reference_t<Streambuf>;
     using encoder_type = estd::conditional_t<
         has_grandparent,
         child_encoder<Streambuf>,
         encoder<Streambuf>>;
-    using streambuf_type = typename estd::remove_reference_t<Streambuf>;
     using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
 
@@ -107,6 +113,9 @@ public:
     using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
 
+    template <numbers n, bool has_grandparent = false>
+    using single_encoder_type = single_encoder<n, Streambuf, has_grandparent>;
+
     static_assert(sizeof(char_type) == 1);
 
     const Streambuf& out() const { return out_; }
@@ -142,7 +151,7 @@ public:
     }
 
     template <numbers n>
-    single_encoder<n, Streambuf> operator<<(option_marker<n>)
+    single_encoder_type<n> operator<<(option_marker<n>)
     {
         return { this };
     }
@@ -151,6 +160,7 @@ public:
     encoder& operator<<(payload_marker) = delete;
 };
 
+/// @brief This class specifically belongs to the top-down coap::encoder
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
 class child_encoder : public encoder<Streambuf&>
 {
