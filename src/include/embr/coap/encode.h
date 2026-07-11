@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fwd.h"
 #include "header.h"
 #include "header/token.h"
 #include "options/encode.h"
@@ -32,19 +33,43 @@ public:
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
-class encoder : public internal::encoder_base, internal::streambuf_provider<Streambuf>
+class encoder :
+    public internal::encoder_base,
+    public internal::streambuf_provider<Streambuf>
 {
     using base_type = internal::streambuf_provider<Streambuf>;
+    using this_type = encoder;
+
+    using base_type::out_;
 
     // DEBT: Temporarily exposing these guys
 public:
-    using base_type::out_;
     using typename base_type::char_type;
 
-    using options_encoder_type = options::child_encoder<Streambuf>;
+    class options_encoder_type : public options::encoder_ll<this_type&>
+    {
+        using base_type = options::encoder_ll<this_type&>;
+
+    public:
+        options_encoder_type(this_type& parent) :
+            base_type(parent)
+        {
+        }
+
+        using base_type::operator <<;
+
+        using payload_type = estd::detail::basic_ostream<Streambuf&>;
+
+        //typename parent_type::payload_type& operator <<(payload_marker)
+        payload_type& operator <<(payload_marker)
+        {
+            return base_type::provider_ << payload_marker{};
+        }
+
+    };
 
     template <options::numbers n>
-    using options_single_encoder_type = options::single_encoder<n, Streambuf, true>;
+    using options_single_encoder_type = options::single_encoder<n, options_encoder_type>;
 
     options_encoder_type options_;
 
@@ -61,7 +86,7 @@ public:
     template <class ...Args>
     constexpr explicit encoder(Args&&... args) :
         base_type(std::forward<Args>(args)...),
-        options_(this)
+        options_(*this)
     {}
 
     encoder& operator<<(const header& v)

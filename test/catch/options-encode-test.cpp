@@ -99,7 +99,7 @@ TEST_CASE("options encoding", "[encode][options]")
         // state machine validation
         encoder.state_ = encoder_type::Options;
 
-        options_encoder_type options_encoder(&encoder);
+        options_encoder_type options_encoder(encoder);
 
         options_encoder << o::uri_host << "host" << o::uri_path << "v1" << "t";
         options_encoder << payload << "x";
