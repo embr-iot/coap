@@ -129,31 +129,34 @@ public:
 class stateful_encoder
 {
     // For header, then token
-    options::out_accumulator<8> temp_;
+    union
+    {
+        options::out_accumulator<8> temp_;
+        options::stateful_encoder options_;
+    };
 
-    options::stateful_encoder options_;
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool sputn(Streambuf& out, const void* data, unsigned sz)
+    {
+        using char_type = typename Streambuf::char_type;
+
+        int written = out.sputn((const char_type*)data, sz);
+        if(written == sz)    return true;
+        temp_.init(data, sz - written);
+        return false;
+    }
 
 public:
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool header(Streambuf& out, const coap::header& v)
     {
-        using char_type = typename Streambuf::char_type;
-        auto data = (const char_type*)&v;
-        int written = out.sputn(data, sizeof(v));
-        if(written == sizeof(v))    return true;
-        temp_.init(data, sizeof(v) - written);
-        return false;
+        return sputn(out, &v, sizeof(v));
     }
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool token(Streambuf& out, const uint8_t* v, unsigned sz)
     {
-        using char_type = typename Streambuf::char_type;
-        auto data = (const char_type*)&v;
-        int written = out.sputn(data, sz);
-        if(written == sz)    return true;
-        temp_.init(data, sz - written);
-        return false;
+        return sputn(out, v, sz);
     }
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>

@@ -112,11 +112,11 @@ TEST_CASE("options encoding", "[encode][options]")
 
         estd::ospanbuf out(char_out);
 
-        stateful_encoder encoder;
+        stateful_encoder encoder(estd::nullopt);
 
         encoder.number_and_length(out, numbers::UriPath, 10);
 
-        REQUIRE(encoder.temp_.size_ == 1);
+        REQUIRE(encoder.temp_.size() == 1);
         REQUIRE(out.pos() == 1);
     }
 }
