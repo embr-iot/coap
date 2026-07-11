@@ -1,6 +1,7 @@
 #include "test-data.h"
 
 #include <embr/coap/options/decode.h>
+#include <embr/coap/options/numbers.h>
 
 #include <catch2/catch_all.hpp>
 
@@ -86,5 +87,25 @@ TEST_CASE("options decoding", "[decode][options]")
             {
 
             });
+    }
+    SECTION("option numbers dispatcher")
+    {
+        // TODO: Move this elsewhere
+        using namespace coap::options;
+
+        int counter = 0;
+
+        dispatch_number(numbers::UriPath, [&](auto number)
+        {
+            //using traits = option_traits<number>;
+
+            //static_assert(traits::number == numbers::UriPath);
+            if constexpr(number == numbers::UriPath)
+            {
+                ++counter;
+            }
+        });
+
+        REQUIRE(counter == 1);
     }
 }
