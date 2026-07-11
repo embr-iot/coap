@@ -63,8 +63,6 @@ estd::errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
 
     f(o);
 
-    in_.pubseekoff(len, estd::ios_base::cur);
-
     // invalid_argument can be considered a warning, not an error
     if(len < traits::min_length)
     {
@@ -83,6 +81,27 @@ template <class F, class Retry2>
 estd::errc decoder<Streambuf>::dispatch(F&& f, numbers number, unsigned len, Retry2&& retry)
 {
     using n = numbers;
+
+    errc err = dispatch_number(number, errc::not_supported, [&](auto number)
+    {
+        return dispatch_ll<number>(std::forward<F>(f), len, std::forward<Retry2>(retry));
+    });
+
+    // DEBT: I feel like this is gonna optimize poorly
+    if(err == errc::not_supported)
+    {
+        option2 o;
+
+        o.number = number;
+        o.length = len;
+        o.opaque_ = nullptr;    // FIX: Actually assign this guy, presume opaque is what is wanted for unknowns
+
+        f(o);
+    }
+
+    in_.pubseekoff(len, estd::ios_base::cur);
+
+/*
 
     switch(number)
     {
@@ -112,11 +131,13 @@ estd::errc decoder<Streambuf>::dispatch(F&& f, numbers number, unsigned len, Ret
             o.length = len;
             o.opaque_ = nullptr;    // FIX: Actually assign this guy, presume opaque is what is wanted for unknowns
 
+            f(o);
+
             in_.pubseekoff(len, estd::ios_base::cur);
 
             break;
         }
-    }
+    }   */
 
     return {};
 }

@@ -7,38 +7,43 @@ namespace embr::coap::options {
 template <numbers n>
 using number_constant = estd::integral_constant<numbers, n>;
 
-template <class F, class ...Args>
-void dispatch_number(numbers number, F&& f, Args&&...args)
+template <class F, class Ret = estd::monostate, class ...Args>
+auto dispatch_number(numbers number, Ret no_match, F&& f, Args&&...args)
 {
     using n = numbers;
+    using retval = decltype(f(number_constant<n::Accept>{}, std::forward<Args>(args)...));
 
     switch(number)
     {
         case n::Accept:
-            f(number_constant<n::Accept>{}, std::forward<Args>(args)...);
-            break;
+            return f(number_constant<n::Accept>{}, std::forward<Args>(args)...);
+
+        case n::Block1:
+            return f(number_constant<n::Block1>{}, std::forward<Args>(args)...);
+
+        case n::Block2:
+            return f(number_constant<n::Block2>{}, std::forward<Args>(args)...);
 
         case n::ContentFormat:
-            f(number_constant<n::ContentFormat>{}, std::forward<Args>(args)...);
-            break;
+            return f(number_constant<n::ContentFormat>{}, std::forward<Args>(args)...);
 
         case n::UriHost:
-            f(number_constant<n::UriHost>{}, std::forward<Args>(args)...);
-            break;
+            return f(number_constant<n::UriHost>{}, std::forward<Args>(args)...);
 
         case n::UriPath:
-            f(number_constant<n::UriPath>{}, std::forward<Args>(args)...);
-            break;
+            return f(number_constant<n::UriPath>{}, std::forward<Args>(args)...);
 
         case n::UriPort:
-            f(number_constant<n::UriPort>{}, std::forward<Args>(args)...);
-            break;
+            return f(number_constant<n::UriPort>{}, std::forward<Args>(args)...);
 
         case n::UriQuery:
-            f(number_constant<n::UriQuery>{}, std::forward<Args>(args)...);
-            break;
+            return f(number_constant<n::UriQuery>{}, std::forward<Args>(args)...);
 
         default:
+            if constexpr(!estd::is_void<retval>::value)
+            {
+                return no_match;
+            }
             break;
     }
 }

@@ -54,25 +54,29 @@ TEST_CASE("options decoding", "[decode][options]")
         //estd::errc err = decode(estd::span(test::data1), [&](const auto& o)
         estd::errc err = decoder.decode([&](const auto o)
         {
-            // NOTE: clang doesn't like const auto&
-            constexpr numbers number = o.number;
-
-            if constexpr(number == numbers::UriHost)
+            // This kinda sucks, there has to be a cleaner way
+            if constexpr(std::is_same_v<
+                estd::remove_cvref_t<decltype(o)>, option2>)
             {
-                ++counter;
-                REQUIRE(o.string() == "host");
-            }
-            else if constexpr(number == numbers::UriPath)
-            {
-                if(++counter == 2)
-                    REQUIRE(o.string() == "v1");
-                else
-                    REQUIRE(o.string() == "t");
+                option2 o2 = o;
             }
             else
             {
-                // NOTE: Just a sanity check that this compiles.  Otherwise not needed
-                option2 o2 = o;
+                // NOTE: clang doesn't like const auto&
+                constexpr numbers number = o.number;
+
+                if constexpr(number == numbers::UriHost)
+                {
+                    ++counter;
+                    REQUIRE(o.string() == "host");
+                }
+                else if constexpr(number == numbers::UriPath)
+                {
+                    if(++counter == 2)
+                        REQUIRE(o.string() == "v1");
+                    else
+                        REQUIRE(o.string() == "t");
+                }
             }
         });
 
@@ -98,7 +102,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         int counter = 0;
 
-        dispatch_number(numbers::UriPath, [&](auto number)
+        dispatch_number(numbers::UriPath, {}, [&](auto number)
         {
             //using traits = option_traits<number>;
 
