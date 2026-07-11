@@ -52,14 +52,17 @@ TEST_CASE("options decoding", "[decode][options]")
         // compiles, but doesn't seem to call f()
         //decode_exp(in, [&](const auto& o)
         //estd::errc err = decode(estd::span(test::data1), [&](const auto& o)
-        estd::errc err = decoder.decode([&](const auto& o)
+        estd::errc err = decoder.decode([&](const auto o)
         {
-            if constexpr(o.number == numbers::UriHost)
+            // NOTE: clang doesn't like const auto&
+            constexpr numbers number = o.number;
+
+            if constexpr(number == numbers::UriHost)
             {
                 ++counter;
                 REQUIRE(o.string() == "host");
             }
-            else if constexpr(o.number == numbers::UriPath)
+            else if constexpr(number == numbers::UriPath)
             {
                 if(++counter == 2)
                     REQUIRE(o.string() == "v1");
