@@ -52,7 +52,7 @@ TEST_CASE("options decoding", "[decode][options]")
         // compiles, but doesn't seem to call f()
         //decode_exp(in, [&](const auto& o)
         //estd::errc err = decode(estd::span(test::data1), [&](const auto& o)
-        estd::errc err = decoder.decode([&](const auto o)
+        estd::errc err = decoder.decode_combined([&](const auto o)
         {
             // This is not great, but serviceable
             if constexpr(!is_constexpr<decltype(o)>)

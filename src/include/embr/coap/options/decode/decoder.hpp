@@ -77,75 +77,46 @@ estd::errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-template <class F, class Retry2>
-estd::errc decoder<Streambuf>::dispatch(F&& f, numbers number, unsigned len, Retry2&& retry)
+template <class F, class NoMatchFunctor, class Retry2>
+estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, numbers number, unsigned len, Retry2&& retry)
 {
     using n = numbers;
 
-    errc err = dispatch_number(number, errc::not_supported, [&](auto number)
-    {
-        return dispatch_ll<number>(std::forward<F>(f), len, std::forward<Retry2>(retry));
-    });
+    errc err = dispatch_number_ll(number,
+        [&](auto number)
+        {
+            return dispatch_ll<number>(std::forward<F>(f), len, std::forward<Retry2>(retry));
+        },
+        [&](numbers)
+        {
+            // no_match path is optional, oftentimes we don't care much
+            if constexpr(!estd::is_same_v<NoMatchFunctor, estd::monostate>)
+            {
+                option2 o;
 
-    // DEBT: I feel like this is gonna optimize poorly
-    if(err == errc::not_supported)
-    {
-        option2 o;
+                o.number = number;
+                o.length = len;
+                o.opaque_ = nullptr;    // FIX: Actually assign this guy, presume opaque is what is wanted for unknowns
 
-        o.number = number;
-        o.length = len;
-        o.opaque_ = nullptr;    // FIX: Actually assign this guy, presume opaque is what is wanted for unknowns
+                f(o);
+                return errc{};
+            }
 
-        f(o);
-    }
+            // In the case where we are ignoring unmatched arguments, indicate
+            // a warning state
+            return errc::invalid_argument;
+        });
 
+    // DEBT: Make sure this proceeds forward correctly
     in_.pubseekoff(len, estd::ios_base::cur);
 
-/*
-
-    switch(number)
-    {
-        case n::Accept:
-            return dispatch_ll<n::Accept>(std::forward<F>(f), len, std::forward<Retry2>(retry));
-
-        case n::ContentFormat:
-            return dispatch_ll<n::ContentFormat>(std::forward<F>(f), len, std::forward<Retry2>(retry));
-
-        case n::UriHost:
-            return dispatch_ll<n::UriHost>(std::forward<F>(f), len, std::forward<Retry2>(retry));
-
-        case n::UriPath:
-            return dispatch_ll<n::UriPath>(std::forward<F>(f), len, std::forward<Retry2>(retry));
-
-        case n::UriPort:
-            return dispatch_ll<n::UriPort>(std::forward<F>(f), len, std::forward<Retry2>(retry));
-
-        case n::UriQuery:
-            return dispatch_ll<n::UriQuery>(std::forward<F>(f), len, std::forward<Retry2>(retry));
-
-        default:
-        {
-            option2 o;
-
-            o.number = number;
-            o.length = len;
-            o.opaque_ = nullptr;    // FIX: Actually assign this guy, presume opaque is what is wanted for unknowns
-
-            f(o);
-
-            in_.pubseekoff(len, estd::ios_base::cur);
-
-            break;
-        }
-    }   */
-
-    return {};
+    return err;
 }
 
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-template <class F>
-estd::errc decoder<Streambuf>::decode(F&& f)
+template <class F, class NoMatchFunctor>
+estd::errc decoder<Streambuf>::decode(F&& f, NoMatchFunctor&& no_match)
 {
     delta_length_decoder dlc;
     unsigned current_number = 0;
@@ -172,7 +143,10 @@ estd::errc decoder<Streambuf>::decode(F&& f)
         if(ret == r::Done)
         {
             current_number += dlc.delta();
-            errc err = dispatch(std::forward<F>(f), (numbers)current_number, dlc.length());
+            errc err = dispatch(
+                std::forward<F>(f),
+                std::forward<NoMatchFunctor>(no_match),
+                (numbers)current_number, dlc.length());
             if(err != errc{} && err != errc::invalid_argument) return err;
 
             dlc.reset();

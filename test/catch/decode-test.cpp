@@ -35,12 +35,9 @@ TEST_CASE("top-level decoding", "[decode]")
 
     decoder.options().decode([&](const auto o)
         {
-            if constexpr(options::is_constexpr<decltype(o)>)
+            if constexpr(o.number == options::numbers::UriHost)
             {
-                if constexpr(o.number == options::numbers::UriHost)
-                {
-                    host = o.string();
-                }
+                host = o.string();
             }
         });
 

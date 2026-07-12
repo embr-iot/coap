@@ -66,6 +66,15 @@ struct option_traits<numbers::ContentFormat> : uint_traits_base<numbers::Content
 };
 
 template <>
+struct option_traits<numbers::Echo> : opaque_traits_base<numbers::Echo>
+{
+    static constexpr const char* name = "Echo";
+
+    static constexpr unsigned min_length = 1;
+    static constexpr unsigned max_length = 40;
+};
+
+template <>
 struct option_traits<numbers::ETag> : opaque_traits_base<numbers::ETag>
 {
     static constexpr const char* name = "ETag";
