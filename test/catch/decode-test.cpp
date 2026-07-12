@@ -15,11 +15,14 @@ TEST_CASE("top-level decoding", "[decode]")
     decoder_type decoder(test::htop_data1);
 
     header h;
+    auto h_expected = (const header*)test::h_data2;
     token t;
 
     decoder >> h;
 
     REQUIRE(decoder.good());
+    REQUIRE(*h_expected == h);
+    REQUIRE(*h_expected == decoder.header());
 
     decoder >> t;
 
@@ -33,7 +36,7 @@ TEST_CASE("top-level decoding", "[decode]")
 
     estd::string_view host{};
 
-    decoder.options_decode([&](const auto o)
+    estd::errc err = decoder.options_decode([&](const auto o)
         {
             if constexpr(o.number == options::numbers::UriHost)
             {
@@ -41,6 +44,8 @@ TEST_CASE("top-level decoding", "[decode]")
             }
         });
 
+    REQUIRE(err == estd::errc{});
+    REQUIRE(decoder.good());
     REQUIRE(host == "host");
     REQUIRE(decoder.state() == decoder_type::Payload);
 

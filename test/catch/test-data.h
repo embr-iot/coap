@@ -6,6 +6,7 @@ namespace test {
 
 // GET CON header with 0 tkl, 0 mid
 constexpr uint8_t h_data1[] = { 0x40, 1, 0, 0 };
+constexpr uint8_t h_data2[] = { 0x42, 1, 0, 0 };
 
 // op_ = option and payload
 

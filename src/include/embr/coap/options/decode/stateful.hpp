@@ -17,13 +17,15 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
                 int c = in.sbumpc();
                 if(c == 0xFF)
                 {
-                    // TODO: Indicate has_payload flag
+                    // NOTE: Indicates has_payload flag
                     return {};
                 }
                 else if(c == -1)
                 {
                     // DEBT: estd istream has a way to distinguish EOF from not-yet-available,
                     // if I recall correctly.  Remind myself about that.  It's been years
+                    // DEBT: Also on EOF it's clunky to return an error code for a very typical
+                    // (no payload) scenario
                     return errc::resource_unavailable_try_again;
                 }
 

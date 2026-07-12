@@ -111,6 +111,8 @@ TEST_CASE("options decoding", "[decode][options]")
             });
 
         REQUIRE(counter == 3);
+        // NOTE: errc{} indicates payload present.  Otherwise we see
+        // resource_unavailable_try_again.  This seems pretty clunky
         REQUIRE(err == estd::errc{});
     }
     SECTION("option numbers dispatcher")

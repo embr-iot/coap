@@ -32,7 +32,7 @@ public:
 
 private:
     options_decoder_type options_;
-    header header_;
+    coap::header header_;
 
     states state_{Header};
 
@@ -52,19 +52,30 @@ public:
 
     constexpr bool good() const { return good_; }
 
-    decoder& operator>>(header& h)
+    const coap::header& header() const { return header_; }
+
+    // Give consumer option of using our cached header directly
+    void read_header()
     {
         static_assert(policy == Presumptive);
         assert(state_ == Header);
 
-        int read = in_.sgetn((pointer)&header_, sizeof(h));
-        good_ = read == sizeof(header);
+        int read = in_.sgetn((pointer)&header_, sizeof(header_));
+        good_ = read == sizeof(coap::header);
         good_ &= header_.valid();
+
         if(good_)
         {
-            h = header_;
             state_ = header_.tkl() > 0 ? Token : Options;
         }
+    }
+
+    decoder& operator>>(coap::header& h)
+    {
+        read_header();
+
+        if(good_)   h = header_;
+
         return *this;
     }
 
@@ -96,6 +107,11 @@ public:
         bool has_payload{};
 
         estd::errc err = options_.decode(std::forward<F>(f), &has_payload);
+
+        if(err != estd::errc{})
+        {
+            good_ = false;
+        }
 
         state_ = has_payload ? Payload : Done;
         return err;
