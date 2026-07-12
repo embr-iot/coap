@@ -33,7 +33,7 @@ TEST_CASE("top-level decoding", "[decode]")
 
     estd::string_view host{};
 
-    decoder.options().decode([&](const auto o)
+    decoder.options_decode([&](const auto o)
         {
             if constexpr(o.number == options::numbers::UriHost)
             {
@@ -42,4 +42,8 @@ TEST_CASE("top-level decoding", "[decode]")
         });
 
     REQUIRE(host == "host");
+    REQUIRE(decoder.state() == decoder_type::Payload);
+
+    REQUIRE(decoder.in().in_avail() == 1);
+    REQUIRE(*decoder.in().gptr() == 'x');
 }

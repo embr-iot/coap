@@ -45,6 +45,7 @@ TEST_CASE("options decoding", "[decode][options]")
         using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
 
         int counter = 0;
+        bool has_payload;
 
         estd::detail::basic_ispanbuf<const uint8_t> in(test::op_data1);
         decoder_type decoder(test::op_data1);
@@ -77,7 +78,7 @@ TEST_CASE("options decoding", "[decode][options]")
                         REQUIRE(o.string() == "t");
                 }
             }
-        });
+        }, &has_payload);
 
         REQUIRE(err == estd::errc{});
         REQUIRE(counter == 3);

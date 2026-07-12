@@ -25,13 +25,13 @@ public:
     constexpr decoder(Args&&...args) : in_{std::forward<Args>(args)...} {}
 
     template <class F, class NoMatchFunctor = estd::monostate>
-    estd::errc decode(F&&, NoMatchFunctor&& = {});
+    estd::errc decode(F&&, bool* has_payload, NoMatchFunctor&& = {});
 
     // Route matched and unmatched options through the same functor
     template <class F>
-    estd::errc decode_combined(F&& f)
+    estd::errc decode_combined(F&& f, bool* has_payload)
     {
-        return decode(std::forward<F>(f), std::forward<F>(f));
+        return decode(std::forward<F>(f), has_payload, std::forward<F>(f));
     }
 };
 

@@ -26,7 +26,8 @@ public:
         Header,
         Token,
         Options,
-        Payload
+        Payload,
+        Done
     };
 
 private:
@@ -44,6 +45,8 @@ public:
         in_{std::forward<Args>(args)...},
         options_{in_}
     {}
+
+    Streambuf& in() { return in_; }
 
     constexpr states state() const { return state_; }
 
@@ -86,7 +89,22 @@ public:
         return *this;
     }
 
-    options_decoder_type& options() { return options_; }
+    template <class F>
+    estd::errc options_decode(F&& f)
+    {
+        assert(state_ == Options);
+        bool has_payload{};
+
+        estd::errc err = options_.decode(std::forward<F>(f), &has_payload);
+
+        state_ = has_payload ? Payload : Done;
+        return err;
+    }
+
+    options_decoder_type& options()
+    {
+        return options_;
+    }
 
     /* No not gonna work well this way, need a callback flavor
     template <options::numbers n>

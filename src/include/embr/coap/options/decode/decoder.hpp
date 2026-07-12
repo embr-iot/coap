@@ -116,7 +116,7 @@ estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, number
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F, class NoMatchFunctor>
-estd::errc decoder<Streambuf>::decode(F&& f, NoMatchFunctor&& no_match)
+estd::errc decoder<Streambuf>::decode(F&& f, bool* has_payload, NoMatchFunctor&& no_match)
 {
     delta_length_decoder dlc;
     unsigned current_number = 0;
@@ -133,6 +133,10 @@ estd::errc decoder<Streambuf>::decode(F&& f, NoMatchFunctor&& no_match)
     auto bump = [&](int& c)
     {
         c = in_.sbumpc();
+        // Awkwardness here because we're not caling sgetc.  But I prefer this awkwardness because
+        // there's no "back up" ever, always progressing characters forward.  Fortunately it's
+        // easy to consume 0xFF as long as we indicate a payload is expected
+        if(c == 0xFF) *has_payload = true;
         return valid(c);
     };
 
