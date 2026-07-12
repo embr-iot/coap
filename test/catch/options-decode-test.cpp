@@ -93,6 +93,8 @@ TEST_CASE("options decoding", "[decode][options]")
             {
 
             });
+
+        REQUIRE(err == estd::errc{});
     }
     SECTION("option numbers dispatcher")
     {
@@ -101,7 +103,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         int counter = 0;
 
-        dispatch_number(numbers::UriPath, {}, [&](auto number)
+        dispatch_number(numbers::UriPath, [&](auto number)
         {
             //using traits = option_traits<number>;
 

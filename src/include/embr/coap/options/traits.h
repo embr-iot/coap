@@ -83,12 +83,31 @@ struct option_traits<numbers::ETag> : opaque_traits_base<numbers::ETag>
     static constexpr unsigned max_length = 8;
 };
 
+
+template <>
+struct option_traits<numbers::LocationPath> : string_traits_base<numbers::LocationPath>
+{
+    static constexpr const char* name = "Location-Path";
+};
+
+template <>
+struct option_traits<numbers::LocationQuery> : string_traits_base<numbers::LocationQuery>
+{
+    static constexpr const char* name = "Location-Query";
+};
+
 template <>
 struct option_traits<numbers::MaxAge> : uint_traits_base<numbers::MaxAge>
 {
     static constexpr const char* name = "Max-Age";
 
     static constexpr unsigned max_length = 4;
+};
+
+template <>
+struct option_traits<numbers::ProxyUri> : string_traits_base<numbers::ProxyUri>
+{
+    static constexpr const char* name = "Proxy-Uri";
 };
 
 
