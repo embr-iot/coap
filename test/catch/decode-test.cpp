@@ -15,6 +15,12 @@ TEST_CASE("top-level decoding", "[decode]")
     decoder_type decoder(test::op_data1);
 
     header h;
+    token t;
 
     decoder >> h;
+    decoder >> t;
+
+    //REQUIRE(t.value[0] == 1);
+    //REQUIRE(t.value[1] == 2);
+    //REQUIRE(t.size == 2);
 }
