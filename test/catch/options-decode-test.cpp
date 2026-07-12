@@ -58,7 +58,7 @@ TEST_CASE("options decoding", "[decode][options]")
             // This is not great, but serviceable
             if constexpr(!is_constexpr<decltype(o)>)
             {
-                option2 o2 = o;
+                option o2 = o;
             }
             else
             {
@@ -89,12 +89,28 @@ TEST_CASE("options decoding", "[decode][options]")
 
         estd::detail::basic_ispanbuf<const uint8_t> in(test::op_data1);
         stateful_decoder decoder;
+        int counter = 0;
 
-        estd::errc err = decoder.decode(in, [](option2 o)
+        estd::errc err = decoder.decode(in, [&](option<> o)
             {
+                switch(o.number)
+                {
+                    case numbers::UriHost:
+                        ++counter;
+                        REQUIRE(o.string() == "host");
+                        break;
 
+                    case numbers::UriPath:
+                        ++counter;
+                        break;
+
+                    default:
+                        FAIL("unexpected number: " << o.number);
+                        break;
+                }
             });
 
+        REQUIRE(counter == 3);
         REQUIRE(err == estd::errc{});
     }
     SECTION("option numbers dispatcher")

@@ -16,13 +16,19 @@ struct option_base
         const uint8_t* opaque_;
         unsigned uint_;
         const char* string_;
+        const void* raw_;
     };
 
     option_base() = default;
-    option_base(const option_base&) = default;
+
+    constexpr option_base(const option_base&) = default;
+    constexpr option_base(unsigned length, const void* raw) :
+        length{length},
+        raw_{raw}
+    {}
 };
 
-template <numbers n>
+template <numbers n = {}>
 struct option : option_base
 {
     static constexpr numbers number = n;
@@ -48,26 +54,46 @@ struct option : option_base
         static_assert(traits::format == value_formats::Uint);
 
         return uint_;
-
     }
 };
 
-
-struct option2 : option_base
+// no constexpr/traits for u
+template <>
+struct option<numbers{}> : option_base
 {
     numbers number;
 
     // only used by stateful decoder
     bool end;
 
-    option2() = default;
+    option() = default;
 
     // Skirts type-punning issue since technically the last-assigned union member is
     // still active.  Plus, our targets are generally gcc or llvm which type pun anyway
     template <numbers n>
-    option2(option<n> convert_from) : number(n),
+    constexpr option(const option<n>& convert_from) : number(n),
         option_base(convert_from)
     {
+    }
+
+    option(numbers number, unsigned length, const void* raw) :
+        option_base(length, raw),
+        number{number}
+    {}
+
+    constexpr estd::string_view string() const
+    {
+        return { string_, length };
+    }
+
+    constexpr estd::span<const uint8_t> opaque() const
+    {
+        return { opaque_, length };
+    }
+
+    constexpr unsigned uint() const
+    {
+        return uint_;
     }
 };
 
@@ -79,7 +105,7 @@ template <class T>
 struct is_constexpr_t;
 
 template <>
-struct is_constexpr_t<option2> : estd::false_type {};
+struct is_constexpr_t<option<>> : estd::false_type {};
 
 template <numbers n>
 struct is_constexpr_t<option<n>> : estd::true_type {};
@@ -87,7 +113,7 @@ struct is_constexpr_t<option<n>> : estd::true_type {};
 template <class T>
 constexpr bool is_constexpr = is_constexpr_t<estd::remove_cvref_t<T>>::value;
 
-static_assert(!is_constexpr<option2>);
+static_assert(!is_constexpr<option<>>);
 static_assert(is_constexpr<option<numbers::Accept>>);
 
 }

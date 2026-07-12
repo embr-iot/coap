@@ -17,6 +17,7 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
                 int c = in.sbumpc();
                 if(c == 0xFF)
                 {
+                    // TODO: Indicate has_payload flag
                     return {};
                 }
                 else if(c == -1)
@@ -48,27 +49,27 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
             unsigned avail = in.egptr() - data;
             uint16_t& length = dlc_.length_;
             uint16_t n = dlc_.delta() + current_number_;
-            option2 o;
+            option<> o((numbers)n, length, data);
 
-            o.length = length;
             o.end = avail >= length;
-
-            // FIX: Temporarily ALL options piping through stateful_decoder are treated as opaque
-            o.opaque_ = data;
 
             in.pubseekoff(length, estd::ios_base::cur);
 
-            if(!o.end)
-            {
-                length -= avail;
-                in.pubsync();
-            }
-
+            // No fancy dispatch here, though you can run through numbers_dispatch yourself
+            // with little ceremony
             f(o);
 
-            if(o.end)   state_ = Header;
+            if(o.end)
+            {
+                current_number_ += dlc_.delta();
+                state_ = Header;
+                return errc::operation_in_progress;
+            }
 
-            return o.end ? errc::operation_in_progress : errc::resource_unavailable_try_again;
+            length -= avail;
+            in.pubsync();
+
+            return errc::resource_unavailable_try_again;
         }
     }
 

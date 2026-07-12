@@ -92,7 +92,7 @@ estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, number
             // no_match path is optional, oftentimes we don't care much
             if constexpr(!estd::is_same_v<NoMatchFunctor, estd::monostate>)
             {
-                option2 o;
+                option o;
 
                 o.number = number;
                 o.length = len;
