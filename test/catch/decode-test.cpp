@@ -12,5 +12,9 @@ TEST_CASE("top-level decoding", "[decode]")
 {
     using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
 
-    decoder_type decoder(test::data1);
+    decoder_type decoder(test::op_data1);
+
+    header h;
+
+    decoder >> h;
 }

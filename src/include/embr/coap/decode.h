@@ -11,7 +11,8 @@ class decoder
     Streambuf in_;
     using streambuf_type = Streambuf;
     using char_type = typename streambuf_type::char_type;
-    using pointer = char_type*;
+    using pointer = estd::remove_const_t<char_type>*;
+    using const_pointer = const char_type*;
 
     using options_decoder_type = options::decoder<Streambuf&>;
 

@@ -46,8 +46,8 @@ TEST_CASE("options decoding", "[decode][options]")
 
         int counter = 0;
 
-        estd::detail::basic_ispanbuf<const uint8_t> in(test::data1);
-        decoder_type decoder(test::data1);
+        estd::detail::basic_ispanbuf<const uint8_t> in(test::op_data1);
+        decoder_type decoder(test::op_data1);
 
         // compiles, but doesn't seem to call f()
         //decode_exp(in, [&](const auto& o)
@@ -87,7 +87,7 @@ TEST_CASE("options decoding", "[decode][options]")
     {
         using namespace coap::options;
 
-        estd::detail::basic_ispanbuf<const uint8_t> in(test::data1);
+        estd::detail::basic_ispanbuf<const uint8_t> in(test::op_data1);
         stateful_decoder decoder;
 
         estd::errc err = decoder.decode(in, [](option2 o)

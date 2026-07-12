@@ -104,7 +104,7 @@ TEST_CASE("options encoding", "[encode][options]")
         options_encoder << o::uri_host << "host" << o::uri_path << "v1" << "t";
         options_encoder << payload << "x";
 
-        REQUIRE_THAT(estd::span(out, sizeof(test::data1)), Catch::Matchers::RangeEquals(estd::span(test::data1)));
+        REQUIRE_THAT(estd::span(out, sizeof(test::op_data1)), Catch::Matchers::RangeEquals(estd::span(test::op_data1)));
     }
     SECTION("stateful")
     {

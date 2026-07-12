@@ -9,8 +9,10 @@
 
 namespace embr::coap {
 
+#pragma pack(push, 1)
+
 // See https://datatracker.ietf.org/doc/html/rfc7252#section-12.1.1
-class __attribute__((packed)) header : public internal::header_base
+class header : public internal::header_base
 {
     static constexpr unsigned VER_MASK = 0b11000000;
     static constexpr unsigned TYPE_MASK = 0b00110000;
@@ -94,7 +96,17 @@ public:
     constexpr void code(response_codes r) { code_ = r; }
 
     constexpr request_codes request_code() const { return static_cast<request_codes>(code_); }
+
+    constexpr bool operator==(const header& compare_to) const
+    {
+        // NOTE: Not doing a raw union 32 bit compare here to avoid presuming type punning.
+        return ver_t_tkl_ == compare_to.ver_t_tkl_ &&
+            code_ == compare_to.code_ &&
+            mid_ == compare_to.mid_;
+    }
 };
+
+#pragma pack(pop)
 
 static_assert(sizeof(header) == 4);
 
