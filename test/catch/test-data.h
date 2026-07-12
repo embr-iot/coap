@@ -16,7 +16,7 @@ constexpr uint8_t op_data1[] = { 0x34, 'h', 'o', 's', 't', 0x82, 'v', '1', 0x01,
 
 constexpr uint8_t htop_data1[] =
 {
-    0x41, 1, 0, 0,
+    0x42, 1, 0, 0,
     1, 2,   // token
     0x34, 'h', 'o', 's', 't',       // option
     0xFF, 'x'                       // payload

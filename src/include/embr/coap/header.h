@@ -81,6 +81,11 @@ public:
         return ver_t_tkl_ & TKL_MASK;
     }
 
+    constexpr unsigned ver() const
+    {
+        return ver_t_tkl_ >> 6;
+    }
+
     constexpr void type(types v)
     {
         ver_t_tkl_ = (ver_t_tkl_ & ~TYPE_MASK) | (v << 4);
@@ -103,6 +108,11 @@ public:
         return ver_t_tkl_ == compare_to.ver_t_tkl_ &&
             code_ == compare_to.code_ &&
             mid_ == compare_to.mid_;
+    }
+
+    constexpr bool valid() const
+    {
+        return ver() == 1 && code_ > 0;
     }
 };
 

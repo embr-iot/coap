@@ -54,9 +54,8 @@ TEST_CASE("options decoding", "[decode][options]")
         //estd::errc err = decode(estd::span(test::data1), [&](const auto& o)
         estd::errc err = decoder.decode([&](const auto o)
         {
-            // This kinda sucks, there has to be a cleaner way
-            if constexpr(std::is_same_v<
-                estd::remove_cvref_t<decltype(o)>, option2>)
+            // This is not great, but serviceable
+            if constexpr(!is_constexpr<decltype(o)>)
             {
                 option2 o2 = o;
             }

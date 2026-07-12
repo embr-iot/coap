@@ -71,5 +71,23 @@ struct option2 : option_base
     }
 };
 
+//template <numbers n>
+//constexpr bool is_constexpr(option<n>) { return true; }
+//constexpr bool is_constexpr(option2) { return false; }
+
+template <class T>
+struct is_constexpr_t;
+
+template <>
+struct is_constexpr_t<option2> : estd::false_type {};
+
+template <numbers n>
+struct is_constexpr_t<option<n>> : estd::true_type {};
+
+template <class T>
+constexpr bool is_constexpr = is_constexpr_t<estd::remove_cvref_t<T>>::value;
+
+static_assert(!is_constexpr<option2>);
+static_assert(is_constexpr<option<numbers::Accept>>);
 
 }
