@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.21)
 
 project(embr-coap-test)
 
-add_definitions(-DUNIT_TESTING)
-
 include(../../tools/cmake/setvars.cmake)
 
 CPMAddPackage("gh:catchorg/Catch2@3.15.1")
