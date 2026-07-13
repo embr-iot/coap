@@ -1,0 +1,3 @@
+dependencies:
+  embr-coap:
+    path: ../../../../tools/esp-idf/components/embr-coap

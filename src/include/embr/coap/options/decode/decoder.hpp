@@ -80,8 +80,6 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F, class NoMatchFunctor, class Retry2>
 estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, numbers number, unsigned len, Retry2&& retry)
 {
-    using n = numbers;
-
     errc err = dispatch_number_ll(number,
         [&](auto number)
         {

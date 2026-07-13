@@ -7,3 +7,8 @@ build/
 # CLion
 # Sorry buddy, your own .gitignore has burnt me in the past
 .idea/
+
+# ESP-IDF
+sdkconfig
+dependencies.lock
+managed_components/
