@@ -1,4 +1,3 @@
-#set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../..)
 include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/setvars.cmake)
 include(${ROOT_DIR}/src/sources.cmake)
 

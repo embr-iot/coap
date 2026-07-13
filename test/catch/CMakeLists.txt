@@ -10,14 +10,7 @@ CPMAddPackage("gh:catchorg/Catch2@3.15.1")
 
 add_subdirectory(${ROOT_DIR}/src coap)
 
-set(SOURCE_FILES
-    decode-test.cpp
-    encode-test.cpp
-    header-test.cpp
-    options-decode-test.cpp
-    options-encode-test.cpp
-    uint-test.cpp
-)
+include(sources.cmake)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
