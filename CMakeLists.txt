@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 
 if(ESP_PLATFORM)
-    include(${CMAKE_CURRENT_LIST_DIR}/tools/esp-idf/embr-coap/CMakeLists.txt)
+    list(APPEND EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_LIST_DIR}/tools/esp-idf/components)
+    include(tools/esp-idf/components/embr-coap/CMakeLists.txt)
 else()
     set(EMBR_COAP_BUILD_TESTS OFF CACHE BOOL "Build embr tests")
 
     project(embr-coap-meta)
 
     if(EMBR_COAP_BUILD_TESTS OR PROJECT_IS_TOP_LEVEL)
-        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/test/catch catch)
+        add_subdirectory(test/catch catch)
     else()
-        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src embr-coap)
+        add_subdirectory(src embr-coap)
     endif()
 endif()
