@@ -7,6 +7,7 @@
 
 #include <estd/cstdint.h>
 #include <estd/optional.h>
+#include <estd/string_view.h>
 
 namespace embr::coap::options {
 
@@ -23,12 +24,14 @@ public:
     uint16_t current_number_;
     internal::out_accumulator<5> temp_;
 
+    // Fill temp_ with encoded option header portion
     void number_and_length(numbers n, unsigned length);
 
 public:
     stateful_encoder() = default;
     stateful_encoder(estd::nullopt_t) : current_number_{}    {}
 
+    // NOTE: Potentially phasing out in favor of 'poll_one' below
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool number_and_length(Streambuf& out)  { return temp_.sputn(out); }
 
@@ -63,16 +66,25 @@ public:
 
         if(v == 0) return true;
 
-        const uint8_t* end = uint_encode(temp_.buf_ + temp_.size(), v);
+        uint8_t* start = temp_.buf_ + temp_.size();
+        const uint8_t* end = uint_encode(start, v);
         // resize up accumulator to include encoded uint
         temp_.init(end - temp_.buf_);
         // update option header length portion with discovered size
-        temp_.buf_[0] |= temp_.size();
+        temp_.buf_[0] |= end - start;
         return temp_.sputn(out);
     }
 
+    // NOTE: Potentially phasing out in favor of 'poll_one' below
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf, class Unsigned>
     bool number_and_uint(Streambuf& out)   { return temp_.sputn(out); }
+
+    // EXPERIMENTAL
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool poll_one(Streambuf& out)
+    {
+        return temp_.sputn(out);
+    }
 };
 
 }

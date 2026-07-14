@@ -173,6 +173,8 @@ class stateful_encoder
     }
 
 public:
+    // true = state change occurred
+
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool header(Streambuf& out, const coap::header& v)
     {
@@ -201,8 +203,27 @@ public:
         return sputn(out, Options);
     }
 
+    // EXPERIMENTAL
+    // If state change didn't occur right away, one may call this guy
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool poll_one(Streambuf& out)
+    {
+        if(state_ == Header)
+        {
+            return header(out);
+        }
+        else if(state_ == Token)
+        {
+            return token(out);
+        }
+
+        return {};
+    }
+
     options::stateful_encoder& options()
     {
+        assert(state_ == Options);
+
         // FIX: Init this once on a state change, options() accessor
         // might be called many times
         new (&options_) options::stateful_encoder(estd::nullopt);

@@ -1,4 +1,5 @@
 #include "test-data.h"
+#include "test-stream.h"
 
 #include <embr/coap/encode.h>
 #include <embr/coap/options/encode.h>
@@ -110,7 +111,7 @@ TEST_CASE("options encoding", "[encode][options]")
     {
         using namespace coap::options;
 
-        estd::ospanbuf out(char_out);
+        restrained_ospanbuf out(char_out);
 
         stateful_encoder encoder(estd::nullopt);
 
@@ -124,9 +125,18 @@ TEST_CASE("options encoding", "[encode][options]")
 
         REQUIRE(out.pos() == 9);
 
+        out.limiter = 1;
         b = encoder.number_and_uint(out, numbers::MaxAge, 0x123);
 
-        REQUIRE(b);
+        REQUIRE(!b);
+
+        REQUIRE(!encoder.poll_one(out));
+        REQUIRE(encoder.poll_one(out));
+
         REQUIRE(out.pos() == 12);
+
+        REQUIRE(char_out[ 9] == 0x32);
+        REQUIRE(char_out[10] == 0x01);
+        REQUIRE(char_out[11] == 0x23);
     }
 }

@@ -60,6 +60,9 @@ public:
         memcpy(buf_, from, sz);
     }
 
+    /// @brief sputn cached output
+    /// @param out
+    /// @return true if all desired data was written, false otherwise
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool sputn(Streambuf& out)
     {
