@@ -18,8 +18,33 @@ estd::errc stateful_decoder::sgetn(Streambuf& in, uint8_t* data, unsigned sz)
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 estd::errc stateful_decoder::poll_one(Streambuf& in, header* h)
 {
+    // UNTESTED
     assert(state_ == Header);
-    return {};
+    errc err = sgetn(in, (uint8_t*)h, 4);
+
+    if(err == errc{})
+    {
+        size_ = h->tkl();
+        state_ = size_ ? Token : Options;
+    }
+
+    return err;
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+estd::errc stateful_decoder::poll_one(Streambuf& in, token* t)
+{
+    // UNTESTED
+    assert(state_ == Token);
+    errc err = sgetn(in, t->value, size_);
+
+    if(err == errc{})
+    {
+        t->size = size_;
+        state_ = Options;
+    }
+
+    return err;
 }
 
 template <auto value>
