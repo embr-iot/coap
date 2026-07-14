@@ -12,7 +12,7 @@ TEST_CASE("top-level decoding", "[decode]")
 {
     using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
 
-    decoder_type decoder(test::htop_data1);
+    decoder_type decoder(test::htop_data2);
 
     header h;
     auto h_expected = (const header*)test::h_data2;
@@ -55,7 +55,7 @@ TEST_CASE("top-level decoding", "[decode]")
 
 TEST_CASE("top-level decoding (stateful)", "[decode][stateful]")
 {
-    estd::detail::basic_ispanbuf<const uint8_t> in(test::htop_data1);
+    estd::detail::basic_ispanbuf<const uint8_t> in(test::htop_data2);
     stateful_decoder decoder;
     int counter = 0;
 
