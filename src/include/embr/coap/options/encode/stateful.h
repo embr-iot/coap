@@ -22,7 +22,11 @@ class stateful_encoder
 public:
 #endif
     uint16_t current_number_;
-    internal::out_accumulator<5> temp_;
+
+    // 5 byte total,
+    // 4-bit width for size tracking
+    // true = ext activated, reducing width 3-bit
+    internal::out_accumulator<5, 4, true> temp_;
 
     // Fill temp_ with encoded option header portion
     void number_and_length(numbers n, unsigned length);
@@ -48,10 +52,14 @@ public:
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool number_and_string(Streambuf& out, numbers n, estd::string_view s)
     {
+        //using char_type = typename Streambuf::char_type;
+
         number_and_length(n, s.size());
         if(temp_.sputn(out))
         {
             // move straight to ext buffer portion
+            temp_.init_ext(s.data(), s.size());
+            return temp_.sputn_ext(out);
         }
         return false;
     }
@@ -83,7 +91,7 @@ public:
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool poll_one(Streambuf& out)
     {
-        return temp_.sputn(out);
+        return temp_.is_ext() ? temp_.sputn_ext(out) : temp_.sputn(out);
     }
 };
 

@@ -125,6 +125,9 @@ TEST_CASE("options encoding", "[encode][options]")
 
         REQUIRE(out.pos() == 9);
 
+        // Not ready yet
+        //b = encoder.number_and_string(out, numbers::UriQuery, "query");
+
         out.limiter = 1;
         b = encoder.number_and_uint(out, numbers::MaxAge, 0x123);
 

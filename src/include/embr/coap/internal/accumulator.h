@@ -60,6 +60,16 @@ public:
         memcpy(buf_, from, sz);
     }
 
+    void init_ext(const void* from, unsigned sz)
+    {
+        static_assert(with_ext);
+
+        pos_ = 0;
+        size_ = sz | ext_mask;
+
+        ext_ = (const uint8_t*) from;
+    }
+
     /// @brief sputn cached output
     /// @param out
     /// @return true if all desired data was written, false otherwise
@@ -69,6 +79,21 @@ public:
         using char_type = typename Streambuf::char_type;
 
         int written = out.sputn((const char_type*)buf_ + pos_, remaining());
+        // DEBT: IIRC written can return -1 on error here, account for that
+        pos_ += written;
+        assert(pos_ <= size());
+        return pos_ == size();
+    }
+
+    // EXPERIMENTAL
+    template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
+    bool sputn_ext(Streambuf& out)
+    {
+        static_assert(with_ext);
+
+        using char_type = typename Streambuf::char_type;
+
+        int written = out.sputn((const char_type*)ext_ + pos_, remaining());
         // DEBT: IIRC written can return -1 on error here, account for that
         pos_ += written;
         assert(pos_ <= size());
