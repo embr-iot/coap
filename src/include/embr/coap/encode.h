@@ -35,6 +35,7 @@ public:
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
 class encoder :
     public internal::encoder_base,
+    public internal::policies_enum,
     public internal::streambuf_provider<Streambuf>
 {
     using base_type = internal::streambuf_provider<Streambuf>;

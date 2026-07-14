@@ -11,7 +11,7 @@
 #include "encode/fwd.h"
 #include "encode/stateful.h"
 
-#include <estd/ostream.h>
+#include <estd/streambuf.h>
 #include <estd/string_view.h>
 
 namespace embr::coap::options {
@@ -89,7 +89,7 @@ public:
 
 
 template <class StreambufProvider>
-class encoder_ll
+class encoder_ll : public internal::policies_enum
 {
 #if UNIT_TESTING
 public:
@@ -105,6 +105,8 @@ public:
 
     template <numbers n, class Parent>
     friend class single_encoder;
+
+    //static_assert(deduce_out<streambuf_type>() == Presumptive);
 
     //template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf2>
     //friend class payload_encoder;

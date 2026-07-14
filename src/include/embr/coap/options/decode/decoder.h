@@ -3,7 +3,7 @@
 #include "../../internal/policies.h"
 
 #include <estd/cstdint.h>
-#include <estd/istream.h>
+#include <estd/streambuf.h>
 
 namespace embr::coap::options {
 
@@ -13,6 +13,12 @@ class decoder : public internal::policies_enum
     using errc = estd::errc;
 
     Streambuf in_;
+
+    using streambuf_type = estd::remove_cvref_t<Streambuf>;
+
+    // TODO: policy is still too experimental and doesn't compile in this circumstance
+    // See https://github.com/malachi-iot/estdlib/issues/219
+    //using use = typename streambuf_type::impl_type::policy::use;
 
     template <numbers, class F, class Retry>
     estd::errc dispatch_ll(F&&, unsigned len, Retry&&);
