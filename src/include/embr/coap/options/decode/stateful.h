@@ -14,6 +14,12 @@ class stateful_decoder
     delta_length_decoder dlc_{};
     uint16_t current_number_{};
 
+    // NOT READY YET
+    // Default mode is to piece out option value on your behalf, basically presenting
+    // you 'opaque' as a sliding window through value.  You may turn that off in which
+    // case YOU must advance the stream yourself by o.length.
+    bool auto_chunk_{true};
+
     using errc = estd::errc;
 
     enum states

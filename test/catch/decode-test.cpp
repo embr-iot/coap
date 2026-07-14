@@ -1,6 +1,6 @@
 #include "test-data.h"
 
-#include <embr/coap/decode.h>
+#include <embr/coap/decode.hpp>
 
 #include <catch2/catch_all.hpp>
 
@@ -51,4 +51,31 @@ TEST_CASE("top-level decoding", "[decode]")
 
     REQUIRE(decoder.in().in_avail() == 1);
     REQUIRE(*decoder.in().gptr() == 'x');
+}
+
+TEST_CASE("top-level decoding (stateful)", "[decode][stateful]")
+{
+    estd::detail::basic_ispanbuf<const uint8_t> in(test::htop_data1);
+    stateful_decoder decoder;
+    int counter = 0;
+
+    decoder.poll_one(in, [&](auto state, auto param)
+    {
+        if constexpr(state == decoder.Header)
+        {
+            ++counter;
+            const header& h = param;
+        }
+        else if constexpr(state == decoder.Token)
+        {
+            ++counter;
+        }
+        else if constexpr(state == decoder.Option)
+        {
+            ++counter;
+            const options::option<>& o = param;
+        }
+    });
+
+    REQUIRE(counter == 3);
 }
