@@ -1,11 +1,9 @@
 menu "embr::wifi"
 
-    menu "WiFi Network"
-        config WIFI_SSID
-            string "WiFi SSID Name"
+    config WIFI_SSID
+        string "WiFi SSID Name"
 
-        config WIFI_PASSWORD
-            string "WiFi Password"
-    endmenu
+    config WIFI_PASSWORD
+        string "WiFi Password"
 
 endmenu

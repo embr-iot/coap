@@ -7,7 +7,7 @@ void udp_coap_recv(void *arg,
     pbuf_free(p);
 }
 
-extern "C" void udp_setup()
+void udp_setup()
 {
     struct udp_pcb *pcb = udp_new();
     assert(pcb);
