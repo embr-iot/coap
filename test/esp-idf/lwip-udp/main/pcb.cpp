@@ -1,6 +1,11 @@
 #include "udp.h"
 
+#include <embr/coap/encode.h>
 #include <embr/coap/decode.hpp>
+#include <embr/lwip/shared_pbuf.h>
+
+#include <embr/platform/lwip/streambuf.h>
+
 #include <estd/span.h>
 
 #include <esp_log.h>
@@ -9,19 +14,42 @@ static const char* TAG = "lwip-udp";
 
 using namespace embr;
 
-void udp_coap_recv(void *arg, 
-    struct udp_pcb *pcb, struct pbuf *p,
-    const ip_addr_t *addr, u16_t port)
+/* failed experiment, these are abiguous
+static void test(pbuf* p)
+{
+
+}
+
+static void test(pbuf*&& p)
+{
+
+}
+
+void test3()
+{
+    pbuf backing;
+    pbuf* dummy = &backing;
+
+    test(dummy);
+    test(std::move(dummy));
+}
+*/
+
+void udp_coap_recv(void* arg, 
+    udp_pcb* pcb, pbuf* p,
+    const ip_addr_t* addr, u16_t port)
 {
     ESP_LOGI(TAG, "udp_coap_recv: entry");
 
-    // DEBT: Bring in embr::lwip pbuf streambuf.  For now, we assume pbuf is contiguous
+    using streambuf_type = lwip::ipbuf_streambuf;
 
-    assert(p->next == nullptr);
-    assert(p->tot_len = p->len);
-    assert(p->tot_len >= 4);
+    lwip::shared_pbuf owned = take_ownership(p);
 
-    coap::decoder<estd::ispanbuf> decoder((char*)p->payload, p->len);
+    // NOTE: ipbuf_streambuf ownsership of pbuf is awkward,
+    // while opbuf_streambuf feels natural.  See if we can displace the
+    // too-magic (pbuf, bool) ownership signature with something more
+    // explicit like 'take_ownership(pbuf)' 
+    coap::decoder<streambuf_type> decoder(owned);
 
     coap::header header;
 
@@ -33,12 +61,18 @@ void udp_coap_recv(void *arg,
         to_string(header.type()),
         header.tkl(), header.mid());
 
-    pbuf_free(p);
+    coap::encoder<lwip::opbuf_streambuf> encoder(16);
+
+    header.type(header.ACK);
+
+    encoder << header;
+
+    udp_sendto(pcb, encoder.out().pbuf(), addr, port);
 }
 
 void udp_setup()
 {
-    struct udp_pcb *pcb = udp_new();
+    udp_pcb* pcb = udp_new();
     assert(pcb);
 
     err_t err = udp_bind(pcb, IP_ADDR_ANY, 5683);

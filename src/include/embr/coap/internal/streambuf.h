@@ -20,6 +20,8 @@ public:
     using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
 
+    // DEBT: Perhaps we want in_ flavors supported too?
+
     streambuf_type& out() { return out_; }
     const Streambuf& out() const { return out_; }
 };
