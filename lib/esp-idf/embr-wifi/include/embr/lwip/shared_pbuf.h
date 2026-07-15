@@ -19,6 +19,8 @@ protected:
 
     pbuf_base(pbuf* p) : pbuf_{p} {}
 
+    void ref() { pbuf_ref(pbuf_); }
+
 public:
     pbuf_base(pbuf_base&& move_from) :
         pbuf_{move_from.pbuf_}
@@ -57,15 +59,13 @@ public:
     }
 };
 
-// EXPERIMENTAL
-class weak_pbuf : public owning_pbuf
-{
-
-};
+class weak_pbuf;
 
 class shared_pbuf : public owning_pbuf
 {
     using base_type = owning_pbuf;
+
+    friend class weak_pbuf;
 
 protected:
     shared_pbuf(pbuf* p) : base_type{p} {}
@@ -109,6 +109,8 @@ public:
     {
     }
 
+    unsigned use_count() const { return pbuf_->ref; }
+
     constexpr bool valid() const { return pbuf_; }
 
     operator pbuf*() const { return pbuf_; }
@@ -121,6 +123,26 @@ public:
         {
             f(i->payload, i->len);
         }
+    }
+};
+
+// EXPERIMENTAL
+class weak_pbuf : public pbuf_base<false>
+{
+    using base_type = pbuf_base<false>;
+
+public:
+    weak_pbuf(const shared_pbuf& copy_from) :
+        base_type(copy_from.pbuf_)
+    {
+
+    }
+
+    shared_pbuf lock()
+    {
+        // FIX: Not ready - I think we need to bump ref here, but not bump ref if
+        // pbuf_->ref is 0?  But if pbuf_->ref is 0, pbuf_ itself might be an invalid pointer
+        return shared_pbuf{pbuf_};
     }
 };
 
