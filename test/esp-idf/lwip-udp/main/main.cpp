@@ -11,6 +11,5 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(simple_flash_init());
     ESP_ERROR_CHECK(simple_wifi_init());
 
-    // Compiles but not ready yet
     udp_setup();
 }

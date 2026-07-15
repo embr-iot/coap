@@ -64,10 +64,18 @@ void udp_coap_recv(void* arg,
     coap::encoder<lwip::opbuf_streambuf> encoder(16);
 
     header.type(header.ACK);
+    header.code(header.OK);
 
     encoder << header;
 
-    udp_sendto(pcb, encoder.out().pbuf(), addr, port);
+    pbuf* out = encoder.out().pbuf();
+
+    // DEBT: Really we expect this to happen in opbuf_streambuf, don't we?  Or
+    // do we use that shrink call?
+    out->len = 4;
+    out->tot_len = 4;
+
+    udp_sendto(pcb, out, addr, port);
 }
 
 void udp_setup()
