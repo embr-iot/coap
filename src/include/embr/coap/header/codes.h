@@ -6,6 +6,8 @@ namespace embr::coap::internal {
 
 struct header_base
 {
+    // TODO: Refactor into just codes
+
     enum request_codes
     {
         GET = 1,
@@ -23,6 +25,10 @@ struct header_base
         UnsupportedContentFormat    = EMBR_COAP_RESPONSE_CODE(4, 15),
         InternalServerError     = EMBR_COAP_RESPONSE_CODE(5, 00),
     };
+
+    // TBD
+    static const char* to_string(request_codes);
+    static const char* to_string(response_codes);
 };
 
 }

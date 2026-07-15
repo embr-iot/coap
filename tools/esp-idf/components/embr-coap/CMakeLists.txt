@@ -5,4 +5,6 @@ list(TRANSFORM SOURCE_FILES PREPEND ${ROOT_DIR}/src/)
 
 idf_component_register(
     SRCS ${SOURCE_FILES}
-    INCLUDE_DIRS ${ROOT_DIR}/src/include)
+    INCLUDE_DIRS ${ROOT_DIR}/src/include
+    REQUIRES estd
+    )

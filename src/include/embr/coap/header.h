@@ -120,4 +120,6 @@ public:
 
 static_assert(sizeof(header) == 4);
 
+const char* to_string(header::types);
+
 }
