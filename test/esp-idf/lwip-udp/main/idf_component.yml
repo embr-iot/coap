@@ -1,3 +1,5 @@
 dependencies:
   embr-coap:
     path: ../../../../tools/esp-idf/components/embr-coap
+  embr-wifi:
+    path: ../../../../lib/esp-idf/embr-wifi
