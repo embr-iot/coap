@@ -2,6 +2,9 @@
 
 #include "../enum.h"
 
+namespace embr::coap {
+}
+
 namespace embr::coap::options {
 
 // One-shot flavor

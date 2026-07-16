@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decode.h"
+#include "decoder.h"
 
 namespace embr::coap {
 

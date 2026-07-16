@@ -1,8 +1,8 @@
 #pragma once
 
-#include "header.h"
-#include "header/token.h"
-#include "options/decode.h"
+#include "../header.h"
+#include "../header/token.h"
+#include "../options/decode.h"
 
 namespace embr::coap {
 

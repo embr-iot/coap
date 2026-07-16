@@ -1,6 +1,6 @@
 #include "test-data.h"
 
-#include <embr/coap/decode.hpp>
+#include <embr/coap/decoder.h>
 
 #include <catch2/catch_all.hpp>
 

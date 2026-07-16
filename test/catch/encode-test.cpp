@@ -1,7 +1,8 @@
 #include <catch2/catch_all.hpp>
 
-#include <embr/coap/encode.h>
+#include <embr/coap/encoder.h>
 
+#include <estd/ostream.h>
 #include <estd/span.h>
 
 using namespace embr::coap;

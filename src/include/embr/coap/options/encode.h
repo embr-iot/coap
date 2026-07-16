@@ -1,11 +1,11 @@
 #pragma once
 
 #include "fwd.h"
-#include "../fwd.h"
 #include "option.h"
 #include "markers.h"
 #include "traits.h"
 
+#include "../internal/fwd.h"
 #include "../internal/policies.h"
 #include "../internal/streambuf.h"
 #include "encode/fwd.h"

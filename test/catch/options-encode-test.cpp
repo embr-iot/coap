@@ -1,7 +1,7 @@
 #include "test-data.h"
 #include "test-stream.h"
 
-#include <embr/coap/encode.h>
+#include <embr/coap/encoder.h>
 #include <embr/coap/options/encode.h>
 
 #include <catch2/catch_all.hpp>
