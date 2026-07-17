@@ -3,6 +3,7 @@
 #include "../header.h"
 #include "../header/token.h"
 #include "../options/decode.h"
+#include "../internal/errc.h"
 
 namespace embr::coap {
 
@@ -27,6 +28,7 @@ public:
 private:
     states state_{Header};
 
+    // TODO: Looks like we could mildly refactor out_accumulator to assist in this
     uint8_t accumulator_[8];
     uint8_t pos_{};
     uint8_t size_{};

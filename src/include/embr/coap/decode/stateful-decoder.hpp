@@ -77,6 +77,10 @@ using auto_constant = estd::integral_constant<decltype(value), value>;
 // {} = do an immediate poll_one_ll again
 // resource_unavailable_try_again = full poll cycle, exit poll_one
 // ??? = end of data stream reached
+// or with new experimental local errc:
+// cycle = do an immediate poll again
+// again = full poll cycle, exit poll_one (maybe do sync, delay, etc use case dependent)
+// done = end of data stream reached
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
 estd::errc stateful_decoder::poll_one_ll(Streambuf& in, F&& f)
 {

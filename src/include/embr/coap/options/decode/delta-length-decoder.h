@@ -29,8 +29,8 @@ public:
     enum codes
     {
         Done,
-        More,
-        Bad
+        More,       ///<! More data expected
+        Bad         ///<! Corrupt Data
     };
 
     codes decode_length();  // DEBT: Make internal
