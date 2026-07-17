@@ -58,24 +58,43 @@ TEST_CASE("top-level decoding (stateful)", "[decode][stateful]")
     estd::detail::basic_ispanbuf<const uint8_t> in(test::htop_data2);
     stateful_decoder decoder;
     int counter = 0;
+    estd::errc err;
 
-    decoder.poll_one(in, [&](auto state, auto param)
+    SECTION("discrete")
     {
-        if constexpr(state == decoder.Header)
-        {
-            ++counter;
-            const header& h = param;
-        }
-        else if constexpr(state == decoder.Token)
-        {
-            ++counter;
-        }
-        else if constexpr(state == decoder.Option)
-        {
-            ++counter;
-            const options::option<>& o = param;
-        }
-    });
+        header h;
+        token t;
 
-    REQUIRE(counter == 3);
+        err = decoder.poll_one(in, &h);
+
+        REQUIRE(err == estd::errc{});
+
+        err = decoder.poll_one(in, &t);
+
+        REQUIRE(err == estd::errc{});
+        REQUIRE(t.value[0] == 1);
+        REQUIRE(t.value[1] == 2);
+    }
+    SECTION("unified poll_one")
+    {
+        err = decoder.poll_one(in, [&](auto state, auto param)
+            {
+                if constexpr(state == decoder.Header)
+                {
+                    ++counter;
+                    const header& h = param;
+                }
+                else if constexpr(state == decoder.Token)
+                {
+                    ++counter;
+                }
+                else if constexpr(state == decoder.Option)
+                {
+                    ++counter;
+                    const options::option<>& o = param;
+                }
+            });
+
+        REQUIRE(counter == 3);
+    }
 }

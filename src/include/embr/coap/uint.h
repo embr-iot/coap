@@ -49,6 +49,14 @@ constexpr Integer uint_decode(const uint8_t* in, const unsigned len)
     return internal::uint_decode<Integer>(in, in + len);
 }
 
+template <typename Integer, typename Byte, size_t N>
+constexpr Integer uint_decode(Byte (&in)[N])
+{
+    static_assert(sizeof(Byte) == 1);
+
+    return internal::uint_decode<Integer>((const uint8_t*)in, in + N);
+}
+
 
 template <typename Integer>
 constexpr uint8_t* uint_encode(uint8_t* out, Integer value, const unsigned len)

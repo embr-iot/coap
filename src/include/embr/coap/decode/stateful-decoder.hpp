@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decoder.h"
+#include "stateful-decoder.h"
 
 namespace embr::coap {
 
@@ -12,18 +12,34 @@ estd::errc stateful_decoder::sgetn(Streambuf& in, uint8_t* data, unsigned sz)
 
     pos_ += read;
 
-    return read == remaining ? errc{} : errc::operation_in_progress;
+    return read == remaining ? errc{} : errc::resource_unavailable_try_again;
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+estd::errc stateful_decoder::sgetn_exp(Streambuf& in, uint8_t** data, unsigned sz)
+{
+    // EXPERIMENTAL
+    // Probably a non-starter, these paradigms differ a little too much
+
+    if(in.in_avail() >= sz)
+    {
+        auto data = *(const uint8_t*)in.gptr();
+    }
+    else
+    {
+        return sgetn(in, &accumulator_, sz);
+    }
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 estd::errc stateful_decoder::poll_one(Streambuf& in, header* h)
 {
-    // UNTESTED
     assert(state_ == Header);
     errc err = sgetn(in, (uint8_t*)h, 4);
 
     if(err == errc{})
     {
+        pos_ = 0;
         size_ = h->tkl();
         state_ = size_ ? Token : Options;
     }
@@ -34,7 +50,14 @@ estd::errc stateful_decoder::poll_one(Streambuf& in, header* h)
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 estd::errc stateful_decoder::poll_one(Streambuf& in, token* t)
 {
-    // UNTESTED
+    if(state_ == Options)
+    {
+        // We can reach here if:
+        // 1. Caller doesn't notice 0 tkl and calls poll_one(token) anyway
+        // 2. Caller accidentally calls token twice with tkl > 0 (system error, moved on to Options already)
+        assert(size_ == 0);
+        return errc{};
+    }
     assert(state_ == Token);
     errc err = sgetn(in, t->value, size_);
 
@@ -50,8 +73,12 @@ estd::errc stateful_decoder::poll_one(Streambuf& in, token* t)
 template <auto value>
 using auto_constant = estd::integral_constant<decltype(value), value>;
 
+// TBD Expect one of 3 error codes:
+// {} = do an immediate poll_one_ll again
+// resource_unavailable_try_again = full poll cycle, exit poll_one
+// ??? = end of data stream reached
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
-estd::errc stateful_decoder::poll_one(Streambuf& in, F&& f)
+estd::errc stateful_decoder::poll_one_ll(Streambuf& in, F&& f)
 {
     estd::errc err;
 
@@ -96,9 +123,26 @@ estd::errc stateful_decoder::poll_one(Streambuf& in, F&& f)
 
             break;
 
+        // TBD: Payload and Done
+        default:
+            break;
+
     }
 
     return {};
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
+estd::errc stateful_decoder::poll_one(Streambuf& in, F&& f)
+{
+    return poll_one_ll(in, f);
+    /*
+    errc err;
+
+    while((err = poll_one_ll(in, std::forward<F>(f)) == errc{}))
+    {
+
+    }   */
 }
 
 }

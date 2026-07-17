@@ -13,19 +13,19 @@ TEST_CASE("uint")
         constexpr uint8_t in_1234[]     { 4, 0xD2 };
         constexpr uint8_t in_123456[]   { 1, 0xE2, 0x40 };
 
-        auto v = coap::uint_decode<unsigned>(in_16, 1);
+        auto v = coap::uint_decode<unsigned>(in_16);
 
         REQUIRE(v == 16);
 
-        v = coap::uint_decode<unsigned>(in_0001, 2);
+        v = coap::uint_decode<unsigned>(in_0001);
 
         REQUIRE(v == 1);
 
-        v = coap::uint_decode<unsigned>(in_1234, 2);
+        v = coap::uint_decode<unsigned>(in_1234);
 
         REQUIRE(v == 1234);
 
-        v = coap::uint_decode<unsigned>(in_123456, 3);
+        v = coap::uint_decode<unsigned>(in_123456);
 
         REQUIRE(v == 123456);
     }
