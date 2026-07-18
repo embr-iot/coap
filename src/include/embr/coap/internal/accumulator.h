@@ -23,6 +23,8 @@ class __attribute__((packed)) out_accumulator
         size_ : width;
 
 public:
+    out_accumulator() = default;
+
     union
     {
         uint8_t buf_[N];

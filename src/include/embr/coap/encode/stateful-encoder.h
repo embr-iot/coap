@@ -9,16 +9,9 @@ namespace embr::coap {
 
 /// @brief all-conditions-handled non blocking encoder
 /// @remarks this may be useful to feed into above regular encoder for Retry flavor
-class stateful_encoder
+class stateful_encoder :    // NOLINT(cppcoreguidelines-pro-type-member-init)
+    public internal::encoder_base
 {
-    enum states
-    {
-        Header,
-        Token,
-        Options,
-        Payload
-    };
-
     states state_{Header};
 
     // For header, then token
@@ -33,7 +26,7 @@ class stateful_encoder
     {
         using char_type = typename Streambuf::char_type;
 
-        int written = out.sputn((const char_type*)data, sz);
+        int written = out.sputn(static_cast<const char_type*>(data), sz);
         if(written == sz)
         {
             state_ = transition_to;
@@ -53,6 +46,8 @@ class stateful_encoder
     }
 
 public:
+    stateful_encoder() = default;
+
     // true = state change occurred
 
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>

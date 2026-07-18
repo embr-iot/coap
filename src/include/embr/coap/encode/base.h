@@ -5,7 +5,7 @@ namespace embr::coap::internal {
 struct encoder_base
 {
     // DEBT: Rename to 'states'
-    enum States
+    enum states
     {
         Header,
         Token,
@@ -17,10 +17,10 @@ struct encoder_base
 protected:
 #endif
 
-    States state_{Header};
+    states state_{Header};
 
 public:
-    constexpr States state() const { return state_; }
+    [[nodiscard]] constexpr states state() const { return state_; }
 };
 
 }
