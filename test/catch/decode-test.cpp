@@ -62,7 +62,7 @@ TEST_CASE("top-level decoding (stateful)", "[decode][stateful]")
 
     SECTION("discrete")
     {
-        header h;
+        header h{};
         token t;
 
         err = decoder.poll_one(in, &h);
@@ -77,7 +77,7 @@ TEST_CASE("top-level decoding (stateful)", "[decode][stateful]")
     }
     SECTION("unified poll_one")
     {
-        err = decoder.poll_one(in, [&](auto state, auto param)
+        err = decoder.poll_one(in, [&](auto state, const auto& param)
             {
                 if constexpr(state == decoder.Header)
                 {

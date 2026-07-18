@@ -3,6 +3,8 @@
 #include <estd/span.h>
 #include <estd/ostream.h>
 
+#include <utility>
+
 struct restrained_ospanbuf : estd::ospanbuf
 {
     struct policy
@@ -14,12 +16,12 @@ struct restrained_ospanbuf : estd::ospanbuf
 
     using base_type = estd::ospanbuf;
 
-    unsigned limiter = 10000;
+    int limiter = 10000;
 
     template <class ...Args>
     restrained_ospanbuf(Args&&...args) : base_type(std::forward<Args>(args)...)    {}
 
-    int sputn(const char_type* data, unsigned sz)
+    int sputn(const char_type* data, int sz)
     {
         return base_type::sputn(data, std::min(limiter, sz));
     }

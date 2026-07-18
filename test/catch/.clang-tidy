@@ -1,0 +1,6 @@
+# NOTE: folded block scalar gives me a ton of grief, so not using that form
+Checks:
+  # Catch2 does fancy loop tricks that trigger this warning
+  - '-altera-id-dependent-backward-branch'
+  # Catch2 macros trigger this
+  - '-readability-function-cognitive-complexity'

@@ -33,7 +33,10 @@ public:
 
 public:
     stateful_encoder() = default;
-    stateful_encoder(estd::nullopt_t) : current_number_{}    {}
+    stateful_encoder(estd::nullopt_t) :
+        current_number_{},
+        temp_{}
+    {}
 
     // NOTE: Potentially phasing out in favor of 'poll_one' below
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>

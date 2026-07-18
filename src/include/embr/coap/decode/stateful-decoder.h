@@ -5,9 +5,6 @@
 #include "../options/decode.h"
 #include "../internal/errc.h"
 
-#include <estd/cstdint.h>
-#include <estd/internal/macros.h>
-
 namespace embr::coap {
 
 class stateful_decoder

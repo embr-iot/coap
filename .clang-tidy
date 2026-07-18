@@ -1,13 +1,20 @@
-Checks: >
-  *,
-  -*-avoid-c-style-cast,
-  -*-use-trailing-return-type,
-  # Catch2 does fancy loop tricks that trigger this warning
-  -altera-id-dependent-backward-branch,
-  -cert-int09-c,
-  -cppcoreguidelines-pro-type-cstyle-cast,
-  -cppcoreguidelines-pro-type-reinterpret-cast,
-  -cppcoreguidelines-use-enum-class,
-  -google-readability-casting,
-  -readability-enum-initial-value,
-  -readability-identifier-length
+# NOTE: folded block scalar gives me a ton of grief, so not using that form
+Checks:
+  - '*'
+  - '-*use-trailing-return-type'
+
+  # c++ style casting is appreciated but warnings are overstated
+  - '-*avoid-c-style-cast'
+  - '-cppcoreguidelines-pro-type-cstyle-cast'
+  - '-cppcoreguidelines-pro-type-reinterpret-cast'
+  - '-google-readability-casting'
+
+  # regular old enums are correct under the right circumstances
+  - '-cert-int09-c'
+  - '-cppcoreguidelines-use-enum-class'
+  - '-readability-enum-initial-value'
+  - '-readability-identifier-length'
+
+  # CLion losing its mind over these
+  - '-llvmlibc-implementation-in-namespace'
+  - '-*inline-function-decl'

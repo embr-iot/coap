@@ -1,3 +1,6 @@
+#pragma once
+
+#include "base.h"
 #include "fwd.h"
 
 #include "../internal/fwd.h"

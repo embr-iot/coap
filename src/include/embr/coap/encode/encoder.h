@@ -1,5 +1,6 @@
+#pragma once
+
 #include "base.h"
-#include "fwd.h"
 
 #include "../header.h"
 #include "../header/token.h"
