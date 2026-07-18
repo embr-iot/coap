@@ -23,13 +23,15 @@ public:
 #endif
     uint16_t current_number_;
 
+    static constexpr int accumulator_max = 5;
+
     // 5 byte total,
     // 4-bit width for size tracking
     // true = ext activated, reducing width 3-bit
-    internal::out_accumulator<5, 4, true> temp_;
+    internal::out_accumulator<accumulator_max, 4, true> temp_;
 
     // Fill temp_ with encoded option header portion
-    void number_and_length(numbers n, unsigned length);
+    void encode(numbers n, unsigned length);
 
 public:
     stateful_encoder() = default;
@@ -45,7 +47,7 @@ public:
     template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>
     bool number_and_length(Streambuf& out, numbers n, unsigned length)
     {
-        number_and_length(n, length);
+        encode(n, length);
         return temp_.sputn(out);
     }
 
@@ -57,7 +59,7 @@ public:
     {
         //using char_type = typename Streambuf::char_type;
 
-        number_and_length(n, s.size());
+        encode(n, s.size());
         if(temp_.sputn(out))
         {
             // move straight to ext buffer portion
@@ -73,7 +75,7 @@ public:
         // We cleverly cheat and stuff in a 0, knowing that we can rewrite
         // without a complex re-encode since no uint options are more than 4.
         // this also means our current temp buffer of 5 is always big enough
-        number_and_length(n, 0);
+        encode(n, 0);
 
         if(v == 0) return true;
 

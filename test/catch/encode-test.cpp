@@ -59,7 +59,7 @@ TEST_CASE("top-level encoding", "[encode]")
         REQUIRE(r);
         REQUIRE(out.pos() == 10);
 
-        // Manual dealing with inideal out streambuf
+        // Manually dealing with unideal out-streambuf
         REQUIRE(out.sputn("host", 4) == 2);
         REQUIRE(out.sputn("st", 2) == 2);
 

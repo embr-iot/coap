@@ -34,6 +34,8 @@ Checks:
   # Thanks but no thanks.  I'll choose when.
   - '-*use-trailing-return-type'
   - '-*-braces-around-statements'
+  - '-cppcoreguidelines-pro-bounds-array-to-pointer-decay'
+  - '-cppcoreguidelines-pro-type-union-access'
   - '-google-build-using-namespace'  
   - '-google-readability-braces-around-statements'
   - '-readability-named-parameter'
