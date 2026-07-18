@@ -68,7 +68,9 @@ public:
     single_encoder operator<<(estd::string_view string)
     {
         static_assert(traits::format == value_formats::String);
-        parent_->write_header(n, string.size());
+        // DEBT: Do 'bad' bit rather than assert/assume.  Unless we decide that
+        // Presumptious mode is really that strict
+        assert(parent_->write_header(n, string.size()));
         parent_->provider_.out().xsputn(reinterpret_cast<const_pointer>(string.data()), string.size());
         return *this;
     }
@@ -130,28 +132,34 @@ protected:
 
 
 public:
-    void write_header(numbers number, unsigned length)
+    bool write_header(numbers number, unsigned length)
     {
         auto out = reinterpret_cast<uint8_t*>(provider_.out().pptr());
         auto end = reinterpret_cast<uint8_t*>(provider_.out().epptr());
 
         // option header part can take up to 5 bytes
-        assert(end - out >= 5);
+        if(end - out < 5)   return false;
 
         // DEBT: Do intermediate buffer flavor if we are in blocking mode and
         // don't have full 5 bytes available
+        // DEBT: Also 5 byte is pessimistic.  Usually it's smaller.  Add a query or
+        // intermediate buffer to figure that out
 
         end = delta_length_encode(out, current_number_, number, length);
 
         current_number_ = number;
 
         provider_.out().pubseekoff(end - out, estd::ios_base::cur);
+
+        return true;
     }
 
     template <numbers n>
     encoder_ll& operator <<(option<n> oh)
     {
-        write_header(oh.number, oh.length);
+        // DEBT: Do 'bad' bit to be more recognizable as ostream-like, presuming
+        // Presumptious mode is that strict
+        assert(write_header(oh.number, oh.length));
 
         return *this;
     }

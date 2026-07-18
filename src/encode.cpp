@@ -31,7 +31,7 @@ static uint8_t* delta_length_encode(uint8_t* const first, uint8_t* out, unsigned
     if(num < option_16_bit_offset)
     {
         apply_first(modes::Extended8Bit);
-        *out++ = num - 13;
+        *out++ = num - option_8_bit_offset;
         return out;
     }
 
@@ -58,6 +58,6 @@ void stateful_encoder::encode(numbers n, unsigned length)
     temp_.init(end - temp_.buf_);
 }
 
-}
+}   // namespace options
 
-}
+}   // namespace embr::coap
