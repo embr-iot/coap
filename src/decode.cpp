@@ -1,5 +1,6 @@
-#include "assert.h"
+#include "assert.h" // NOLINT
 
+#include "embr/coap/internal/constants.h"
 #include "embr/coap/options/decode.h"
 #include "embr/coap/uint.h"
 
@@ -103,6 +104,7 @@ auto delta_length_decoder::decode_length() -> codes
 
 auto delta_length_decoder::decode_byte(uint8_t c) -> codes
 {
+    using namespace constants;
     using modes = internal::option_enum_base::extended_modes;
 
     switch(state_)
@@ -113,12 +115,12 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
 
             if(delta_ == modes::Extended8Bit)
             {
-                delta_ = 13;
+                delta_ = option_8_bit_offset;
                 state_ = Delta1;
             }
             else if(delta_ == modes::Extended16Bit)
             {
-                delta_ = 269;
+                delta_ = option_16_bit_offset;
                 state_ = Delta2;
             }
             else if(delta_ == modes::Reserved)

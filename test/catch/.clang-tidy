@@ -4,3 +4,6 @@ Checks:
   - '-altera-id-dependent-backward-branch'
   # Catch2 macros trigger this
   - '-readability-function-cognitive-complexity'
+  # Unit Testing has unusual data hiding behavior
+  - '-misc-non-private-member-variables-in-classes'
+  - '-readability-redundant-access-specifiers'

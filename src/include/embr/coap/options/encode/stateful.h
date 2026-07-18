@@ -33,7 +33,7 @@ public:
 
 public:
     stateful_encoder() = default;
-    stateful_encoder(estd::nullopt_t) :
+    explicit stateful_encoder(estd::nullopt_t) :
         current_number_{},
         temp_{}
     {}

@@ -1,7 +1,8 @@
-#include "assert.h"
+#include "assert.h" // NOLINT
 
-#include "embr/coap/uint.h"
+#include "embr/coap/internal/constants.h"
 #include "embr/coap/options/encode.h"
+#include "embr/coap/uint.h"
 
 namespace embr::coap {
 
@@ -11,22 +12,23 @@ namespace options {
 template <bool delta>
 static uint8_t* delta_length_encode(uint8_t* const first, uint8_t* out, unsigned num)
 {
+    using namespace constants;
     using modes = internal::option_enum_base::extended_modes;
 
     auto apply_first = [first](unsigned v)
     {
         if constexpr(delta)
-            *first = v << 4;
+            *first = v << 4U;
         else
             *first |= v;
     };
 
-    if(num < 13)
+    if(num < option_8_bit_offset)
     {
         apply_first(num);
         return out;
     }
-    else if(num < 269)
+    if(num < option_16_bit_offset)
     {
         apply_first(modes::Extended8Bit);
         *out++ = num - 13;
@@ -34,7 +36,7 @@ static uint8_t* delta_length_encode(uint8_t* const first, uint8_t* out, unsigned
     }
 
     apply_first(modes::Extended16Bit);
-    return uint_encode(out, num - 269, 2);
+    return uint_encode(out, num - option_16_bit_offset, 2);
 }
 
 uint8_t* delta_length_encode(uint8_t* out, unsigned current, numbers number, unsigned length)

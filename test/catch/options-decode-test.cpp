@@ -1,5 +1,6 @@
 #include "test-data.h"
 
+#include <embr/coap/internal/constants.h>
 #include <embr/coap/options/decode.h>
 #include <embr/coap/options/numbers.h>
 
@@ -13,6 +14,7 @@ TEST_CASE("options decoding", "[decode][options]")
     {
         constexpr uint8_t val1[] { 0x1E, 0x12, 0x34 };
         coap::options::numbers number;
+        namespace constants = coap::constants;
         unsigned length{3};
 
         SECTION("direct")
@@ -21,7 +23,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
             REQUIRE(out1 == val1 + 3);
             REQUIRE(number == 1);
-            REQUIRE(length == 0x1234 + 269);
+            REQUIRE(length == 0x1234 + constants::option_16_bit_offset);
         }
         SECTION("state machine")
         {
@@ -35,7 +37,7 @@ TEST_CASE("options decoding", "[decode][options]")
             REQUIRE(!b);
 
             REQUIRE(d.delta() == 1);
-            REQUIRE(d.length() == 0x1234 + 269);
+            REQUIRE(d.length() == 0x1234 + constants::option_16_bit_offset);
         }
     }
     SECTION("decoder")

@@ -1,7 +1,6 @@
 # NOTE: folded block scalar gives me a ton of grief, so not using that form
 Checks:
   - '*'
-  - '-*use-trailing-return-type'
 
   # c++ style casting is appreciated but warnings are overstated
   - '-*avoid-c-style-cast'
@@ -9,12 +8,32 @@ Checks:
   - '-cppcoreguidelines-pro-type-reinterpret-cast'
   - '-google-readability-casting'
 
+  # buffer management is a c++ superpower.  this warning is so damned odd.
+  - '-cppcoreguidelines-pro-bounds-pointer-arithmetic'
+
   # regular old enums are correct under the right circumstances
   - '-cert-int09-c'
   - '-cppcoreguidelines-use-enum-class'
   - '-readability-enum-initial-value'
   - '-readability-identifier-length'
 
+  # yes we know, but sometimes we specifically don't want to
+  - '-*-concat-nested-namespaces'
+  - '-modernize-concat-nested-namespaces'
+
   # CLion losing its mind over these
   - '-llvmlibc-implementation-in-namespace'
+  - '-llvmlibc-callee-namespace'
   - '-*inline-function-decl'
+
+  # I am 100% OK with this.  However, it's to displace 'static' keyword and yet
+  # if I use anonymous namespaces, THEN i get warnings that I SHOULD use static
+  # keyword.  So you lose, linter.  Disabled.  
+  - '-misc-use-anonymous-namespace'
+
+  # Thanks but no thanks.  I'll choose when.
+  - '-*use-trailing-return-type'
+  - '-*-braces-around-statements'
+  - '-google-build-using-namespace'  
+  - '-google-readability-braces-around-statements'
+  - '-readability-named-parameter'
