@@ -7,6 +7,7 @@
 #include "markers.h"
 
 #include <estd/cstdint.h>
+#include <estd/internal/macros.h>
 #include <estd/istream.h>
 
 namespace embr::coap::options {

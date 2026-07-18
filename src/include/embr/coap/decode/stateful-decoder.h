@@ -5,6 +5,9 @@
 #include "../options/decode.h"
 #include "../internal/errc.h"
 
+#include <estd/cstdint.h>
+#include <estd/internal/macros.h>
+
 namespace embr::coap {
 
 class stateful_decoder
@@ -15,7 +18,7 @@ public:
     using errc = estd::errc;
 
     // DEBT: Probably both encoders and both decoders can all share one states enum
-    enum states
+    enum states : uint8_t
     {
         Header,
         Token,

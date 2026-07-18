@@ -1,0 +1,13 @@
+Checks: >
+  *,
+  -*-avoid-c-style-cast,
+  -*-use-trailing-return-type,
+  # Catch2 does fancy loop tricks that trigger this warning
+  -altera-id-dependent-backward-branch,
+  -cert-int09-c,
+  -cppcoreguidelines-pro-type-cstyle-cast,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-use-enum-class,
+  -google-readability-casting,
+  -readability-enum-initial-value,
+  -readability-identifier-length
