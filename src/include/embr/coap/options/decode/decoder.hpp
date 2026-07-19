@@ -123,6 +123,8 @@ estd::errc decoder<Streambuf>::decode(F&& f, bool* has_payload, NoMatchFunctor&&
 
     auto valid = [](int c)
     {
+        // Be advised, bug https://github.com/malachi-iot/estdlib/issues/220
+        // presents 0xFF AS -1
         // DEBT: EOS not same as EOL or maybe EOF
         return c != 0xFF && c != -1;
     };
