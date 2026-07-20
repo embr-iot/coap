@@ -65,7 +65,7 @@ public:
         mid_{swap(mid)}
     {}
 
-    constexpr uint16_t mid() const { return swap(mid_); }
+    [[nodiscard]] constexpr uint16_t mid() const { return swap(mid_); }
 
     constexpr void mid(uint16_t v) { mid_ = swap(v); }
 
@@ -76,12 +76,12 @@ public:
         ver_t_tkl_ = (ver_t_tkl_ & ~TKL_MASK) | v;
     }
 
-    constexpr unsigned tkl() const
+    [[nodiscard]] constexpr unsigned tkl() const
     {
         return ver_t_tkl_ & TKL_MASK;
     }
 
-    constexpr unsigned ver() const
+    [[nodiscard]] constexpr unsigned ver() const
     {
         return ver_t_tkl_ >> 6;
     }
@@ -91,7 +91,7 @@ public:
         ver_t_tkl_ = (ver_t_tkl_ & ~TYPE_MASK) | (v << 4);
     }
 
-    constexpr types type() const
+    [[nodiscard]] constexpr types type() const
     {
         return static_cast<types>((ver_t_tkl_ & TYPE_MASK) >> 4);
     }
@@ -100,7 +100,7 @@ public:
 
     constexpr void code(response_codes r) { code_ = r; }
 
-    constexpr request_codes request_code() const { return static_cast<request_codes>(code_); }
+    [[nodiscard]] constexpr request_codes request_code() const { return static_cast<request_codes>(code_); }
 
     constexpr bool operator==(const header& compare_to) const
     {
@@ -110,7 +110,7 @@ public:
             mid_ == compare_to.mid_;
     }
 
-    constexpr bool valid() const
+    [[nodiscard]] constexpr bool valid() const
     {
         return ver() == 1 && code_ > 0;
     }

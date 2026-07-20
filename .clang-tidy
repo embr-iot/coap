@@ -1,6 +1,15 @@
 # NOTE: folded block scalar gives me a ton of grief, so not using that form
 Checks:
-  - '*'
+  # Baseline - not enabling '*' because that brings in oddballs like 'fuchsia'
+  - bugprone-*
+  - cppcoreguidelines-*
+  - clang-analyzer-*
+  - google-*
+  - performance-*
+  - portability-*
+  - misc-*
+  - modernize-*
+  - readability-*
 
   # c++ style casting is appreciated but warnings are overstated
   - '-*avoid-c-style-cast'
@@ -12,16 +21,18 @@ Checks:
   - '-cppcoreguidelines-pro-bounds-pointer-arithmetic'
 
   # regular old enums are correct under the right circumstances
-  - '-cert-int09-c'
   - '-cppcoreguidelines-use-enum-class'
   - '-readability-enum-initial-value'
   - '-readability-identifier-length'
+  # Just in case '*' returns
+  - '-cert-int09-c'
 
   # yes we know, but sometimes we specifically don't want to
   - '-*-concat-nested-namespaces'
   - '-modernize-concat-nested-namespaces'
 
   # CLion losing its mind over these
+  # (defunct now that we don't do '*' but keeping around just in case)
   - '-llvmlibc-implementation-in-namespace'
   - '-llvmlibc-callee-namespace'
   - '-*inline-function-decl'
@@ -34,6 +45,7 @@ Checks:
   # Thanks but no thanks.  I'll choose when.
   - '-*use-trailing-return-type'
   - '-*-braces-around-statements'
+  - '-*-avoid-c-arrays'
   - '-cppcoreguidelines-pro-bounds-array-to-pointer-decay'
   - '-cppcoreguidelines-pro-type-union-access'
   - '-google-build-using-namespace'  
