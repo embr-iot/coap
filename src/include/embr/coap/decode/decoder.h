@@ -19,8 +19,6 @@ public:
     using pointer = estd::remove_const_t<char_type>*;
     using const_pointer = const char_type*;
 
-    using options_decoder_type = options::decoder<Streambuf&>;
-
     enum states
     {
         Header,
@@ -30,20 +28,33 @@ public:
         Done
     };
 
+    enum substates
+    {
+        OptionsUninitialized,
+        OptionsMiddle
+    };
+
 private:
-    options_decoder_type options_;
-    coap::header header_;
+    union
+    {
+        coap::header header_;
+        uint16_t current_number_;
+    };
 
     states state_{Header};
 
     // DEBT: Result of last read, ios style.  Expand on this
-    bool good_{};
+    bool good_ : 1;
+    // DEBT: Used to disambiguate header_ from current_number_ but maybe not worth it, is it really
+    // that important of a feature to reveal header() ?
+    bool current_number_initialized_ : 1;
 
 public:
     template <class ...Args>
-    constexpr decoder(Args&&...args) :
+    explicit constexpr decoder(Args&&...args) :
         in_{std::forward<Args>(args)...},
-        options_{in_}
+        good_{},
+        current_number_initialized_{}
     {}
 
     Streambuf& in() { return in_; }
@@ -68,13 +79,16 @@ public:
 
     decoder& operator>>(token& v);
 
+    decoder& operator>>(options::option<>&);
+
     template <class F>
     estd::errc options_decode(F&& f)
     {
         assert(state_ == Options);
         bool has_payload{};
+        options::decoder<Streambuf&> options(in_);
 
-        estd::errc err = options_.decode(std::forward<F>(f), &has_payload);
+        estd::errc err = options.decode(std::forward<F>(f), &has_payload);
 
         if(err != estd::errc{})
         {
@@ -83,11 +97,6 @@ public:
 
         state_ = has_payload ? Payload : Done;
         return err;
-    }
-
-    options_decoder_type& options()
-    {
-        return options_;
     }
 
     /* No not gonna work well this way, need a callback flavor

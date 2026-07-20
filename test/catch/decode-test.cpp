@@ -36,21 +36,33 @@ TEST_CASE("top-level decoding", "[decode]")
 
     estd::string_view host{};
 
-    estd::errc err = decoder.options_decode([&](const auto o)
-        {
-            if constexpr(o.number == options::numbers::UriHost)
+    SECTION("options decode callback")
+    {
+        estd::errc err = decoder.options_decode([&](const auto o)
             {
-                host = o.string();
-            }
-        });
+                if constexpr(o.number == options::numbers::UriHost)
+                {
+                    host = o.string();
+                }
+            });
 
-    REQUIRE(err == estd::errc{});
-    REQUIRE(decoder.good());
-    REQUIRE(host == "host");
-    REQUIRE(decoder.state() == decoder_type::Payload);
+        REQUIRE(err == estd::errc{});
+        REQUIRE(decoder.good());
+        REQUIRE(host == "host");
+        REQUIRE(decoder.state() == decoder_type::Payload);
 
-    REQUIRE(decoder.in().in_avail() == 1);
-    REQUIRE(*decoder.in().gptr() == 'x');
+        REQUIRE(decoder.in().in_avail() == 1);
+        REQUIRE(*decoder.in().gptr() == 'x');
+    }
+    SECTION("options bit by bit")
+    {
+        options::option opt;
+
+        decoder >> opt;
+
+        // NOTE: Partially works, but value part not quite sorted out yet.  See operator>>
+        REQUIRE(opt.number == options::numbers::UriHost);
+    }
 }
 
 TEST_CASE("top-level decoding", "[decode][char]")

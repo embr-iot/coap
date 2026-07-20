@@ -31,6 +31,11 @@ class stateful_decoder
     states state_{Header};
 
 public:
+    stateful_decoder() = default;
+    explicit stateful_decoder(uint16_t current_number) :
+        current_number_{current_number}
+    {}
+
     ///
     /// @brief decode_one
     /// @return
@@ -42,6 +47,8 @@ public:
 
     template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
     errc decode(Streambuf&, F&&);
+
+    constexpr uint16_t current_number() const { return current_number_; }
 };
 
 }

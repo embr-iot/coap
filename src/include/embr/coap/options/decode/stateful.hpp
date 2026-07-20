@@ -46,7 +46,7 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
 
         case Value:
         {
-            // TODO: Use streambuf::policy::use
+            // TODO: Use streambuf::policy::use with fallback to local buffer if need be
             auto data = (const uint8_t*)in.gptr();
             unsigned avail = in.egptr() - data;
             uint16_t& length = dlc_.length_;
