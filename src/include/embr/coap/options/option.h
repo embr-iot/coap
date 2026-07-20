@@ -63,7 +63,9 @@ struct option<numbers{}> : option_base
 {
     numbers number;
 
-    // only used by stateful decoder
+    // only used by stateful decoder. represents whether this option
+    // is a partial chunk (end == false) or the buffer goes all the way
+    // to the end
     bool end;
 
     option() = default;

@@ -1,4 +1,4 @@
 #pragma once
 
-#include "decode/decoder.h"
+#include "decode/decoder.hpp"
 #include "decode/stateful-decoder.hpp"
