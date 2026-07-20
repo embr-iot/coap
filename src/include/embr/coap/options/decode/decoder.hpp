@@ -111,6 +111,51 @@ estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, number
     return err;
 }
 
+// DEBT: Be aware no extra help during retry (maybe you want a pubsync, delay, etc)
+// otherwise we would have used the more direct delta_length_decode call
+// EXPERIMENTAL, not used yet - but shaping up
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
+estd::errc decode_one_ll(Streambuf& in, F&& f, uint16_t current_number, bool* has_payload)
+{
+    delta_length_decoder dlc;
+
+    using r = delta_length_decoder::codes;
+
+    auto valid = [](int c)
+    {
+        // Be advised, bug https://github.com/malachi-iot/estdlib/issues/220
+        // presents 0xFF AS -1
+        // DEBT: EOS not same as EOL or maybe EOF
+        return c != 0xFF && c != -1;
+    };
+
+    // EXPERIMENTAL - too side-effecty?  Or cool?
+    auto bump = [&](int& c)
+    {
+        c = in.sbumpc();
+        // Awkwardness here because we're not caling sgetc.  But I prefer this awkwardness because
+        // there's no "back up" ever, always progressing characters forward.  Fortunately it's
+        // easy to consume 0xFF as long as we indicate a payload is expected
+        if(c == 0xFF) *has_payload = true;
+        return valid(c);
+    };
+
+    for(int c; bump(c); )
+    {
+        r ret = dlc.decode_byte(c);
+
+        if(ret == r::Done)
+        {
+            f(dlc);
+            // NOTE: Caller must consume value portion from streambuf themself including
+            // advancing streambuf forward
+            return {};
+        }
+    }
+
+    return {};
+}
+
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F, class NoMatchFunctor>

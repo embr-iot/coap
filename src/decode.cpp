@@ -2,6 +2,7 @@
 
 #include "embr/coap/internal/constants.h"
 #include "embr/coap/options/decode.h"
+#include "embr/coap/options/decode/delta-length-decoder.h"
 #include "embr/coap/uint.h"
 
 namespace embr::coap {
@@ -21,6 +22,7 @@ inline void delta_length_decode_number(const uint8_t* in)
 const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, numbers* number, unsigned* length)
 {
     using modes = internal::option_enum_base::extended_modes;
+    using namespace constants;
 
     unsigned delta = *in >> 4;
     unsigned length_raw = *in & 0x0F;
@@ -32,7 +34,7 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
     {
         case modes::Extended8Bit:
         {
-            delta = 13 + *in;
+            delta = option_8_bit_offset + *in;
             *number = static_cast<numbers>(number_current + delta);
 
             ++in;
@@ -43,7 +45,8 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
 
         case modes::Extended16Bit:
 
-            *number = static_cast<numbers>(number_current + 269 + uint_decode(in, 2));
+            *number = static_cast<numbers>(
+                number_current + option_16_bit_offset + uint_decode(in, 2));
 
             in += 2;
             if(in > end)   return nullptr;
@@ -61,13 +64,13 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
     switch(length_raw)
     {
         case modes::Extended8Bit:
-            *length = 13 + *in;
+            *length = option_8_bit_offset + *in;
             ++in;
             if(in > end)   return nullptr;
             break;
 
         case modes::Extended16Bit:
-            *length = 269 + uint_decode(in, 2);
+            *length = option_16_bit_offset + uint_decode(in, 2);
             in += 2;
             return in > end ? nullptr : in;
 
@@ -84,19 +87,21 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
 
 auto delta_length_decoder::decode_length() -> codes
 {
+    using namespace constants;
+
     if(length_ == modes::Extended8Bit)
     {
-        length_ = 13;
+        length_ = option_8_bit_offset;
         state_ = Length1;
         return More;
     }
-    else if(length_ == modes::Extended16Bit)
+    if(length_ == modes::Extended16Bit)
     {
-        length_ = 269;
+        length_ = option_16_bit_offset;
         state_ = Length2;
         return More;
     }
-    else if(length_ == modes::Reserved)
+    if(length_ == modes::Reserved)
         return Bad;
 
     return Done;

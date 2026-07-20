@@ -7,6 +7,11 @@
 
 namespace embr::coap::options {
 
+// Decode one option only
+// Low-level because caller must manually move  stream forward
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
+estd::errc decode_one_ll(Streambuf& in, F&&, uint16_t current_number, bool* has_payload);
+
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 class decoder : public internal::policies_enum
 {
@@ -30,6 +35,7 @@ public:
     template <class ...Args>
     constexpr decoder(Args&&...args) : in_{std::forward<Args>(args)...} {}
 
+    // DEBT: Rename to 'dispatch' to indicate type of decode behavior
     template <class F, class NoMatchFunctor = estd::monostate>
     estd::errc decode(F&&, bool* has_payload, NoMatchFunctor&& = {});
 
