@@ -1,3 +1,5 @@
+# Malachi clang-tidy convention: core v0.1.0
+# Hosted at https://gitlab.com/malachi-linux/useful-scripts.git
 # NOTE: folded block scalar gives me a ton of grief, so not using that form
 Checks:
   # Baseline - not enabling '*' because that brings in oddballs like 'fuchsia'
@@ -39,7 +41,7 @@ Checks:
 
   # I am 100% OK with this.  However, it's to displace 'static' keyword and yet
   # if I use anonymous namespaces, THEN i get warnings that I SHOULD use static
-  # keyword.  So you lose, linter.  Disabled.  
+  # keyword.  So you lose, linter.  Disabled.
   - '-misc-use-anonymous-namespace'
 
   # Thanks but no thanks.  I'll choose when.
@@ -48,6 +50,6 @@ Checks:
   - '-*-avoid-c-arrays'
   - '-cppcoreguidelines-pro-bounds-array-to-pointer-decay'
   - '-cppcoreguidelines-pro-type-union-access'
-  - '-google-build-using-namespace'  
+  - '-google-build-using-namespace'
   - '-google-readability-braces-around-statements'
   - '-readability-named-parameter'
