@@ -109,7 +109,7 @@ TEST_CASE("top-level decoding (stateful)", "[decode][stateful]")
     estd::detail::basic_ispanbuf<const uint8_t> in(test::htop_data2);
     stateful_decoder decoder;
     int counter = 0;
-    estd::errc err;
+    errc err;
 
     SECTION("discrete")
     {
@@ -118,11 +118,11 @@ TEST_CASE("top-level decoding (stateful)", "[decode][stateful]")
 
         err = decoder.poll_one(in, &h);
 
-        REQUIRE(err == estd::errc{});
+        REQUIRE(err == errc{});
 
         err = decoder.poll_one(in, &t);
 
-        REQUIRE(err == estd::errc{});
+        REQUIRE(err == errc{});
         REQUIRE(t.value[0] == 1);
         REQUIRE(t.value[1] == 2);
     }

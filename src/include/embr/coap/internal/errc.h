@@ -12,7 +12,7 @@ enum class errc
     again,
     /// state machine is in ready state, requesting additional call
     cycle,
-    more = cycle,
+    //more = cycle,
     /// corrupt data OR stream error
     bad,
     //bad_data,

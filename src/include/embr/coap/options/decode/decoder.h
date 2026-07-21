@@ -14,6 +14,7 @@ class decoder : public internal::policies_enum
     Streambuf in_;
 
     using streambuf_type = estd::remove_cvref_t<Streambuf>;
+    static constexpr policies policy = Presumptive;
 
     // TODO: policy is still too experimental and doesn't compile in this circumstance
     // See https://github.com/malachi-iot/estdlib/issues/219
@@ -33,9 +34,11 @@ public:
     template <class ...Args>
     constexpr decoder(Args&&...args) : in_{std::forward<Args>(args)...} {}
 
-    // DEBT: Rename to 'dispatch' to indicate type of decode behavior
     template <class F, class NoMatchFunctor = estd::monostate>
     errc dispatch(F&&, bool* has_payload, NoMatchFunctor&& = {});
+
+    template <class F>
+    errc decode(F&&, bool* has_payload);
 
     // Route matched and unmatched options through the same functor
     template <class F>

@@ -6,7 +6,7 @@
 namespace embr::coap::options {
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
-estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
+errc stateful_decoder::decode_one(Streambuf& in, F&& f)
 {
     switch(state_)
     {
@@ -26,20 +26,23 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
                     // if I recall correctly.  Remind myself about that.  It's been years
                     // DEBT: Also on EOF it's clunky to return an error code for a very typical
                     // (no payload) scenario
-                    return errc::resource_unavailable_try_again;
+                    return errc::done;
                 }
 
-                r code = dlc_.decode_byte(c);
+                r code = dld_.decode_byte(c);
 
                 if(code == r::Bad)
                 {
-                    return errc::invalid_argument;
+                    return errc::bad;
                 }
                 else if(code == r::Done)
                 {
                     state_ = Value;
 
-                    return errc::operation_in_progress;
+                    dld_.reset();
+
+                    // this option header is decoded.  Signal we're ready to proceed to next one
+                    return errc::cycle;
                 }
             }
             break;
@@ -49,8 +52,8 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
             // TODO: Use streambuf::policy::use with fallback to local buffer if need be
             auto data = (const uint8_t*)in.gptr();
             unsigned avail = in.egptr() - data;
-            uint16_t& length = dlc_.length_;
-            uint16_t n = dlc_.delta() + current_number_;
+            uint16_t& length = dld_.length_;
+            uint16_t n = dld_.delta() + current_number_;
             option<> o((numbers)n, length, data);
 
             o.end = avail >= length;
@@ -58,20 +61,24 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
             in.pubseekoff(length, estd::ios_base::cur);
 
             // No fancy dispatch here, though you can run through numbers_dispatch yourself
-            // with little ceremony
+            // with little ceremony.  Be advised also you must pubseekoff (or similar) yourself
             f(o);
 
             if(o.end)
             {
-                current_number_ += dlc_.delta();
+                current_number_ += dld_.delta();
                 state_ = Header;
-                return errc::operation_in_progress;
+
+                dld_.reset();
+
+                // this option header is decoded.  Signal we're ready to proceed to next one
+                return errc::cycle;
             }
 
             length -= avail;
             in.pubsync();
 
-            return errc::resource_unavailable_try_again;
+            return errc::again;
         }
     }
 
@@ -79,14 +86,14 @@ estd::errc stateful_decoder::decode_one(Streambuf& in, F&& f)
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
-estd::errc stateful_decoder::decode(Streambuf& in, F&& f)
+errc stateful_decoder::decode(Streambuf& in, F&& f)
 {
     errc err;
 
     for(;;)
     {
         err = decode_one(in, f);
-        if(err != errc::operation_in_progress)
+        if(err != errc::cycle)
         {
             return err;
         }

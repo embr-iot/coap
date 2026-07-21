@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../internal/errc.h"
 #include "delta-length-decoder.h"
 
 #include <estd/system_error.h>
@@ -11,7 +12,7 @@ namespace embr::coap::options {
 // - Much harder to use
 class stateful_decoder
 {
-    delta_length_decoder dlc_{};
+    delta_length_decoder dld_{};
     uint16_t current_number_{};
 
     // NOT READY YET
@@ -19,8 +20,6 @@ class stateful_decoder
     // you 'opaque' as a sliding window through value.  You may turn that off in which
     // case YOU must advance the stream yourself by o.length.
     bool auto_chunk_{true};
-
-    using errc = estd::errc;
 
     enum states
     {

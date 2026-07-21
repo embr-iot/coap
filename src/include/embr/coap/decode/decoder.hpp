@@ -78,7 +78,7 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
     // with some fine tuning (only decode one option) may be preferable
     options::stateful_decoder osd(current_number_);
 
-    estd::errc err = osd.decode(in_, [&](options::option<> op)
+    errc err = osd.decode(in_, [&](options::option<> op)
         {
             v = op;
         });
@@ -88,11 +88,11 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
 
     switch(err)
     {
-        case estd::errc{}:  // NOLINT
+        case errc{}:  // NOLINT
             state_ = Payload;
             break;
 
-        case estd::errc::resource_unavailable_try_again:
+        case errc::again:
             state_ = Done;
             break;
 

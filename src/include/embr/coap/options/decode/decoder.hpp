@@ -15,6 +15,9 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F>
 errc decoder<Streambuf>::emit(F&& f, numbers number, unsigned len)
 {
+    // TODO: Strongly consider 'Presumptive' mode auto-advancing
+    // through buf on your behalf
+
     const unsigned avail = in_.in_avail();
 
     option o;
@@ -24,6 +27,8 @@ errc decoder<Streambuf>::emit(F&& f, numbers number, unsigned len)
 
     if(avail < len)
     {
+        if constexpr(policy == Presumptive) return errc::bad;
+
         // Signal that consumer should look directly at streambuf
         o.opaque_ = nullptr;
     }
@@ -32,7 +37,9 @@ errc decoder<Streambuf>::emit(F&& f, numbers number, unsigned len)
         o.opaque_ = in_.gptr();
     }
 
+    // Be advised also you must pubseekoff (or similar) yourself
     f(o);
+
     return errc{};
 }
 
@@ -40,7 +47,6 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <numbers number, class F, class Retry2>
 errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
 {
-    constexpr policies policy = Presumptive;
     constexpr unsigned temp_sz = policy == Presumptive ? 0 : 64;
 
     using traits = option_traits<number>;
@@ -160,5 +166,31 @@ errc decoder<Streambuf>::dispatch(F&& f, bool* has_payload, NoMatchFunctor&& no_
     return err;
 }
 
+
+// UNTESTED
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+template <class F>
+errc decoder<Streambuf>::decode(F&& f, bool* has_payload)
+{
+    errc err{};
+    unsigned current_number = 0;
+
+    auto f2 = [&](const delta_length_decoder& dld)
+    {
+        current_number += dld.delta();
+        // DEBT:  Heed emit err code
+        emit(std::forward<F>(f), (numbers)current_number, dld.length());
+    };
+
+    estd::optional<int> c;
+
+    while(!(c = delta_length_decode(in_, f2)).has_value())
+    {
+    }
+
+    *has_payload = c.value() == 0xFF;
+
+    return err;
+}
 
 }

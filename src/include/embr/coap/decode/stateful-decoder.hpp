@@ -5,18 +5,18 @@
 namespace embr::coap {
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-estd::errc stateful_decoder::sgetn(Streambuf& in, uint8_t* data, unsigned sz)
+errc stateful_decoder::sgetn(Streambuf& in, uint8_t* data, unsigned sz)
 {
     int remaining = sz - pos_;
     int read = in.sgetn(data + pos_, remaining);
 
     pos_ += read;
 
-    return read == remaining ? errc{} : errc::resource_unavailable_try_again;
+    return read == remaining ? errc{} : errc::again;
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-estd::errc stateful_decoder::sgetn_exp(Streambuf& in, uint8_t** data, unsigned sz)
+errc stateful_decoder::sgetn_exp(Streambuf& in, uint8_t** data, unsigned sz)
 {
     // EXPERIMENTAL
     // Probably a non-starter, these paradigms differ a little too much
@@ -32,7 +32,7 @@ estd::errc stateful_decoder::sgetn_exp(Streambuf& in, uint8_t** data, unsigned s
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-estd::errc stateful_decoder::poll_one(Streambuf& in, header* h)
+errc stateful_decoder::poll_one(Streambuf& in, header* h)
 {
     assert(state_ == Header);
     errc err = sgetn(in, (uint8_t*)h, 4);
@@ -48,7 +48,7 @@ estd::errc stateful_decoder::poll_one(Streambuf& in, header* h)
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-estd::errc stateful_decoder::poll_one(Streambuf& in, token* t)
+errc stateful_decoder::poll_one(Streambuf& in, token* t)
 {
     if(state_ == Options)
     {
@@ -82,9 +82,9 @@ using auto_constant = estd::integral_constant<decltype(value), value>;
 // again = full poll cycle, exit poll_one (maybe do sync, delay, etc use case dependent)
 // done = end of data stream reached
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
-estd::errc stateful_decoder::poll_one_ll(Streambuf& in, F&& f)
+errc stateful_decoder::poll_one_ll(Streambuf& in, F&& f)
 {
-    estd::errc err;
+    errc err;
 
     switch(state_)
     {
@@ -121,7 +121,7 @@ estd::errc stateful_decoder::poll_one_ll(Streambuf& in, F&& f)
                 f(auto_constant<Option>{}, o);
             });
 
-            if(err == errc::operation_in_progress)
+            if(err == errc::cycle)
                 // DEBT: Don't do recursion
                 poll_one(in, f);
 
@@ -137,7 +137,7 @@ estd::errc stateful_decoder::poll_one_ll(Streambuf& in, F&& f)
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
-estd::errc stateful_decoder::poll_one(Streambuf& in, F&& f)
+errc stateful_decoder::poll_one(Streambuf& in, F&& f)
 {
     return poll_one_ll(in, f);
     /*

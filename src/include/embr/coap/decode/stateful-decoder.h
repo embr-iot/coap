@@ -12,8 +12,6 @@ class stateful_decoder
     options::stateful_decoder options_;
 
 public:
-    using errc = estd::errc;
-
     // DEBT: Probably both encoders and both decoders can all share one states enum
     enum states : uint8_t
     {

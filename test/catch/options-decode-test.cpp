@@ -94,7 +94,7 @@ TEST_CASE("options decoding", "[decode][options]")
         stateful_decoder decoder;
         int counter = 0;
 
-        estd::errc err = decoder.decode(in, [&](option<> o)
+        coap::errc err = decoder.decode(in, [&](option<> o)
             {
                 switch(o.number)
                 {
@@ -116,7 +116,7 @@ TEST_CASE("options decoding", "[decode][options]")
         REQUIRE(counter == 3);
         // NOTE: errc{} indicates payload present.  Otherwise we see
         // resource_unavailable_try_again.  This seems pretty clunky
-        REQUIRE(err == estd::errc{});
+        REQUIRE(err == coap::errc{});
     }
     SECTION("option numbers dispatcher")
     {
