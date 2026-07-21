@@ -12,8 +12,6 @@ estd::optional<int> delta_length_decode(Streambuf& in, F&& f)
 {
     delta_length_decoder dld;
 
-    using r = delta_length_decoder::codes;
-
     auto valid = [](int c)
     {
         // Be advised, bug https://github.com/malachi-iot/estdlib/issues/220
@@ -28,18 +26,21 @@ estd::optional<int> delta_length_decode(Streambuf& in, F&& f)
     {
         switch(dld.decode_byte(c))
         {
-            case r::Done:
+            case errc::done:
                 f(dld);
                 // NOTE: Caller must consume value portion from streambuf themself including
                 // advancing streambuf forward
                 return {};
 
-            case r::Bad:
+            case errc::bad:
                 // DEBT: Need better indicator, this will get misinterpreted as EOF and also
                 // EOF isn't guaranteed to be -1 from streambuf
                 return -1;
 
-            case r::More:   break;
+            case errc::again:   break;
+
+            default:
+                abort();
         }
     }
 

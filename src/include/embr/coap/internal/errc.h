@@ -6,8 +6,8 @@ namespace embr::coap {
 enum class errc
 {
     done,
-    /// in: more data expected for input - would have blocked
-    /// out: more data required to output - would have blocked
+    /// in: more data expected for input - might have blocked
+    /// out: more data required to output - might have blocked
     /// (similar to resource_unavailable_try_again / EAGAIN)
     again,
     /// state machine is in ready state, requesting additional call

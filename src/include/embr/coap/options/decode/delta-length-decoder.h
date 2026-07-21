@@ -2,6 +2,8 @@
 
 #include "fwd.h"
 
+#include "../../internal/errc.h"
+
 namespace embr::coap::options {
 
 // State machine flavor
@@ -26,15 +28,8 @@ class delta_length_decoder
     uint16_t length_;
 
 public:
-    enum class codes
-    {
-        Done,
-        More,       ///<! More data expected
-        Bad         ///<! Corrupt Data
-    };
-
-    codes decode_length();  // DEBT: Make internal
-    codes decode_byte(uint8_t c);
+    errc decode_length();  // DEBT: Make internal
+    errc decode_byte(uint8_t c);
 
     void reset();
 

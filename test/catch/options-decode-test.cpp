@@ -28,14 +28,14 @@ TEST_CASE("options decoding", "[decode][options]")
         SECTION("state machine")
         {
             coap::options::delta_length_decoder d;
-            using c = coap::options::delta_length_decoder::codes;
+            using c = coap::errc;
 
             c code = d.decode_byte(val1[0]);
-            REQUIRE(code == c::More);
+            REQUIRE(code == c::again);
             code = d.decode_byte(val1[1]);
-            REQUIRE(code == c::More);
+            REQUIRE(code == c::again);
             code = d.decode_byte(val1[2]);
-            REQUIRE(code == c::Done);
+            REQUIRE(code == c::done);
 
             REQUIRE(d.delta() == 1);
             REQUIRE(d.length() == 0x1234 + constants::option_16_bit_offset);
@@ -114,9 +114,10 @@ TEST_CASE("options decoding", "[decode][options]")
             });
 
         REQUIRE(counter == 3);
-        // NOTE: errc{} indicates payload present.  Otherwise we see
-        // resource_unavailable_try_again.  This seems pretty clunky
-        REQUIRE(err == coap::errc{});
+        // NOTE: 'again' indicates payload present.  Otherwise we see
+        // 'done'.  Kinda clulnky, since 'again' misleads one into thinking
+        // more options might be available
+        REQUIRE(err == coap::errc::again);
     }
     SECTION("option numbers dispatcher")
     {

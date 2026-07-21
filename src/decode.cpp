@@ -89,7 +89,7 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
     return in;
 }
 
-auto delta_length_decoder::decode_length() -> codes
+errc delta_length_decoder::decode_length()
 {
     using namespace constants;
 
@@ -97,21 +97,21 @@ auto delta_length_decoder::decode_length() -> codes
     {
         length_ = option_8_bit_offset;
         state_ = Length1;
-        return codes::More;
+        return errc::again;
     }
     if(length_ == modes::Extended16Bit)
     {
         length_ = option_16_bit_offset;
         state_ = Length2;
-        return codes::More;
+        return errc::again;
     }
     if(length_ == modes::Reserved)
-        return codes::Bad;
+        return errc::bad;
 
-    return codes::Done;
+    return {};
 }
 
-auto delta_length_decoder::decode_byte(uint8_t c) -> codes
+errc delta_length_decoder::decode_byte(uint8_t c)
 {
     using namespace constants;
     using modes = internal::option_enum_base::extended_modes;
@@ -133,7 +133,7 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
                 state_ = Delta2;
             }
             else if(delta_ == modes::Reserved)
-                return codes::Bad;
+                return errc::bad;
             else
             {
                 return decode_length();
@@ -152,7 +152,7 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
 
         case Length1:
             length_ += c;
-            return codes::Done;
+            return {};
 
         case Length2:
             length_ += c << 8;
@@ -160,7 +160,7 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
             break;
     }
 
-    return codes::More;
+    return errc::again;
 }
 
 void delta_length_decoder::reset()
