@@ -15,19 +15,18 @@ void decoder<Streambuf>::read_header()
     good_ = read == sizeof(coap::header);
     good_ &= header_.valid();
 
-    if(good_)
-    {
-        state_ = header_.tkl() > 0 ? Token : Options;
-    }
+    if(good_) state_ = Token;
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 auto decoder<Streambuf>::operator>>(token& v) -> decoder&
 {
     static_assert(policy == Presumptive);
+    assert(state_ == Token);
+
+    const unsigned tkl = header_.tkl();
+
     // permit a 0-token just for ease of consumption
-    assert(state_ == Token || state_ == Options);
-    unsigned tkl = header_.tkl();
     v.size = tkl;
     if(tkl > 0)
     {
@@ -37,6 +36,8 @@ auto decoder<Streambuf>::operator>>(token& v) -> decoder&
 
     if(good_)
     {
+        // Just incase they go >> flavor
+        current_number_ = 0;
         state_ = Options;
     }
 
@@ -44,16 +45,37 @@ auto decoder<Streambuf>::operator>>(token& v) -> decoder&
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
+template <class F>
+estd::errc decoder<Streambuf>::options_decode(F&& f)
 {
+    if(state_ == Token) state_ = Options;
+
     assert(state_ == Options);
 
-    // DEBT: Really an additional state would probably be better
-    if(!current_number_initialized_)
+    bool has_payload{};
+    options::decoder<Streambuf&> options(in_);
+
+    estd::errc err = options.decode(std::forward<F>(f), &has_payload);
+
+    if(err != estd::errc{})
+    {
+        good_ = false;
+    }
+
+    state_ = has_payload ? Payload : Done;
+    return err;
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
+{
+    if(state_ == Token)
     {
         current_number_ = 0;
-        current_number_initialized_ = true;
+        state_ = Options;
     }
+    else
+        assert(state_ == Options);
 
     // Using stateful decoder is a neat trick here but I think using regular options::decoder
     // with some fine tuning (only decode one option) may be preferable
