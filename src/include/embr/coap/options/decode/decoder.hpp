@@ -115,7 +115,7 @@ estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, number
 // otherwise we would have used the more direct delta_length_decode call
 // EXPERIMENTAL, not used yet - but shaping up
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
-estd::errc decode_one_ll(Streambuf& in, F&& f, uint16_t current_number, bool* has_payload)
+estd::optional<int> decode_one_ll(Streambuf& in, F&& f, uint16_t current_number, bool* has_payload)
 {
     delta_length_decoder dlc;
 
@@ -140,20 +140,28 @@ estd::errc decode_one_ll(Streambuf& in, F&& f, uint16_t current_number, bool* ha
         return valid(c);
     };
 
-    for(int c; bump(c); )
-    {
-        r ret = dlc.decode_byte(c);
+    int c;
 
-        if(ret == r::Done)
+    while(bump(c))
+    {
+        switch(dlc.decode_byte(c))
         {
-            f(dlc);
-            // NOTE: Caller must consume value portion from streambuf themself including
-            // advancing streambuf forward
-            return {};
+            case r::Done:
+                f(dlc);
+                // NOTE: Caller must consume value portion from streambuf themself including
+                // advancing streambuf forward
+                return {};
+
+            case r::Bad:
+                // DEBT: Need better indicator, this will get misinterpreted as EOF and also
+                // EOF isn't guaranteed to be -1 from streambuf
+                return -1;
+
+            case r::More:   break;
         }
     }
 
-    return {};
+    return c;
 }
 
 

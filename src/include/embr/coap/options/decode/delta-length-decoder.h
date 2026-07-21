@@ -26,7 +26,7 @@ class delta_length_decoder
     uint16_t length_;
 
 public:
-    enum codes
+    enum class codes
     {
         Done,
         More,       ///<! More data expected

@@ -52,4 +52,5 @@ Checks:
   - '-cppcoreguidelines-pro-type-union-access'
   - '-google-build-using-namespace'
   - '-google-readability-braces-around-statements'
+  - '-readability-inconsistent-ifelse-braces'
   - '-readability-named-parameter'

@@ -9,8 +9,9 @@ namespace embr::coap::options {
 
 // Decode one option only
 // Low-level because caller must manually move  stream forward
+// As name implies, not stateful
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
-estd::errc decode_one_ll(Streambuf& in, F&&, uint16_t current_number, bool* has_payload);
+estd::optional<int> decode_one_ll(Streambuf& in, F&&, uint16_t current_number, bool* has_payload);
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 class decoder : public internal::policies_enum

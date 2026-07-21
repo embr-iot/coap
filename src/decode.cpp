@@ -5,6 +5,10 @@
 #include "embr/coap/options/decode/delta-length-decoder.h"
 #include "embr/coap/uint.h"
 
+
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace embr::coap {
 
 
@@ -25,7 +29,7 @@ const uint8_t* delta_length_decode(const uint8_t* in, unsigned number_current, n
     using namespace constants;
 
     unsigned delta = *in >> 4;
-    unsigned length_raw = *in & 0x0F;
+    const unsigned length_raw = *in & 0x0F;
     const uint8_t* end = in + *length;
 
     ++in;
@@ -93,18 +97,18 @@ auto delta_length_decoder::decode_length() -> codes
     {
         length_ = option_8_bit_offset;
         state_ = Length1;
-        return More;
+        return codes::More;
     }
     if(length_ == modes::Extended16Bit)
     {
         length_ = option_16_bit_offset;
         state_ = Length2;
-        return More;
+        return codes::More;
     }
     if(length_ == modes::Reserved)
-        return Bad;
+        return codes::Bad;
 
-    return Done;
+    return codes::Done;
 }
 
 auto delta_length_decoder::decode_byte(uint8_t c) -> codes
@@ -129,7 +133,7 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
                 state_ = Delta2;
             }
             else if(delta_ == modes::Reserved)
-                return Bad;
+                return codes::Bad;
             else
             {
                 return decode_length();
@@ -148,7 +152,7 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
 
         case Length1:
             length_ += c;
-            return Done;
+            return codes::Done;
 
         case Length2:
             length_ += c << 8;
@@ -156,7 +160,7 @@ auto delta_length_decoder::decode_byte(uint8_t c) -> codes
             break;
     }
 
-    return More;
+    return codes::More;
 }
 
 void delta_length_decoder::reset()
@@ -165,6 +169,9 @@ void delta_length_decoder::reset()
 }
 
 
-}
+}   // namespace options
 
-}
+}   // namespace embr::coap
+
+// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

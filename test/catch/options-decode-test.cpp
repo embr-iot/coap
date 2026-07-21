@@ -28,13 +28,14 @@ TEST_CASE("options decoding", "[decode][options]")
         SECTION("state machine")
         {
             coap::options::delta_length_decoder d;
+            using c = coap::options::delta_length_decoder::codes;
 
-            bool b = d.decode_byte(val1[0]);
-            REQUIRE(b);
-            b = d.decode_byte(val1[1]);
-            REQUIRE(b);
-            b = d.decode_byte(val1[2]);
-            REQUIRE(!b);
+            c code = d.decode_byte(val1[0]);
+            REQUIRE(code == c::More);
+            code = d.decode_byte(val1[1]);
+            REQUIRE(code == c::More);
+            code = d.decode_byte(val1[2]);
+            REQUIRE(code == c::Done);
 
             REQUIRE(d.delta() == 1);
             REQUIRE(d.length() == 0x1234 + constants::option_16_bit_offset);
