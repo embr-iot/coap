@@ -72,7 +72,7 @@ public:
     decoder& operator>>(options::option<>&);
 
     template <class F>
-    estd::errc options_decode(F&& f);
+    errc options_decode(F&& f);
 
     /* No not gonna work well this way, need a callback flavor
     template <options::numbers n>

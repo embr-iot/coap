@@ -16,7 +16,9 @@ enum class errc
     /// corrupt data OR stream error
     bad,
     //bad_data,
-    //bad_stream
+    //bad_stream,
+    /// unexpected data, perhaps corrupt but recoverable
+    warn
 };
 
 }

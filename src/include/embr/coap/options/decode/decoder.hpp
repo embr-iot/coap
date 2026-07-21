@@ -12,8 +12,33 @@
 namespace embr::coap::options {
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+template <class F>
+errc decoder<Streambuf>::emit(F&& f, numbers number, unsigned len)
+{
+    const unsigned avail = in_.in_avail();
+
+    option o;
+
+    o.number = number;
+    o.length = len;
+
+    if(avail < len)
+    {
+        // Signal that consumer should look directly at streambuf
+        o.opaque_ = nullptr;
+    }
+    else
+    {
+        o.opaque_ = in_.gptr();
+    }
+
+    f(o);
+    return errc{};
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <numbers number, class F, class Retry2>
-estd::errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
+errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
 {
     constexpr policies policy = Presumptive;
     constexpr unsigned temp_sz = policy == Presumptive ? 0 : 64;
@@ -36,7 +61,7 @@ estd::errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
             // Since it is akin to user input, this is not an assert but a validation class
             // error
             // NOTE: I would have used 'interrupted' but estd's fallback alias doesn't have that guy yet
-            return errc::no_message_available;
+            return errc::bad;
         }
         else if constexpr(policy == Retry)
         {
@@ -67,11 +92,11 @@ estd::errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
     // invalid_argument can be considered a warning, not an error
     if(len < traits::min_length)
     {
-        return errc::invalid_argument;
+        return errc::warn;
     }
     else if(traits::max_length != 0 && len > traits::max_length)
     {
-        return errc::invalid_argument;
+        return errc::warn;
     }
 
     return {};
@@ -79,7 +104,7 @@ estd::errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F, class NoMatchFunctor, class Retry2>
-estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, numbers number, unsigned len, Retry2&& retry)
+errc decoder<Streambuf>::dispatch_ll(F&& f, NoMatchFunctor&& no_match, numbers number, unsigned len, Retry2&& retry)
 {
     errc err = dispatch_number_ll(number,
         [&](auto number)
@@ -91,19 +116,13 @@ estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, number
             // no_match path is optional, oftentimes we don't care much
             if constexpr(!estd::is_same_v<NoMatchFunctor, estd::monostate>)
             {
-                option o;
-
-                o.number = number;
-                o.length = len;
-                o.opaque_ = nullptr;    // FIX: Actually assign this guy, presume opaque is what is wanted for unknowns
-
-                f(o);
+                emit(std::forward<NoMatchFunctor>(no_match), number, len);
                 return errc{};
             }
 
             // In the case where we are ignoring unmatched arguments, indicate
             // a warning state
-            return errc::invalid_argument;
+            return errc::warn;
         });
 
     // DEBT: Make sure this proceeds forward correctly
@@ -114,19 +133,20 @@ estd::errc decoder<Streambuf>::dispatch(F&& f, NoMatchFunctor&& no_match, number
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F, class NoMatchFunctor>
-estd::errc decoder<Streambuf>::decode(F&& f, bool* has_payload, NoMatchFunctor&& no_match)
+errc decoder<Streambuf>::dispatch(F&& f, bool* has_payload, NoMatchFunctor&& no_match)
 {
+    errc err{};
     unsigned current_number = 0;
 
     auto f2 = [&](const delta_length_decoder& dld)
     {
         current_number += dld.delta();
-        errc err = dispatch(
+        errc err2 = dispatch_ll(
             std::forward<F>(f),
             std::forward<NoMatchFunctor>(no_match),
             (numbers)current_number, dld.length());
-        // FIX: Heed return code
-        //if(err != errc{} && err != errc::invalid_argument) return err;
+
+        if(err2 == errc::bad)    err = err2;
     };
 
     estd::optional<int> c;
@@ -137,7 +157,7 @@ estd::errc decoder<Streambuf>::decode(F&& f, bool* has_payload, NoMatchFunctor&&
 
     *has_payload = c.value() == 0xFF;
 
-    return {};
+    return err;
 }
 
 

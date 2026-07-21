@@ -38,7 +38,7 @@ TEST_CASE("top-level decoding", "[decode]")
 
     SECTION("options decode callback")
     {
-        estd::errc err = decoder.options_decode([&](const auto o)
+        errc err = decoder.options_decode([&](const auto o)
             {
                 if constexpr(o.number == options::numbers::UriHost)
                 {
@@ -46,7 +46,7 @@ TEST_CASE("top-level decoding", "[decode]")
                 }
             });
 
-        REQUIRE(err == estd::errc{});
+        REQUIRE(err == errc{});
         REQUIRE(decoder.good());
         REQUIRE(host == "host");
         REQUIRE(decoder.state() == decoder_type::Payload);
@@ -84,7 +84,7 @@ TEST_CASE("top-level decoding", "[decode][char]")
 
     estd::string_view host{};
 
-    estd::errc err = decoder.options_decode([&](const auto o)
+    errc err = decoder.options_decode([&](const auto o)
         {
             if constexpr(o.number == options::numbers::UriHost)
             {

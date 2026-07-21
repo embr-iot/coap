@@ -46,7 +46,7 @@ auto decoder<Streambuf>::operator>>(token& v) -> decoder&
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F>
-estd::errc decoder<Streambuf>::options_decode(F&& f)
+errc decoder<Streambuf>::options_decode(F&& f)
 {
     if(state_ == Token) state_ = Options;
 
@@ -55,12 +55,9 @@ estd::errc decoder<Streambuf>::options_decode(F&& f)
     bool has_payload{};
     options::decoder<Streambuf&> options(in_);
 
-    estd::errc err = options.decode(std::forward<F>(f), &has_payload);
+    errc err = options.dispatch(std::forward<F>(f), &has_payload);
 
-    if(err != estd::errc{})
-    {
-        good_ = false;
-    }
+    good_ = err == errc{};
 
     state_ = has_payload ? Payload : Done;
     return err;

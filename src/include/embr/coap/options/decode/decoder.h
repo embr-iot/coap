@@ -1,5 +1,6 @@
 #include "fwd.h"
 
+#include "../../internal/errc.h"
 #include "../../internal/policies.h"
 
 #include <estd/cstdint.h>
@@ -10,8 +11,6 @@ namespace embr::coap::options {
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 class decoder : public internal::policies_enum
 {
-    using errc = estd::errc;
-
     Streambuf in_;
 
     using streambuf_type = estd::remove_cvref_t<Streambuf>;
@@ -20,11 +19,15 @@ class decoder : public internal::policies_enum
     // See https://github.com/malachi-iot/estdlib/issues/219
     //using use = typename streambuf_type::impl_type::policy::use;
 
+    // DEBT: Do Retry
+    template <class F>
+    errc emit(F&&, numbers, unsigned len);
+
     template <numbers, class F, class Retry>
-    estd::errc dispatch_ll(F&&, unsigned len, Retry&&);
+    errc dispatch_ll(F&&, unsigned len, Retry&&);
 
     template <class F, class NoMatchFunctor, class Retry = estd::monostate>
-    estd::errc dispatch(F&&, NoMatchFunctor&&, numbers number, unsigned len, Retry&& = {});
+    errc dispatch_ll(F&&, NoMatchFunctor&&, numbers number, unsigned len, Retry&& = {});
 
 public:
     template <class ...Args>
@@ -32,13 +35,13 @@ public:
 
     // DEBT: Rename to 'dispatch' to indicate type of decode behavior
     template <class F, class NoMatchFunctor = estd::monostate>
-    estd::errc decode(F&&, bool* has_payload, NoMatchFunctor&& = {});
+    errc dispatch(F&&, bool* has_payload, NoMatchFunctor&& = {});
 
     // Route matched and unmatched options through the same functor
     template <class F>
-    estd::errc decode_combined(F&& f, bool* has_payload)
+    errc decode_combined(F&& f, bool* has_payload)
     {
-        return decode(std::forward<F>(f), has_payload, std::forward<F>(f));
+        return dispatch(std::forward<F>(f), has_payload, std::forward<F>(f));
     }
 };
 
