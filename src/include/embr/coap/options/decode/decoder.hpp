@@ -116,52 +116,26 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F, class NoMatchFunctor>
 estd::errc decoder<Streambuf>::decode(F&& f, bool* has_payload, NoMatchFunctor&& no_match)
 {
-    delta_length_decoder dlc;
     unsigned current_number = 0;
 
-    using r = delta_length_decoder::codes;
-
-    auto valid = [](int c)
+    auto f2 = [&](const delta_length_decoder& dld)
     {
-        // Be advised, bug https://github.com/malachi-iot/estdlib/issues/220
-        // presents 0xFF AS -1
-        // DEBT: EOS not same as EOL or maybe EOF
-        return c != 0xFF && c != -1;
+        current_number += dld.delta();
+        errc err = dispatch(
+            std::forward<F>(f),
+            std::forward<NoMatchFunctor>(no_match),
+            (numbers)current_number, dld.length());
+        // FIX: Heed return code
+        //if(err != errc{} && err != errc::invalid_argument) return err;
     };
 
-    // EXPERIMENTAL - too side-effecty?  Or cool?
-    auto bump = [&](int& c)
+    estd::optional<int> c;
+
+    while(!(c = delta_length_decode(in_, f2)).has_value())
     {
-        c = in_.sbumpc();
-        // Awkwardness here because we're not caling sgetc.  But I prefer this awkwardness because
-        // there's no "back up" ever, always progressing characters forward.  Fortunately it's
-        // easy to consume 0xFF as long as we indicate a payload is expected
-        if(c == 0xFF) *has_payload = true;
-        return valid(c);
-    };
-
-    for(int c; bump(c); )
-    {
-        r ret = dlc.decode_byte(c);
-
-        if(ret == r::Done)
-        {
-            current_number += dlc.delta();
-            errc err = dispatch(
-                std::forward<F>(f),
-                std::forward<NoMatchFunctor>(no_match),
-                (numbers)current_number, dlc.length());
-            if(err != errc{} && err != errc::invalid_argument) return err;
-
-            dlc.reset();
-        }
-        else if(ret == r::Bad)
-        {
-            return errc::no_message_available;
-        }
-        else
-            assert(ret == r::More);
     }
+
+    *has_payload = c.value() == 0xFF;
 
     return {};
 }

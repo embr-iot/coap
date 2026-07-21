@@ -10,7 +10,7 @@ namespace embr::coap::options {
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
 estd::optional<int> delta_length_decode(Streambuf& in, F&& f)
 {
-    delta_length_decoder dlc;
+    delta_length_decoder dld;
 
     using r = delta_length_decoder::codes;
 
@@ -24,12 +24,12 @@ estd::optional<int> delta_length_decode(Streambuf& in, F&& f)
 
     int c;
 
-    while(valid(c = in.sbump()))
+    while(valid(c = in.sbumpc()))
     {
-        switch(dlc.decode_byte(c))
+        switch(dld.decode_byte(c))
         {
             case r::Done:
-                f(dlc);
+                f(dld);
                 // NOTE: Caller must consume value portion from streambuf themself including
                 // advancing streambuf forward
                 return {};
