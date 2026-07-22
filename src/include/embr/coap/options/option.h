@@ -2,6 +2,8 @@
 
 #include "fwd.h"
 
+#include "../uint.h"
+
 #include <estd/span.h>
 #include <estd/string_view.h>
 
@@ -54,6 +56,22 @@ struct option : option_base
         static_assert(traits::format == value_formats::Uint);
 
         return uint_;
+    }
+
+    void value(const uint8_t* v)
+    {
+        if constexpr(traits::format == value_formats::Opaque)
+        {
+            opaque_ = v;
+        }
+        else if constexpr(traits::format == value_formats::String)
+        {
+            string_ = (const char*)v;
+        }
+        else if constexpr(traits::format == value_formats::Uint)
+        {
+            uint_ = uint_decode<unsigned>(v, length);
+        }
     }
 };
 

@@ -109,4 +109,35 @@ static_assert(sizeof(out_accumulator<8, 4>) == 9);
 static_assert(sizeof(out_accumulator<8, 16>) == 12);
 
 
+// NOT READY YET
+template <unsigned N, unsigned width = 8, bool with_ext = false>
+class __attribute__((packed)) in_accumulator
+{
+    // No default initialization so we can live comfortably inside a union
+
+    static constexpr unsigned ext_mask = with_ext ?
+        (1 << (width - 1)) : 0;
+
+    unsigned
+        pos_ : width,
+        size_ : width;
+
+
+public:
+    union
+    {
+        uint8_t buf_[N];
+        uint8_t* ext_;
+    };
+
+    constexpr int pos() const { return pos_; }
+    constexpr int remaining() const { return size_ - pos_; }
+    constexpr unsigned size() const
+    {
+        return size_ & ~ext_mask;
+    }
+
+};
+
+
 }

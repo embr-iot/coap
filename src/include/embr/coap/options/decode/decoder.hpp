@@ -11,9 +11,9 @@
 
 namespace embr::coap::options {
 
-template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F>
-errc decoder<Streambuf>::emit(F&& f, numbers number, unsigned len)
+errc decoder<Streambuf, Traits>::emit(F&& f, numbers number, unsigned len)
 {
     // TODO: Strongly consider 'Presumptive' mode auto-advancing
     // through buf on your behalf
@@ -43,16 +43,36 @@ errc decoder<Streambuf>::emit(F&& f, numbers number, unsigned len)
     return errc{};
 }
 
-template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-template <numbers number, class F, class Retry2>
-errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
+template <numbers number, class F>
+errc decoder<Streambuf, Traits>::emit(F&& f, unsigned len, const uint8_t* data)
 {
-    constexpr unsigned temp_sz = policy == Presumptive ? 0 : 64;
-
     using traits = option_traits<number>;
     option<number> o;
 
     o.length = len;
+    o.value(data);
+
+    f(o);
+
+    // invalid_argument can be considered a warning, not an error
+    if(len < traits::min_length)
+    {
+        return errc::warn;
+    }
+    else if(traits::max_length != 0 && len > traits::max_length)
+    {
+        return errc::warn;
+    }
+
+    return {};
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
+template <numbers number, class F, class Retry2>
+errc decoder<Streambuf, Traits>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
+{
+    constexpr unsigned temp_sz = policy == Presumptive ? 0 : 64;
 
     unsigned avail = in_.in_avail();
     uint8_t temp[temp_sz];
@@ -80,37 +100,12 @@ errc decoder<Streambuf>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
 
     auto data = (const uint8_t*)in_.gptr();
 
-    if constexpr(traits::format == value_formats::Opaque)
-    {
-        o.opaque_ = data;
-    }
-    else if constexpr(traits::format == value_formats::String)
-    {
-        o.string_ = (const char*)data;
-    }
-    else if constexpr(traits::format == value_formats::Uint)
-    {
-        o.uint_ = uint_decode<unsigned>(data, len);
-    }
-
-    f(o);
-
-    // invalid_argument can be considered a warning, not an error
-    if(len < traits::min_length)
-    {
-        return errc::warn;
-    }
-    else if(traits::max_length != 0 && len > traits::max_length)
-    {
-        return errc::warn;
-    }
-
-    return {};
+    return emit<number>(std::forward<F>(f), len, data);
 }
 
-template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F, class NoMatchFunctor, class Retry2>
-errc decoder<Streambuf>::dispatch_ll(F&& f, NoMatchFunctor&& no_match, numbers number, unsigned len, Retry2&& retry)
+errc decoder<Streambuf, Traits>::dispatch_ll(F&& f, NoMatchFunctor&& no_match, numbers number, unsigned len, Retry2&& retry)
 {
     errc err = dispatch_number_ll(number,
         [&](auto number)
@@ -137,9 +132,9 @@ errc decoder<Streambuf>::dispatch_ll(F&& f, NoMatchFunctor&& no_match, numbers n
     return err;
 }
 
-template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F, class NoMatchFunctor>
-errc decoder<Streambuf>::dispatch(F&& f, bool* has_payload, NoMatchFunctor&& no_match)
+errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunctor&& no_match)
 {
     errc err{};
     unsigned current_number = 0;
@@ -168,9 +163,9 @@ errc decoder<Streambuf>::dispatch(F&& f, bool* has_payload, NoMatchFunctor&& no_
 
 
 // UNTESTED
-template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F>
-errc decoder<Streambuf>::decode(F&& f, bool* has_payload)
+errc decoder<Streambuf, Traits>::decode(F&& f, bool* has_payload)
 {
     errc err{};
     unsigned current_number = 0;
