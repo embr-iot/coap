@@ -137,6 +137,29 @@ public:
         return size_ & ~ext_mask;
     }
 
+    void init(unsigned size)
+    {
+        pos_ = 0;
+        size_ = size;
+    }
+
+    /// @brief sgetn
+    /// @param in
+    /// @return true if all desired data is read, false otherwise
+    template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+    bool sgetn(Streambuf& in)
+    {
+        using char_type = typename Streambuf::char_type;
+
+        const int bytes_to_read = size_ - pos_;
+
+        int bytes_read = in.sgetn((char_type*)buf_ + pos_, bytes_to_read);
+
+        if(bytes_read == bytes_to_read) return true;
+
+        pos_ += bytes_read;
+        return false;
+    }
 };
 
 

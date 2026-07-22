@@ -18,7 +18,9 @@ enum class errc
     //bad_data,
     //bad_stream,
     /// unexpected data, perhaps corrupt but recoverable
-    warn
+    warn,
+    /// internal problem with encoder/decoder itself
+    fail
 };
 
 }

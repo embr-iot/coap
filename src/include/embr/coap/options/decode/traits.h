@@ -18,7 +18,10 @@ struct retry_decoder_traits : decoder_traits_base
 {
     static constexpr policies policy = policies::Retry;
 
-    static constexpr unsigned in_accumulator_size = 32;
+    // IDEA: Can also be 0, indicating consumer must manually bump stream forward
+    // themselves.  Interesting also might be ext mode for in_accumulator, but that's
+    // less obvious how to do cleanly
+    static constexpr unsigned in_accumulator_size = 64;
 };
 
 }

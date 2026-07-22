@@ -16,7 +16,26 @@ class decoder : public internal::policies_enum
 public:
     using traits = Traits;
     using streambuf_type = estd::remove_cvref_t<Streambuf>;
+    using streambuf_policy_test = typename streambuf_type::policy;
     static constexpr policies policy = traits::policy;
+
+    using rfc = estd::internal::rfc::rfc2119;
+
+    // DEBT: Crude recreation of what's in estd.  Doing this due to how
+    // https://github.com/malachi-iot/estdlib/issues/219 isn't quite stabalized yet
+    // and also there's some bugs in acquiring existing policy in the first place
+    struct streambuf_policy
+    {
+        static constexpr bool blocking = false;
+
+        struct use
+        {
+            static constexpr rfc gptr = rfc::should;
+            static constexpr rfc pptr = rfc::must_not;
+            static constexpr rfc seekoff = rfc::should;
+            static constexpr rfc seekpos = rfc::should;
+        };
+    };
 
 private:
     Streambuf in_;
@@ -34,7 +53,10 @@ private:
     errc emit(F&&, unsigned len, const uint8_t* value);
 
     template <numbers, class F, class Retry>
-    errc dispatch_ll(F&&, unsigned len, Retry&&);
+    errc dispatch_sgetn_ll(F&&, unsigned len, Retry&&);
+
+    template <numbers, class F, class Retry>
+    errc dispatch_gptr_ll(F&&, unsigned len, Retry&&);
 
     template <class F, class NoMatchFunctor, class Retry = estd::monostate>
     errc dispatch_ll(F&&, NoMatchFunctor&&, numbers number, unsigned len, Retry&& = {});

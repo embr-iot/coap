@@ -8,6 +8,7 @@
 #include "../traits.h"
 #include "../option.h"
 #include "../../uint.h"
+#include "../../internal/accumulator.h"
 
 namespace embr::coap::options {
 
@@ -70,37 +71,49 @@ errc decoder<Streambuf, Traits>::emit(F&& f, unsigned len, const uint8_t* data)
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <numbers number, class F, class Retry2>
-errc decoder<Streambuf, Traits>::dispatch_ll(F&& f, unsigned len, Retry2&& retry)
+errc decoder<Streambuf, Traits>::dispatch_sgetn_ll(F&& f, unsigned len, Retry2&& retry)
 {
-    constexpr unsigned temp_sz = policy == Presumptive ? 0 : 64;
+    constexpr unsigned max_size = traits::in_accumulator_size;
+    internal::in_accumulator<max_size> accumulator;
 
-    unsigned avail = in_.in_avail();
-    uint8_t temp[temp_sz];
+    if(len > max_size) return errc::fail;
 
-    if(avail < len)
+    accumulator.init(len);
+
+    while(accumulator.sgetn(in_) == false)
     {
-        // DEBT: temp buffer may sometimes may not be big enough, since options technically can get pretty big.
-        // account for this with a validation class error (don't want poison packets bringing us down)
-        if constexpr(policy == Presumptive)
-        {
+        retry();
+    }
+
+    return emit<number>(std::forward<F>(f), len, accumulator.buf_);
+}
+
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
+template <numbers number, class F, class Retry2>
+errc decoder<Streambuf, Traits>::dispatch_gptr_ll(F&& f, unsigned len, Retry2&& retry)
+{
+    const unsigned avail = in_.in_avail();
+
+    static_assert(streambuf_policy::use::gptr >= rfc::may);
+
+    if constexpr(policy == Presumptive)
+    {
+        if(avail < len)
             // Input stream is presumed to be incorrectly truncated in this mode.
             // Since it is akin to user input, this is not an assert but a validation class
             // error
-            // NOTE: I would have used 'interrupted' but estd's fallback alias doesn't have that guy yet
             return errc::bad;
-        }
-        else if constexpr(policy == Retry)
-        {
-            // Do blocking/repeat read here
-            //in_.sgetn(temp, len);
-        }
-        else
-            static_assert(false, "Unsupported policy");
     }
+    else if constexpr(policy == Retry || policy == NonContiguous)
+    {
+        if(avail < len)
+            return dispatch_sgetn_ll(std::forward<F>(f), len, std::forward<Retry2>(retry));
+    }
+    else
+        static_assert(false, "Unrecognized policy");
 
-    auto data = (const uint8_t*)in_.gptr();
-
-    return emit<number>(std::forward<F>(f), len, data);
+    return emit<number>(std::forward<F>(f), len, (const uint8_t*)in_.gptr());
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
@@ -110,7 +123,7 @@ errc decoder<Streambuf, Traits>::dispatch_ll(F&& f, NoMatchFunctor&& no_match, n
     errc err = dispatch_number_ll(number,
         [&](auto number)
         {
-            return dispatch_ll<number>(std::forward<F>(f), len, std::forward<Retry2>(retry));
+            return dispatch_gptr_ll<number>(std::forward<F>(f), len, std::forward<Retry2>(retry));
         },
         [&](numbers)
         {
