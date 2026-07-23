@@ -62,6 +62,14 @@ public:
     single_encoder operator<<(unsigned)
     {
         static_assert(traits::format == value_formats::Uint);
+        // FIX: Need to call uint_encode
+        return *this;
+    }
+
+    single_encoder operator<<(uint64_t)
+    {
+        static_assert(traits::format == value_formats::Uint);
+        // FIX: Need to call uint_encode
         return *this;
     }
 

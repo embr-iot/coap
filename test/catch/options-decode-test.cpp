@@ -168,17 +168,36 @@ TEST_CASE("options decoding", "[decode][options]")
 
         int counter = 0;
 
-        dispatch_number(numbers::UriPath, [&](auto number)
+        SECTION("primary case")
         {
-            //using traits = option_traits<number>;
-
-            //static_assert(traits::number == numbers::UriPath);
-            if constexpr(number == numbers::UriPath)
+            dispatch_number(numbers::UriPath, [&](auto number)
             {
-                ++counter;
-            }
-        });
+                //using traits = option_traits<number>;
 
-        REQUIRE(counter == 1);
+                //static_assert(traits::number == numbers::UriPath);
+                if constexpr(number == numbers::UriPath)
+                {
+                    ++counter;
+                }
+            });
+
+            REQUIRE(counter == 1);
+        }
+        SECTION("helper options.dispatch method")
+        {
+            option<> o(numbers::UriHost, 4, "host");
+
+            bool r = o.dispatch([&](const auto o2)
+            {
+                if constexpr(o2.number == numbers::UriHost)
+                {
+                    ++counter;
+                    if(o2.string() == "host")   ++counter;
+                }
+            });
+
+            REQUIRE(r);
+            REQUIRE(counter == 2);
+        }
     }
 }

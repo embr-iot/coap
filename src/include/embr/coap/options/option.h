@@ -16,6 +16,7 @@ struct option_base
     union
     {
         const uint8_t* opaque_;
+        // DEBT: it's easily possible for an int bigger than an unsigned to appear
         unsigned uint_;
         const char* string_;
         const void* raw_;
@@ -51,9 +52,13 @@ struct option : option_base
         return { opaque_, length };
     }
 
-    constexpr unsigned uint() const
+    template <class Integer = unsigned>
+    constexpr Integer uint() const
     {
         static_assert(traits::format == value_formats::Uint);
+
+        // DEBT: Switch over and decode to a bigger int type if we need to/can
+        //if(length > sizeof(uint_)) {}
 
         return uint_;
     }
@@ -72,6 +77,8 @@ struct option : option_base
         {
             uint_ = uint_decode<unsigned>(v, length);
         }
+        else
+            static_assert(false, "value not assignable for this option");
     }
 };
 
@@ -120,6 +127,20 @@ struct option<numbers{}> : private option_base
     constexpr unsigned uint() const
     {
         return uint_decode(opaque_, length);
+    }
+
+
+    template <class F, class ...Args>
+    bool dispatch(F&& f, Args&&...args)
+    {
+        return dispatch_number(number, [&](const auto number)
+        {
+            option<number> o;
+            o.length = length;
+            o.value(opaque_);
+            f(o, std::forward<Args>(args)...);
+            return true;
+        }, false);
     }
 };
 
