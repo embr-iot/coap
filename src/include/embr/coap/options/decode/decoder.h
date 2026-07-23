@@ -72,10 +72,8 @@ public:
 
     /// @brief decode_one
     /// @param current_number
-    /// @param has_payload unlike elsewhere, this can be null since one-at-a-time option decoding can
-    /// easily notice a payload before even beginning
     /// @return
-    errc decode_one(option<>*, uint16_t* current_number, bool* has_payload = nullptr);
+    errc decode_one(option<>*, uint16_t* current_number);
 
     template <class F>
     errc decode(F&&, bool* has_payload);

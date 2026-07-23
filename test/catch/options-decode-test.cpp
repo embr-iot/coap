@@ -89,7 +89,6 @@ TEST_CASE("options decoding", "[decode][options]")
         using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
 
         int counter = 0;
-        bool has_payload;
         uint16_t current_number = 0;
         option<> opt{};
 
@@ -97,12 +96,12 @@ TEST_CASE("options decoding", "[decode][options]")
         {
             decoder_type decoder(test::op_data1);
 
-            coap::errc err = decoder.decode_one(&opt, &current_number, &has_payload);
+            coap::errc err = decoder.decode_one(&opt, &current_number);
 
             REQUIRE(err == coap::errc{});
             REQUIRE(opt.number == numbers::UriHost);
 
-            err = decoder.decode_one(&opt, &current_number, &has_payload);
+            err = decoder.decode_one(&opt, &current_number);
 
             REQUIRE(err == coap::errc{});
             REQUIRE(opt.number == numbers::UriPath);
@@ -111,10 +110,15 @@ TEST_CASE("options decoding", "[decode][options]")
         {
             decoder_type decoder(test::op_data2);
 
-            coap::errc err = decoder.decode_one(&opt, &current_number, &has_payload);
+            coap::errc err = decoder.decode_one(&opt, &current_number);
 
             REQUIRE(err == coap::errc{});
             REQUIRE(opt.number == numbers::UriHost);
+
+            err = decoder.decode_one(&opt, &current_number);
+
+            // For low-level-ish decode_one, 'cycle' means Payload encountered
+            REQUIRE(err == coap::errc::cycle);
         }
     }
     SECTION("stateful decoder")

@@ -53,7 +53,7 @@ errc decoder<Streambuf>::options_decode(F&& f)
     assert(state_ == Options);
 
     bool has_payload{};
-    options::decoder<Streambuf&> options(in_);
+    options::decoder<Streambuf&, traits> options(in_);
 
     errc err = options.dispatch(std::forward<F>(f), &has_payload);
 
@@ -86,6 +86,9 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
             break;
         }
 
+        // 'cycle' means we unexpectedly hit payload, which we already should have
+        // detected in errc{} above.
+        // 'bad' is just how it sounds
         default:
             good_ = false;
             break;

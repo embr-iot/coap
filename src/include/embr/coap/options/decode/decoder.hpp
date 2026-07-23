@@ -167,7 +167,7 @@ errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunct
 
 // Does not advance stream past value portion, thus the ll
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number, bool* has_payload)
+errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number)
 {
     delta_length_decoder dld;
 
@@ -179,15 +179,22 @@ errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number, bool*
 
     *opt = make_option(in, (numbers)*current_number, dld.length());
 
-    if(has_payload) *has_payload = c.has_value() && c.value() == 0xFF;
+    // We use 'cycle' to signal more data is available in the form of a payload and that no
+    // option was actually available.  This fits the lower level nature of decode_one better
+    // than a payload flag because:
+    // - Usually we're in a position to to sgetc to notice if a payload is present
+    // - Usually we're wrapped up in internal calls here, so checking against cycle is not unnnatural
+    // DEBT: Consider errc::warn - consider whether delta_length_decoder inner chain ever issues that
+    // and weigh conflation possibilities
+    if(c.has_value() && c.value() == 0xFF) return errc::cycle;
 
     return {};
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
-errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_number, bool* has_payload)
+errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_number)
 {
-    errc err = decode_one_ll(in_, o, current_number, has_payload);
+    errc err = decode_one_ll(in_, o, current_number);
 
     if(err != errc{})   return err;
 
@@ -199,6 +206,21 @@ errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_numbe
 
         if(ret == -1) err = errc::bad;
     }
+    return err;
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
+template <class F>
+errc decoder<Streambuf, Traits>::decode(F&& f, bool* has_payload)
+{
+    uint16_t current_number = 0;
+    option o;
+    errc err;
+
+    // FIX: Infinite loops if no payload is present
+    while((err = decode_one(&o, &current_number)) == errc{})
+        f(o);
+
     return err;
 }
 
