@@ -74,7 +74,7 @@ public:
 
     // Route matched and unmatched options through the same functor
     template <class F>
-    errc decode_combined(F&& f, bool* has_payload)
+    errc dispatch_combined(F&& f, bool* has_payload)
     {
         return dispatch(std::forward<F>(f), has_payload, std::forward<F>(f));
     }

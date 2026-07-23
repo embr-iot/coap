@@ -41,7 +41,7 @@ TEST_CASE("options decoding", "[decode][options]")
             REQUIRE(d.length() == 0x1234 + constants::option_16_bit_offset);
         }
     }
-    SECTION("decoder")
+    SECTION("decoder: dispatch")
     {
         using namespace coap::options;
 
@@ -50,13 +50,9 @@ TEST_CASE("options decoding", "[decode][options]")
         int counter = 0;
         bool has_payload;
 
-        estd::detail::basic_ispanbuf<const uint8_t> in(test::op_data1);
         decoder_type decoder(test::op_data1);
 
-        // compiles, but doesn't seem to call f()
-        //decode_exp(in, [&](const auto& o)
-        //estd::errc err = decode(estd::span(test::data1), [&](const auto& o)
-        coap::errc err = decoder.decode_combined([&](const auto o)
+        coap::errc err = decoder.dispatch_combined([&](const auto o)
         {
             // This is not great, but serviceable
             if constexpr(!is_constexpr<decltype(o)>)
@@ -85,6 +81,27 @@ TEST_CASE("options decoding", "[decode][options]")
 
         REQUIRE(err == coap::errc{});
         REQUIRE(counter == 3);
+    }
+    SECTION("decoder: decode_one")
+    {
+        using namespace coap::options;
+
+        using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
+
+        int counter = 0;
+        bool has_payload;
+
+        decoder_type decoder(test::op_data1);
+
+        option<> opt{};
+
+        coap::errc err = decoder.decode_one([&](const option<>& o)
+            {
+                opt = o;
+            }, &has_payload);
+
+        REQUIRE(err == coap::errc{});
+        REQUIRE(opt.number == numbers::UriHost);
     }
     SECTION("stateful decoder")
     {
