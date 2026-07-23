@@ -9,7 +9,8 @@ namespace embr::coap {
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 class decoder : public internal::policies_enum
 {
-    static constexpr policies policy = Presumptive;
+    using traits = options::presumptive_decoder_traits;
+    static constexpr policies policy = traits::policy;
 
     Streambuf in_;
 

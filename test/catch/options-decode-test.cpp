@@ -90,18 +90,32 @@ TEST_CASE("options decoding", "[decode][options]")
 
         int counter = 0;
         bool has_payload;
-
-        decoder_type decoder(test::op_data1);
-
+        uint16_t current_number = 0;
         option<> opt{};
 
-        coap::errc err = decoder.decode_one([&](const option<>& o)
-            {
-                opt = o;
-            }, &has_payload);
+        SECTION("data#1")
+        {
+            decoder_type decoder(test::op_data1);
 
-        REQUIRE(err == coap::errc{});
-        REQUIRE(opt.number == numbers::UriHost);
+            coap::errc err = decoder.decode_one(&opt, &current_number, &has_payload);
+
+            REQUIRE(err == coap::errc{});
+            REQUIRE(opt.number == numbers::UriHost);
+
+            err = decoder.decode_one(&opt, &current_number, &has_payload);
+
+            REQUIRE(err == coap::errc{});
+            REQUIRE(opt.number == numbers::UriPath);
+        }
+        SECTION("data#2")
+        {
+            decoder_type decoder(test::op_data2);
+
+            coap::errc err = decoder.decode_one(&opt, &current_number, &has_payload);
+
+            REQUIRE(err == coap::errc{});
+            REQUIRE(opt.number == numbers::UriHost);
+        }
     }
     SECTION("stateful decoder")
     {

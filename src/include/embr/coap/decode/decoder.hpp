@@ -74,20 +74,17 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
     else
         assert(state_ == Options);
 
-    options::decoder<Streambuf&> options(in_);
+    options::decoder<Streambuf&, traits> options(in_);
 
-    bool has_payload;
-
-    errc err = options.decode_one([&](const options::option<>& op)
-        {
-            v = op;
-        }, &has_payload);
+    errc err = options.decode_one(&v, &current_number_);
 
     switch(err)
     {
         case errc{}:  // NOLINT
-            state_ = has_payload ? Payload : Done;
+        {
+            state_ = in_.sgetc() == 0xFF ? Payload : Done;
             break;
+        }
 
         default:
             good_ = false;

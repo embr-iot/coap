@@ -77,8 +77,14 @@ struct option : option_base
 
 // no constexpr/traits for u
 template <>
-struct option<numbers{}> : option_base
+struct option<numbers{}> : private option_base
 {
+    // non-specialized option doesn't know whether he's opaque, string, etc. and
+    // producer also doesn't (otherwise we could dispatch and specialize).
+    // Therefore, all values are presented as opaque_
+    using option_base::length;
+    using option_base::opaque_;
+
     numbers number;
 
     // only used by stateful decoder. represents whether this option
@@ -113,7 +119,7 @@ struct option<numbers{}> : option_base
 
     constexpr unsigned uint() const
     {
-        return uint_;
+        return uint_decode(opaque_, length);
     }
 };
 

@@ -4,6 +4,7 @@
 //#include "../../internal/accumulator.h"
 #include "../../internal/errc.h"
 #include "../../internal/policies.h"
+#include "../option.h"
 
 #include <estd/cstdint.h>
 #include <estd/streambuf.h>
@@ -48,7 +49,7 @@ private:
 
     // DEBT: Do Retry
     template <class F>
-    errc emit(F&&, numbers, unsigned len);
+    errc emit(F&&, const option<>&);
 
     template <numbers n, class F>
     errc emit(F&&, unsigned len, const uint8_t* value);
@@ -69,8 +70,15 @@ public:
     template <class F, class NoMatchFunctor = estd::monostate>
     errc dispatch(F&&, bool* has_payload, NoMatchFunctor&& = {});
 
+    /// @brief decode_one
+    /// @param current_number
+    /// @param has_payload unlike elsewhere, this can be null since one-at-a-time option decoding can
+    /// easily notice a payload before even beginning
+    /// @return
+    errc decode_one(option<>*, uint16_t* current_number, bool* has_payload = nullptr);
+
     template <class F>
-    errc decode_one(F&&, bool* has_payload);
+    errc decode(F&&, bool* has_payload);
 
     // Route matched and unmatched options through the same functor
     template <class F>

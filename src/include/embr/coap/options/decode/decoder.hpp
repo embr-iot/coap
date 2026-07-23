@@ -12,31 +12,20 @@
 
 namespace embr::coap::options {
 
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+constexpr option<> make_option(Streambuf& in, numbers number, unsigned len)
+{
+    // DEBT: static_assert that gptr is present
+
+    return { number, len, in.in_avail() < len ? nullptr : (const uint8_t*)in.gptr() };
+}
+
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F>
-errc decoder<Streambuf, Traits>::emit(F&& f, numbers number, unsigned len)
+errc decoder<Streambuf, Traits>::emit(F&& f, const option<>& o)
 {
-    // TODO: Strongly consider 'Presumptive' mode auto-advancing
-    // through buf on your behalf
-
-    const unsigned avail = in_.in_avail();
-
-    option o;
-
-    o.number = number;
-    o.length = len;
-
-    if(avail < len)
-    {
+    if(o.length > 0 && o.opaque_ == nullptr)
         if constexpr(policy == Presumptive) return errc::bad;
-
-        // Signal that consumer should look directly at streambuf
-        o.opaque_ = nullptr;
-    }
-    else
-    {
-        o.opaque_ = in_.gptr();
-    }
 
     // Be advised also you must pubseekoff (or similar) yourself
     f(o);
@@ -130,7 +119,7 @@ errc decoder<Streambuf, Traits>::dispatch_ll(F&& f, NoMatchFunctor&& no_match, n
             // no_match path is optional, oftentimes we don't care much
             if constexpr(!estd::is_same_v<NoMatchFunctor, estd::monostate>)
             {
-                emit(std::forward<NoMatchFunctor>(no_match), number, len);
+                emit(std::forward<NoMatchFunctor>(no_match), make_option(in_, number, len));
                 return errc{};
             }
 
@@ -176,32 +165,40 @@ errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunct
 }
 
 
-template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
-template <class F>
-errc decoder<Streambuf, Traits>::decode_one(F&& f, bool* has_payload)
+// Does not advance stream past value portion, thus the ll
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number, bool* has_payload)
 {
-    errc err{};
-    unsigned current_number = 0;
+    delta_length_decoder dld;
 
-    auto f2 = [&](const delta_length_decoder& dld)
+    estd::optional<int> c = delta_length_decode(dld, in);
+
+    if(c == -2) return errc::bad;
+
+    *current_number += dld.delta();
+
+    *opt = make_option(in, (numbers)*current_number, dld.length());
+
+    if(has_payload) *has_payload = c.has_value() && c.value() == 0xFF;
+
+    return {};
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
+errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_number, bool* has_payload)
+{
+    errc err = decode_one_ll(in_, o, current_number, has_payload);
+
+    if(err != errc{})   return err;
+
+    if constexpr(policy == Presumptive)
     {
-        current_number += dld.delta();
-        err = emit(std::forward<F>(f), (numbers)current_number, dld.length());
+        // DEBT: Do check 'emit' does to ensure value portion is not null if this is a Presumptive decoder
 
-        if(err != errc{})   return;
+        pos_type ret = in_.pubseekoff(o->length, estd::ios_base::cur);
 
-        if constexpr(policy == Presumptive)
-        {
-            pos_type ret = in_.pubseekoff(dld.length(), estd::ios_base::cur);
-
-            if(ret == -1) err = errc::bad;
-        }
-    };
-
-    estd::optional<int> c = delta_length_decode(in_, f2);
-
-    *has_payload = c.has_value() && c.value() == 0xFF;
-
+        if(ret == -1) err = errc::bad;
+    }
     return err;
 }
 
