@@ -80,7 +80,7 @@ public:
         if(v == 0) return true;
 
         uint8_t* start = temp_.buf_ + temp_.size();
-        const uint8_t* end = uint_encode(start, v);
+        const uint8_t* end = uint_encode(start, temp_.buf_ + temp_.max_size(), v);
         // resize up accumulator to include encoded uint
         temp_.init(end - temp_.buf_);
         // update option header length portion with discovered size

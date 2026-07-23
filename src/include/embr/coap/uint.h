@@ -1,11 +1,12 @@
 #pragma once
 
-#include "stdlib.h"
+#include "fwd.h"
 
 #include <estd/cstdint.h>
 #include <estd/limits.h>
 
-#include "fwd.h"
+#include "assert.h"
+#include "stdlib.h"
 
 namespace embr::coap {
 
@@ -30,7 +31,7 @@ constexpr Integer uint_decode(const uint8_t* in, const uint8_t* end)
 /// Encode an integer in big endian/network order (low level call).
 /// @param out = begin + len - 1
 template <typename Integer>
-constexpr void uint_encode(const uint8_t* const begin, uint8_t* out, Integer value)
+constexpr void uint_encode_fixed(const uint8_t* const begin, uint8_t* out, Integer value)
 {
     while(out > begin)
     {
@@ -39,6 +40,26 @@ constexpr void uint_encode(const uint8_t* const begin, uint8_t* out, Integer val
     }
 
     *out = value & 0xFF;
+}
+
+template <typename Integer>
+constexpr uint8_t* uint_encode_deduced(uint8_t* begin, const uint8_t* const end, Integer value)
+{
+    assert(end - begin >= sizeof(value));
+
+    // Internal call - 0 not supported
+    assert(value > 0);
+
+    uint8_t* out = begin;
+    int shift = (sizeof(value) - 1) * 8;
+
+    // Skip leading zeroes
+    for(; value >> shift == 0; shift -= 8);
+
+    for(; shift >= 0; shift -= 8)
+        *out++ = (value >> shift) & 0xFF;
+
+    return out;
 }
 
 }
@@ -59,39 +80,27 @@ constexpr Integer uint_decode(Byte (&in)[N])
 
 
 template <typename Integer>
-constexpr uint8_t* uint_encode(uint8_t* out, Integer value, const unsigned len)
+constexpr uint8_t* uint_encode_fixed(uint8_t* out, Integer value, const unsigned len)
 {
     uint8_t* end = out + len;
-    internal::uint_encode(out, end - 1, value);
+    internal::uint_encode_fixed(out, end - 1, value);
     return end;
 }
 
 template <typename Integer>
-constexpr uint8_t* uint_encode(uint8_t* out, Integer value)
+constexpr uint8_t* uint_encode(uint8_t* out, const uint8_t* const end, Integer value)
 {
     //using limits = estd::numeric_limits<Integer>;
 
     if(value == 0)
         return out;
-    else if(sizeof(Integer) == 1 || value <= 0xFF)
+    else if(sizeof(Integer) == 1)
     {
         *out++ = value;
         return out;
     }
-    else if(sizeof(Integer) == 2 || value <= 0xFFFF)
-    {
-        return uint_encode(out, value, 2);
-    }
-    else if(value <= 0xFFFFFF)
-    {
-        return uint_encode(out, value, 3);
-    }
-    else if(value <= 0xFFFFFFFF)
-    {
-        return uint_encode(out, value, 4);
-    }
 
-    abort();
+    return internal::uint_encode_deduced(out, end, value);
 }
 
 

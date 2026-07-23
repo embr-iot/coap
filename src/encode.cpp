@@ -36,7 +36,7 @@ static uint8_t* delta_length_encode(uint8_t* const first, uint8_t* out, unsigned
     }
 
     apply_first(modes::Extended16Bit);
-    return uint_encode(out, num - option_16_bit_offset, 2);
+    return uint_encode_fixed(out, num - option_16_bit_offset, 2);
 }
 
 uint8_t* delta_length_encode(uint8_t* out, unsigned current, numbers number, unsigned length)

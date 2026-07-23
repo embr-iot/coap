@@ -6,6 +6,27 @@ using namespace embr;
 
 TEST_CASE("uint")
 {
+    SECTION("encode")
+    {
+        uint8_t buf[16];
+
+        SECTION("deduced")
+        {
+            uint8_t* end;
+
+            end = coap::internal::uint_encode_deduced(buf, buf + sizeof(buf), 0x80);
+
+            REQUIRE(end - buf == 1);
+
+            end = coap::internal::uint_encode_deduced(buf, buf + sizeof(buf), 0x123456);
+
+            REQUIRE(end - buf == 3);
+
+            REQUIRE(buf[0] == 0x12);
+            REQUIRE(buf[1] == 0x34);
+            REQUIRE(buf[2] == 0x56);
+        }
+    }
     SECTION("decode")
     {
         constexpr uint8_t in_16[]       { 0x10 };
