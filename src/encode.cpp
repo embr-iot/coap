@@ -9,11 +9,22 @@ namespace embr::coap {
 
 namespace options {
 
+/// Low level options number delta/length encoder
+/// @param first always first byte, indicating core delta/length info
+/// @param out current position for further encoding.  always first + 1 for delta, but can vary after that
+/// @param num either number_delta or length
+/// @return
+///
 template <bool delta>
 static uint8_t* delta_length_encode(uint8_t* const first, uint8_t* out, unsigned num)
 {
     using namespace constants;
     using modes = internal::option_enum_base::extended_modes;
+
+    // CoAP option length can be just a little bit bigger than 16-bit maximum, though so
+    // far the biggest option I've seen is under 256 bytes
+    assert(num < 0xFFFF + option_16_bit_offset);
+    assert(!delta || out == first + 1);
 
     auto apply_first = [first](unsigned v)
     {
@@ -31,12 +42,13 @@ static uint8_t* delta_length_encode(uint8_t* const first, uint8_t* out, unsigned
     if(num < option_16_bit_offset)
     {
         apply_first(modes::Extended8Bit);
-        *out++ = num - option_8_bit_offset;
-        return out;
+        *out = num - option_8_bit_offset;
+        return out + 1;
     }
 
     apply_first(modes::Extended16Bit);
-    return uint_encode_fixed(out, num - option_16_bit_offset, 2);
+    uint_encode_fixed(out, out + 2, num - option_16_bit_offset);
+    return out + 2;
 }
 
 uint8_t* delta_length_encode(uint8_t* out, unsigned current, numbers number, unsigned length)

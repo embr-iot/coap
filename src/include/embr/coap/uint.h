@@ -29,16 +29,13 @@ constexpr Integer uint_decode(const uint8_t* in, const uint8_t* end)
 }
 
 /// Encode an integer in big endian/network order (low level call).
-/// @param out = begin + len - 1
 template <typename Integer>
 constexpr void uint_encode_fixed(const uint8_t* const begin, uint8_t* out, Integer value)
 {
-    while(out > begin)
-    {
-        *out-- = value & 0xFF;
-        value >>= 8;
-    }
+    for(;out > begin; value >>= 8)
+        *--out = value & 0xFF;
 
+    // Perhaps skipping the decrement makes things go faster?  Or would it cache better without it... ?
     *out = value & 0xFF;
 }
 
@@ -78,14 +75,7 @@ constexpr Integer uint_decode(Byte (&in)[N])
     return internal::uint_decode<Integer>((const uint8_t*)in, in + N);
 }
 
-
-template <typename Integer>
-constexpr uint8_t* uint_encode_fixed(uint8_t* out, Integer value, const unsigned len)
-{
-    uint8_t* end = out + len;
-    internal::uint_encode_fixed(out, end - 1, value);
-    return end;
-}
+using internal::uint_encode_fixed;
 
 template <typename Integer>
 constexpr uint8_t* uint_encode(uint8_t* out, const uint8_t* const end, Integer value)
