@@ -86,7 +86,7 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
             break;
         }
 
-        // 'cycle' means we unexpectedly hit payload, which we already should have
+        // 'alternate' means we unexpectedly hit payload, which we already should have
         // detected in errc{} above.
         // 'bad' is just how it sounds
         default:

@@ -25,6 +25,13 @@ constexpr uint8_t op_data2[] = { O_DATA2, P_DATA2 };
 
 // htop_ = header, token, option and payload
 
+constexpr uint8_t htop_data1[] =
+{
+    H_DATA1,
+    O_DATA1,    // option
+    P_DATA1     // payload
+};
+
 constexpr uint8_t htop_data2[] =
 {
     H_DATA2,

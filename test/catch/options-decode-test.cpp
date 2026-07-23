@@ -105,6 +105,13 @@ TEST_CASE("options decoding", "[decode][options]")
 
             REQUIRE(err == coap::errc{});
             REQUIRE(opt.number == numbers::UriPath);
+            REQUIRE(opt.string() == "v1");
+
+            err = decoder.decode_one(&opt, &current_number);
+
+            REQUIRE(err == coap::errc{});
+            REQUIRE(opt.number == numbers::UriPath);
+            REQUIRE(opt.string() == "t");
         }
         SECTION("data#2")
         {
@@ -117,8 +124,8 @@ TEST_CASE("options decoding", "[decode][options]")
 
             err = decoder.decode_one(&opt, &current_number);
 
-            // For low-level-ish decode_one, 'cycle' means Payload encountered
-            REQUIRE(err == coap::errc::cycle);
+            // For low-level-ish decode_one, 'alternate' means Payload encountered
+            REQUIRE(err == coap::errc::alternate);
         }
     }
     SECTION("stateful decoder")

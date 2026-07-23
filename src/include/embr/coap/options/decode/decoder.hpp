@@ -169,24 +169,26 @@ errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunct
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number)
 {
+    using char_traits = typename Streambuf::traits_type;
+
     delta_length_decoder dld;
 
     estd::optional<int> c = delta_length_decode(dld, in);
 
+    // Since we gently expect option data here, no further data is a warning, but not corruption per se
+    if(c == char_traits::eof()) return errc::warn;
     if(c == -2) return errc::bad;
 
     *current_number += dld.delta();
 
     *opt = make_option(in, (numbers)*current_number, dld.length());
 
-    // We use 'cycle' to signal more data is available in the form of a payload and that no
+    // We use 'alternate' to signal more data is available in the form of a payload and that no
     // option was actually available.  This fits the lower level nature of decode_one better
     // than a payload flag because:
     // - Usually we're in a position to to sgetc to notice if a payload is present
     // - Usually we're wrapped up in internal calls here, so checking against cycle is not unnnatural
-    // DEBT: Consider errc::warn - consider whether delta_length_decoder inner chain ever issues that
-    // and weigh conflation possibilities
-    if(c.has_value() && c.value() == 0xFF) return errc::cycle;
+    if(c.has_value() && c.value() == 0xFF) return errc::alternate;
 
     return {};
 }
@@ -217,7 +219,6 @@ errc decoder<Streambuf, Traits>::decode(F&& f, bool* has_payload)
     option o;
     errc err;
 
-    // FIX: Infinite loops if no payload is present
     while((err = decode_one(&o, &current_number)) == errc{})
         f(o);
 

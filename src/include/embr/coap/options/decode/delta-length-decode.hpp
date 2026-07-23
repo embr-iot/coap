@@ -8,7 +8,7 @@ namespace embr::coap::options {
 // otherwise we would have used the more direct delta_length_decode call
 /// @returns
 ///     nullopt - happily finished decoding
-///     -1 - bad stream OR eof discovered (DEBT, disambiguate if we can)
+///     char_traits::eof - bad stream OR eof discovered (DEBT, disambiguate if we can)
 ///     -2 - bad data during decode
 ///     0xFF - payload discovered
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>

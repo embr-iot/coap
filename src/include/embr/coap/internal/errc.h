@@ -15,9 +15,11 @@ enum class errc
     //more = cycle,
     /// corrupt data OR stream error
     bad,
+    /// data was encountered which is recognized, but incorrect for the requested operation
+    alternate,
     //bad_data,
     //bad_stream,
-    /// unexpected data, perhaps corrupt but recoverable
+    /// unexpected data (or lack of data), perhaps corrupt but recoverable
     warn,
     /// internal problem with encoder/decoder itself
     fail
