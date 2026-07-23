@@ -74,26 +74,19 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
     else
         assert(state_ == Options);
 
-    // Using stateful decoder is a neat trick here but I think using regular options::decoder
-    // with some fine tuning (only decode one option) may be preferable
-    options::stateful_decoder osd(current_number_);
+    options::decoder<Streambuf&> options(in_);
 
-    errc err = osd.decode(in_, [&](options::option<> op)
+    bool has_payload;
+
+    errc err = options.decode_one([&](const options::option<>& op)
         {
             v = op;
-        });
-
-    // NOTE: Not quite ready yet, osd.decode looping isn't sensible for movement through Header AND Value
-    // and probably won't be until reworking return type
+        }, &has_payload);
 
     switch(err)
     {
         case errc{}:  // NOLINT
-            state_ = Payload;
-            break;
-
-        case errc::again:
-            state_ = Done;
+            state_ = has_payload ? Payload : Done;
             break;
 
         default:

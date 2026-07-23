@@ -29,6 +29,12 @@ class delta_length_decoder
 
 public:
     errc decode_length();  // DEBT: Make internal
+
+    ///
+    /// @returns
+    ///     done: obviously, finished
+    ///     again: more data required
+    ///     bad: unexpected data encountered
     errc decode_byte(uint8_t c);
 
     void reset();

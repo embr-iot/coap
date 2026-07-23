@@ -7,6 +7,10 @@ namespace embr::coap::options {
 // DEBT: Be aware no extra help during retry (maybe you want a pubsync, delay, etc)
 // otherwise we would have used the more direct delta_length_decode call
 // EXPERIMENTAL, not used yet - but shaping up
+/// @returns
+///     nullopt - happily finished decoding
+///     -1 - bad data OR eof discovered (DEBT, disambiguate)
+///     0xFF - payload discovered
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class F>
 estd::optional<int> delta_length_decode(Streambuf& in, F&& f)
 {

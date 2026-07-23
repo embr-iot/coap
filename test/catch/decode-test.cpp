@@ -62,6 +62,8 @@ TEST_CASE("top-level decoding", "[decode]")
 
         // NOTE: Partially works, but value part not quite sorted out yet.  See operator>>
         REQUIRE(opt.number == options::numbers::UriHost);
+
+        //REQUIRE(decoder.state() == decoder_type::Payload);
     }
 }
 

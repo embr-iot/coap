@@ -16,6 +16,7 @@ class decoder : public internal::policies_enum
 public:
     using traits = Traits;
     using streambuf_type = estd::remove_cvref_t<Streambuf>;
+    using pos_type = typename streambuf_type::pos_type;
     using streambuf_policy_test = typename streambuf_type::policy;
     static constexpr policies policy = traits::policy;
 
@@ -69,7 +70,7 @@ public:
     errc dispatch(F&&, bool* has_payload, NoMatchFunctor&& = {});
 
     template <class F>
-    errc decode(F&&, bool* has_payload);
+    errc decode_one(F&&, bool* has_payload);
 
     // Route matched and unmatched options through the same functor
     template <class F>

@@ -165,6 +165,7 @@ errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunct
 
     estd::optional<int> c;
 
+    // no value means successful decode without seeing a payload
     while(!(c = delta_length_decode(in_, f2)).has_value())
     {
     }
@@ -175,10 +176,9 @@ errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunct
 }
 
 
-// UNTESTED
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F>
-errc decoder<Streambuf, Traits>::decode(F&& f, bool* has_payload)
+errc decoder<Streambuf, Traits>::decode_one(F&& f, bool* has_payload)
 {
     errc err{};
     unsigned current_number = 0;
@@ -186,17 +186,21 @@ errc decoder<Streambuf, Traits>::decode(F&& f, bool* has_payload)
     auto f2 = [&](const delta_length_decoder& dld)
     {
         current_number += dld.delta();
-        // DEBT:  Heed emit err code
-        emit(std::forward<F>(f), (numbers)current_number, dld.length());
+        err = emit(std::forward<F>(f), (numbers)current_number, dld.length());
+
+        if(err != errc{})   return;
+
+        if constexpr(policy == Presumptive)
+        {
+            pos_type ret = in_.pubseekoff(dld.length(), estd::ios_base::cur);
+
+            if(ret == -1) err = errc::bad;
+        }
     };
 
-    estd::optional<int> c;
+    estd::optional<int> c = delta_length_decode(in_, f2);
 
-    while(!(c = delta_length_decode(in_, f2)).has_value())
-    {
-    }
-
-    *has_payload = c.value() == 0xFF;
+    *has_payload = c.has_value() && c.value() == 0xFF;
 
     return err;
 }
