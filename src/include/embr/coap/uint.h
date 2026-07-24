@@ -84,7 +84,7 @@ constexpr uint8_t* uint_encode(uint8_t* out, const uint8_t* const end, Integer v
 
     if(value == 0)
         return out;
-    else if(sizeof(Integer) == 1)
+    else if constexpr(sizeof(Integer) == 1)
     {
         *out++ = value;
         return out;
