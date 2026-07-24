@@ -19,7 +19,7 @@ class header : public internal::header_base
     static constexpr unsigned TKL_MASK = 0b00001111;
 
     uint8_t ver_t_tkl_;
-    uint8_t code_;
+    codes code_;
     uint16_t mid_;
 
 public:
@@ -96,11 +96,9 @@ public:
         return static_cast<types>((ver_t_tkl_ & TYPE_MASK) >> 4);
     }
 
-    constexpr void code(request_codes r) { code_ = r; }
+    constexpr void code(codes r) { code_ = r; }
 
-    constexpr void code(response_codes r) { code_ = r; }
-
-    [[nodiscard]] constexpr request_codes request_code() const { return static_cast<request_codes>(code_); }
+    [[nodiscard]] constexpr codes code() const { return code_; }
 
     constexpr bool operator==(const header& compare_to) const
     {

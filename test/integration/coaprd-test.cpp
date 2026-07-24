@@ -62,6 +62,7 @@ TEST_CASE("coaprd.com")
     REQUIRE(header.valid());
     REQUIRE(header.tkl() == 2);
     REQUIRE(header.type() == coap::header::NON);
+    REQUIRE(header.code() == coap::header::Content);
 
     in >> token;
 
