@@ -83,6 +83,12 @@ public:
         return *this;
     }
 
+    /* It seems operator precedence precludes this possibility
+    single_encoder operator/(estd::string_view string)
+    {
+        return operator <<(string);
+    }   */
+
     template <numbers number>
     single_encoder<number, Parent> operator<<(option_marker<number>)
     {

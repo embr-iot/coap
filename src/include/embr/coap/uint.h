@@ -32,11 +32,7 @@ constexpr Integer uint_decode(const uint8_t* in, const uint8_t* end)
 template <typename Integer>
 constexpr void uint_encode_fixed(const uint8_t* const begin, uint8_t* out, Integer value)
 {
-    for(;out > begin; value >>= 8)
-        *--out = value & 0xFF;
-
-    // Perhaps skipping the decrement makes things go faster?  Or would it cache better without it... ?
-    *out = value & 0xFF;
+    for(;out > begin; value >>= 8)  *--out = value & 0xFF;
 }
 
 template <typename Integer>
@@ -50,9 +46,12 @@ constexpr uint8_t* uint_encode_deduced(uint8_t* begin, const uint8_t* const end,
     uint8_t* out = begin;
     int shift = (sizeof(value) - 1) * 8;
 
-    // Skip leading zeroes
+    // Skip leading zero bytes
     for(; value >> shift == 0; shift -= 8);
 
+    // DEBT: Consider dogfooding in uint_encode_fixed:
+    // 1. Theoretically faster due to simpler bit shift (practically maybe not)
+    // 2. Dogfooding obvious benefits: better code quality
     for(; shift >= 0; shift -= 8)
         *out++ = (value >> shift) & 0xFF;
 

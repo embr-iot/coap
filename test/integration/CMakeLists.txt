@@ -9,7 +9,9 @@ CPMAddPackage("gh:catchorg/Catch2@3.15.1")
 
 add_subdirectory(${ROOT_DIR}/src coap)
 
-set(SOURCE_FILES coaprd-test.cpp)
+set(SOURCE_FILES
+    coapme-test.cpp
+    coaprd-test.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 

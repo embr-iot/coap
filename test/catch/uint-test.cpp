@@ -14,9 +14,8 @@ TEST_CASE("uint")
         {
             coap::uint_encode_fixed(buf, buf + 2, 0x1234);
 
-            // FIX: Incorrect result
-            //REQUIRE(buf[0] == 0x12);
-            //REQUIRE(buf[1] == 0x34);
+            REQUIRE(buf[0] == 0x12);
+            REQUIRE(buf[1] == 0x34);
         }
         SECTION("deduced length")
         {
