@@ -34,11 +34,12 @@ TEST_CASE("coaprd.com")
         std::to_string(coap::constants::ip::port));
     udp::endpoint endpoint = *resolved.begin();
 
-    socket.open(udp::v4());
-
-    out << coap::header(coap::header::NON, coap::header::GET);
+    out << coap::header(coap::header::NON, coap::header::GET, 2, 0);
+    out << coap::token{ .value{0x12, 0x34} };
     out << coap::options::uri_path << ".well-known" << "core";
 
+    socket.open(udp::v4());
+    // DEBT: Using pos() directly not ideal
     socket.send_to(asio::buffer(buf, out.out().pos()), endpoint);
 
     udp::endpoint sender;
@@ -50,6 +51,7 @@ TEST_CASE("coaprd.com")
     coap::decoder<estd::detail::basic_ispanbuf<uint8_t>> in(buf, n);
 
     coap::header header;
+    coap::token token;
     coap::options::option<> option;
     using numbers = coap::options::numbers;
 
@@ -58,8 +60,15 @@ TEST_CASE("coaprd.com")
     REQUIRE(in.good());
 
     REQUIRE(header.valid());
-    REQUIRE(header.tkl() == 0);
+    REQUIRE(header.tkl() == 2);
     REQUIRE(header.type() == coap::header::NON);
+
+    in >> token;
+
+    REQUIRE(token.value[0] == 0x12);
+    REQUIRE(token.value[1] == 0x34);
+    REQUIRE(token.size == 2);
+    //REQUIRE(estd::span(token.value, token.size) == estd::span())
 
     in >> option;
 

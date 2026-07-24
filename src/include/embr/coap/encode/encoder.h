@@ -82,7 +82,7 @@ public:
         // DEBT: Account for errors here
         out_.sputn((const_pointer)v.value, token_length_);
 
-        state_ == Options;
+        state_ = Options;
         return *this;
     }
 
