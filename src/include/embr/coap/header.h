@@ -22,16 +22,6 @@ class header : public internal::header_base
     codes code_;
     uint16_t mid_;
 
-public:
-    enum types
-    {
-        CON,
-        NON,
-        ACK,
-        RST
-    };
-
-private:
     static constexpr uint8_t ver_t_tkl(types type, unsigned tkl)
     {
         return 0x40 | (type << 4) | tkl;
@@ -69,7 +59,7 @@ public:
 
     constexpr void mid(uint16_t v) { mid_ = swap(v); }
 
-    void tkl(unsigned v)
+    constexpr void tkl(unsigned v)
     {
         assert(v <= 8);
 
@@ -108,16 +98,14 @@ public:
             mid_ == compare_to.mid_;
     }
 
-    [[nodiscard]] constexpr bool valid() const
+    [[nodiscard]] constexpr bool invariant() const
     {
-        return ver() == 1 && code_ > 0;
+        return ver() == 1 && code_ > 0 && tkl() <= 8;
     }
 };
 
 #pragma pack(pop)
 
 static_assert(sizeof(header) == 4);
-
-const char* to_string(header::types);
 
 }

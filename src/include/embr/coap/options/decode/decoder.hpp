@@ -188,7 +188,7 @@ errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number)
     // than a payload flag because:
     // - Usually we're in a position to to sgetc to notice if a payload is present
     // - Usually we're wrapped up in internal calls here, so checking against cycle is not unnnatural
-    if(c.has_value() && c.value() == 0xFF) return errc::alternate;
+    if(c == 0xFF) return errc::alternate;
 
     return {};
 }
@@ -202,7 +202,8 @@ errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_numbe
 
     if constexpr(policy == Presumptive)
     {
-        // DEBT: Do check 'emit' does to ensure value portion is not null if this is a Presumptive decoder
+        // NOTE: Presumptive it is safe to seek here, and decode_one_ll populates 'opaque' with any data
+        // (event uint, etc) if it's present.  Retry/NonContiguous you are on your own
 
         pos_type ret = in_.pubseekoff(o->length, estd::ios_base::cur);
 

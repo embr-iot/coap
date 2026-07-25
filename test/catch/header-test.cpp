@@ -8,7 +8,8 @@ using namespace embr;
 
 TEST_CASE("header")
 {
-    using codes = coap::header;
+    using types = coap::header::types;
+    using codes = coap::header::codes;
 
     coap::header h1{};
 
@@ -17,8 +18,8 @@ TEST_CASE("header")
     h1.code(coap::header::PUT);
     h1.mid(1);
 
-    constexpr coap::header h2{codes::ACK, codes::Content};
-    constexpr coap::header nullish{codes::CON, codes::GET};
+    constexpr coap::header h2{types::ACK, codes::Content};
+    constexpr coap::header nullish{types::CON, codes::GET};
 
     REQUIRE(h1.tkl() == 1);
 

@@ -13,7 +13,7 @@ void decoder<Streambuf>::read_header()
 
     int read = in_.sgetn((pointer)&header_, sizeof(header_));
     good_ = read == sizeof(coap::header);
-    good_ &= header_.valid();
+    good_ &= header_.invariant();
 
     if(good_) state_ = Token;
 }
@@ -28,11 +28,11 @@ auto decoder<Streambuf>::operator>>(token& v) -> decoder&
 
     // permit a 0-token just for ease of consumption
     v.size = tkl;
-    if(tkl > 0)
-    {
-        int read = in_.sgetn((pointer)&v, tkl);
-        good_ = read == tkl;
-    }
+
+    if(tkl == 0)    return *this;
+
+    int read = in_.sgetn((pointer)&v, tkl);
+    good_ = read == tkl;
 
     if(good_)
     {

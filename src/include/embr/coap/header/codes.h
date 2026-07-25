@@ -32,6 +32,14 @@ struct header_base
         InternalServerError     = EMBR_COAP_RESPONSE_CODE(ServerError, 00),
     };
 
+    enum types
+    {
+        CON,
+        NON,
+        ACK,
+        RST
+    };
+
     static const char* to_string(classes);
     static const char* to_string(codes);
 };
@@ -44,5 +52,7 @@ constexpr header_base::classes get_class(header_base::codes c)
 
 inline const char* to_string(header_base::classes c) { return header_base::to_string(c); }
 inline const char* to_string(header_base::codes c) { return header_base::to_string(c); }
+
+const char* to_string(header_base::types);
 
 }
