@@ -8,6 +8,15 @@ TEST_CASE("uint")
 {
     uint8_t buf[16];
 
+    // DEBT: Naming is intermingling of hex and dec, fix that
+    constexpr uint8_t in_16[]       { 0x10 };
+    constexpr uint8_t in_0001[]     { 0,    1 };
+    constexpr uint8_t in_0016[]     { 0, 0x10 };
+    constexpr uint8_t in_0017[]     { 0, 0x11 };
+    constexpr uint8_t in_1234[]     { 4, 0xD2 };
+    constexpr uint8_t in_123456[]   { 1, 0xE2, 0x40 };
+    constexpr uint8_t in_000002[]   { 0,    0,    2 };
+
     SECTION("encode")
     {
         SECTION("fixed length")
@@ -36,11 +45,6 @@ TEST_CASE("uint")
     }
     SECTION("decode")
     {
-        constexpr uint8_t in_16[]       { 0x10 };
-        constexpr uint8_t in_0001[]     { 0,    1 };
-        constexpr uint8_t in_1234[]     { 4, 0xD2 };
-        constexpr uint8_t in_123456[]   { 1, 0xE2, 0x40 };
-
         auto v = coap::uint_decode<unsigned>(in_16);
 
         REQUIRE(v == 16);
@@ -56,7 +60,39 @@ TEST_CASE("uint")
         v = coap::uint_decode<unsigned>(in_123456);
 
         REQUIRE(v == 123456);
+    }
+    SECTION("bigint")
+    {
+        int r = be_uintcmp(in_16, in_0001);
 
+        REQUIRE(r > 0);
+
+        r = be_uintcmp(in_16, in_0016);
+
+        REQUIRE(r == 0);
+
+        r = be_uintcmp(in_16, in_0017);
+
+        REQUIRE(r < 0);
+
+        r = be_uintcmp(in_0001, in_16);
+
+        REQUIRE(r < 0);
+
+        r = be_uintcmp(in_0016, in_16);
+
+        REQUIRE(r == 0);
+
+        r = be_uintcmp(in_0017, in_16);
+
+        REQUIRE(r > 0);
+
+        r = be_uintcmp(in_000002, in_16);
+
+        REQUIRE(r < 0);
+    }
+    SECTION("uint standalone")
+    {
         coap::const_uint v2(in_123456, 3);
         coap::uint v3(buf);
 
@@ -65,5 +101,6 @@ TEST_CASE("uint")
         v3 = 1234;
 
         REQUIRE(v3 == coap::const_uint(in_1234));
+        REQUIRE(v3.compare(v2) < 0);
     }
 }

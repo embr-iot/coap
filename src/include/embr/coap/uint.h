@@ -1,6 +1,9 @@
 #pragma once
 
 #include "fwd.h"
+#include "uint/compare.h"
+#include "uint/decode.h"
+#include "uint/encode.h"
 
 #include <estd/algorithm.h>
 #include <estd/cstdint.h>
@@ -8,6 +11,9 @@
 #include <estd/limits.h>
 
 #include "assert.h"
+#if __cpp_impl_three_way_comparison
+#include <compare>
+#endif
 
 namespace embr::coap {
 
@@ -93,9 +99,6 @@ constexpr uint8_t* uint_encode(uint8_t* out, const uint8_t* const end, Integer v
     return internal::uint_encode_deduced(out, end, value);
 }
 
-// EXPERIMENTAL
-// Bad idea to intermingle const and non-const like this
-
 namespace internal {
 
 // I have a feeling std has something like this already
@@ -115,6 +118,7 @@ public:
     constexpr T* data() const { return data_; }
     constexpr unsigned size() const { return len_; }
 
+    // NOTE: This turns out to not be reliable for uint due to leading zeroes
     constexpr bool operator==(const deep_compare& compare_to) const
     {
         // DEBT: Use estd once https://github.com/malachi-iot/estdlib/issues/221 is implemented
@@ -167,6 +171,30 @@ public:
         encode(v);
         return *this;
     }
+
+    /// Lexical comparison
+    template <class Byte2>
+    constexpr int compare(const uint<Byte2>& compare_to) const
+    {
+        return be_uintcmp(
+            data_, len_,
+            compare_to.data(), compare_to.size());
+    }
+
+#if __cpp_impl_three_way_comparison
+    // UNTESTED
+    template <class Byte2>
+    constexpr std::strong_ordering operator<=>(const uint<Byte2>& compare_to) const
+    {
+        return compare(compare_to) <=> 0;
+    }
+#else
+    template <class Byte2>
+    constexpr bool operator==(const uint<Byte2>& compare_to) const
+    {
+        return compare(compare_to) == 0;
+    }
+#endif
 };
 
 }
