@@ -4,3 +4,5 @@
 Checks:
   # Low level library, this can't be helped
   - '-bugprone-easily-swappable-parameters'
+  # General avoidance of std in favor of estd means we use legacy headers sometimes
+  - '-modernize-deprecated-headers'

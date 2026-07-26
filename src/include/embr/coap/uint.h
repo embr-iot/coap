@@ -3,10 +3,10 @@
 #include "fwd.h"
 
 #include <estd/cstdint.h>
+#include <estd/cstdlib.h>
 #include <estd/limits.h>
 
 #include "assert.h"
-#include "stdlib.h"
 
 namespace embr::coap {
 
@@ -91,6 +91,54 @@ constexpr uint8_t* uint_encode(uint8_t* out, const uint8_t* const end, Integer v
 
     return internal::uint_encode_deduced(out, end, value);
 }
+
+// EXPERIMENTAL
+// Bad idea to intermingle const and non-const like this
+class uint
+{
+    union
+    {
+        const uint8_t* const_data_;
+        uint8_t* data_;
+    };
+    unsigned len_;
+
+public:
+    constexpr uint(uint8_t* data, unsigned len) :
+        data_(data), len_(len)
+    {
+    }
+
+    constexpr uint(const uint8_t* data, unsigned len) :
+        const_data_(data), len_(len)
+    {
+    }
+
+    template <typename Integer>
+    [[nodiscard]] constexpr Integer decode() const
+    {
+        return uint_decode<Integer>(data_, len_);
+    }
+
+    template <typename Integer>
+    void encode(Integer value)
+    {
+        // Experimental, rewriting max length with actual encoded length
+        uint8_t* out = uint_encode(data_, data_ + len_, value);
+        len_ = out - data_;
+    }
+
+    constexpr operator unsigned() const
+    {
+        return decode<unsigned>();
+    }
+
+    uint& operator=(unsigned v)
+    {
+        encode(v);
+        return *this;
+    }
+};
 
 
 }
