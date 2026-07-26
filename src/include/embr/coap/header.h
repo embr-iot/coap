@@ -9,6 +9,8 @@
 
 namespace embr::coap {
 
+// NOLINTBEGIN(*-magic-numbers)
+
 #pragma pack(push, 1)
 
 // See https://datatracker.ietf.org/doc/html/rfc7252#section-12.1.1
@@ -43,13 +45,13 @@ public:
         mid_{}
     {}
 
-    constexpr explicit header(types type, uint8_t code, unsigned tkl, uint16_t mid) :
+    constexpr explicit header(types type, codes code, unsigned tkl, uint16_t mid) :
         ver_t_tkl_{ver_t_tkl(type, tkl)},
         code_{code},
         mid_{swap(mid)}
     {}
 
-    constexpr explicit header(types type, uint8_t code, uint16_t mid = 0) :
+    constexpr explicit header(types type, codes code, uint16_t mid = 0) :
         ver_t_tkl_{ver_t_tkl(type, 0)},
         code_{code},
         mid_{swap(mid)}
@@ -107,5 +109,7 @@ public:
 #pragma pack(pop)
 
 static_assert(sizeof(header) == 4);
+
+// NOLINTEND(*-magic-numbers)
 
 }

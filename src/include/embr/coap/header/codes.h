@@ -4,11 +4,11 @@
 
 namespace embr::coap::internal {
 
-#define EMBR_COAP_RESPONSE_CODE(class, detail)  ( class << 5 | detail )
+#define EMBR_COAP_RESPONSE_CODE(class, detail)  ( class << 5U | unsigned(detail) )
 
 struct header_base
 {
-    enum classes : uint8_t
+    enum classes : unsigned
     {
         Request,
         Success = 2,
@@ -28,11 +28,12 @@ struct header_base
         Created                 = EMBR_COAP_RESPONSE_CODE(Success, 01),
         Content                 = EMBR_COAP_RESPONSE_CODE(Success, 05),
         NotFound                = EMBR_COAP_RESPONSE_CODE(Success, 04),
+        NotAcceptable           = EMBR_COAP_RESPONSE_CODE(ClientError, 06),
         UnsupportedContentFormat    = EMBR_COAP_RESPONSE_CODE(ClientError, 15),
         InternalServerError     = EMBR_COAP_RESPONSE_CODE(ServerError, 00),
     };
 
-    enum types
+    enum types : unsigned
     {
         CON,
         NON,
@@ -47,7 +48,7 @@ struct header_base
 
 constexpr header_base::classes get_class(header_base::codes c)
 {
-    return static_cast<header_base::classes>(c >> 5);
+    return static_cast<header_base::classes>(c >> 5);   // NOLINT
 }
 
 inline const char* to_string(header_base::classes c) { return header_base::to_string(c); }
@@ -55,4 +56,4 @@ inline const char* to_string(header_base::codes c) { return header_base::to_stri
 
 const char* to_string(header_base::types);
 
-}
+}   // namespace embr::coap::internal

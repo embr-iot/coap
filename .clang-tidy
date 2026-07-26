@@ -54,3 +54,4 @@ Checks:
   - '-google-readability-braces-around-statements'
   - '-readability-inconsistent-ifelse-braces'
   - '-readability-named-parameter'
+  - '-readability-trailing-comma'
