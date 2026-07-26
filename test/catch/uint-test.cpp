@@ -6,10 +6,10 @@ using namespace embr;
 
 TEST_CASE("uint")
 {
+    uint8_t buf[16];
+
     SECTION("encode")
     {
-        uint8_t buf[16];
-
         SECTION("fixed length")
         {
             coap::uint_encode_fixed(buf, buf + 2, 0x1234);
@@ -56,5 +56,14 @@ TEST_CASE("uint")
         v = coap::uint_decode<unsigned>(in_123456);
 
         REQUIRE(v == 123456);
+
+        coap::const_uint v2(in_123456, 3);
+        coap::uint v3(buf);
+
+        REQUIRE(v2 == 123456);
+
+        v3 = 1234;
+
+        REQUIRE(v3 == coap::const_uint(in_1234));
     }
 }

@@ -2,6 +2,7 @@
 
 #include "fwd.h"
 
+#include <estd/algorithm.h>
 #include <estd/cstdint.h>
 #include <estd/cstdlib.h>
 #include <estd/limits.h>
@@ -94,51 +95,83 @@ constexpr uint8_t* uint_encode(uint8_t* out, const uint8_t* const end, Integer v
 
 // EXPERIMENTAL
 // Bad idea to intermingle const and non-const like this
-class uint
+
+namespace internal {
+
+// I have a feeling std has something like this already
+template <typename T>
+class deep_compare
 {
-    union
-    {
-        const uint8_t* const_data_;
-        uint8_t* data_;
-    };
+protected:
+    T* data_;
     unsigned len_;
 
-public:
-    constexpr uint(uint8_t* data, unsigned len) :
+    constexpr deep_compare(T* data, unsigned len) :
         data_(data), len_(len)
     {
     }
 
-    constexpr uint(const uint8_t* data, unsigned len) :
-        const_data_(data), len_(len)
+public:
+    constexpr T* data() const { return data_; }
+    constexpr unsigned size() const { return len_; }
+
+    constexpr bool operator==(const deep_compare& compare_to) const
+    {
+        // DEBT: Use estd once https://github.com/malachi-iot/estdlib/issues/221 is implemented
+        return std::equal(
+            data_, data_ + len_,
+            compare_to.data_,
+            compare_to.data_ + compare_to.len_);
+    }
+};
+
+template <typename Byte>
+class uint : public deep_compare<Byte>
+{
+    using base_type = deep_compare<Byte>;
+    using base_type::data_;
+    using base_type::len_;
+
+public:
+    constexpr uint(Byte* data, unsigned len) :
+        base_type(data, len)
     {
     }
+
+    template <unsigned N>
+    constexpr uint(Byte (&in)[N]) : uint(in, N) {}
 
     template <typename Integer>
     [[nodiscard]] constexpr Integer decode() const
     {
-        return uint_decode<Integer>(data_, len_);
+        return coap::uint_decode<Integer>(data_, len_);
     }
 
     template <typename Integer>
     void encode(Integer value)
     {
         // Experimental, rewriting max length with actual encoded length
-        uint8_t* out = uint_encode(data_, data_ + len_, value);
+        uint8_t* out = coap::uint_encode(data_, data_ + len_, value);
         len_ = out - data_;
     }
 
+    // DEBT: If c++20, do a requires/constraint to accept a wider range of unsigned
     constexpr operator unsigned() const
     {
         return decode<unsigned>();
     }
 
-    uint& operator=(unsigned v)
+    template <class T>
+    estd::enable_if_t<estd::numeric_limits<T>::is_integer, uint&> operator=(T v)
     {
         encode(v);
         return *this;
     }
 };
 
+}
+
+using uint = internal::uint<uint8_t>;
+using const_uint = internal::uint<const uint8_t>;
 
 }
