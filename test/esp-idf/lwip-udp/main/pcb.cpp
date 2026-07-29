@@ -1,7 +1,7 @@
 #include "udp.h"
 
-#include <embr/coap/encode.h>
-#include <embr/coap/decode.hpp>
+#include <embr/coap/encoder.h>
+#include <embr/coap/decoder.h>
 #include <embr/lwip/shared_pbuf.h>
 
 #include <embr/platform/lwip/streambuf.h>

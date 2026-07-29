@@ -3,4 +3,10 @@ description: "embr::coap mk2"
 tags:
   - coap
 dependencies:
-  malachi-iot/estd: "0.8.12-alpha3"
+  # 29JUL26 MB EXPERIMENTAL
+  # Let's see if external consumers can make sense of this approach
+  # See also PGESP-74
+  embr-coap:
+    path: tools/esp-idf/components/embr-coap
+  #embr-coap-meta:
+  #  path: tools/esp-idf/components/embr-coap-meta

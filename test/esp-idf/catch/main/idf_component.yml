@@ -1,5 +1,7 @@
 dependencies:
   espressif/catch2:
     version: '*'
+  #embr-coap-meta:
+  #  path: ../../../..
   embr-coap:
     path: ../../../../tools/esp-idf/components/embr-coap

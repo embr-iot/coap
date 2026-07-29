@@ -18,7 +18,7 @@ public:
     using traits = Traits;
     using streambuf_type = estd::remove_cvref_t<Streambuf>;
     using pos_type = typename streambuf_type::pos_type;
-    using streambuf_policy_test = typename streambuf_type::policy;
+    using streambuf_policy = typename streambuf_type::policy;
     static constexpr policies policy = traits::policy;
 
     using rfc = estd::internal::rfc::rfc2119;
@@ -26,7 +26,7 @@ public:
     // DEBT: Crude recreation of what's in estd.  Doing this due to how
     // https://github.com/malachi-iot/estdlib/issues/219 isn't quite stabalized yet
     // and also there's some bugs in acquiring existing policy in the first place
-    struct streambuf_policy
+    struct streambuf_policy_manual
     {
         static constexpr bool blocking = false;
 

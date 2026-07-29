@@ -6,11 +6,13 @@ namespace test {
 
 #define H_DATA1     0x40, 1, 0, 0
 #define H_DATA2     0x42, 1, 0, 0
+#define H_DATA3     0x50, 3, 0, 0
 
 // GET CON header with 0 tkl, 0 mid
 constexpr uint8_t h_data1[] = { 0x40, 1, 0, 0 };
 // GET CON header with 2 tkl, 0 mid
-constexpr uint8_t h_data2[] = { 0x42, 1, 0, 0 };
+constexpr uint8_t h_data2[] = { H_DATA2 };
+constexpr uint8_t h_data3[] = { H_DATA3 };
 
 // op_ = option and payload
 

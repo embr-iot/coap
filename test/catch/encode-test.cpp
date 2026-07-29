@@ -1,9 +1,11 @@
+#include "test-data.h"
 #include "test-stream.h"
 
 #include <embr/coap/encoder.h>
 
 #include <estd/ostream.h>
 #include <estd/span.h>
+#include <estd/sstream.h>
 
 #include <catch2/catch_all.hpp>
 
@@ -17,7 +19,7 @@ TEST_CASE("top-level encoding", "[encode]")
         char char_out[32];
     };
 
-    SECTION("streambuf")
+    SECTION("streambuf: spanbuf")
     {
         using encoder_type = encoder<estd::ospanbuf>;
 
@@ -27,9 +29,25 @@ TEST_CASE("top-level encoding", "[encode]")
         encoder << options::uri_path << "Hello";
         encoder << payload << "x";
 
-        constexpr uint8_t expected[] { 0x50, 3, 0, 0, 0xB5, 'H', 'e', 'l', 'l', 'o', 0xFF, 'x'};
+        constexpr uint8_t expected[] { H_DATA3, 0xB5, 'H', 'e', 'l', 'l', 'o', 0xFF, 'x'};
 
         REQUIRE_THAT(estd::span(out_uint8, 12), Catch::Matchers::RangeEquals(estd::span(expected)));
+    }
+    SECTION("streambuf: stringbuf")
+    {
+        // stringbuf + coap has some issues.  See:
+        // https://github.com/malachi-iot/estdlib/issues/224
+        // https://github.com/malachi-iot/estdlib/issues/229
+        using encoder_type = encoder<estd::layer2::basic_stringbuf<char, 32, false>>;
+
+        encoder_type encoder(char_out);
+
+        encoder << header(header::NON, header::PUT);
+        /*
+        encoder << options::uri_path << "Hello";
+        encoder << payload << "x"; */
+
+        REQUIRE_THAT(estd::span(char_out, 4), Catch::Matchers::RangeEquals(estd::span(test::h_data3)));
     }
     SECTION("stateful")
     {

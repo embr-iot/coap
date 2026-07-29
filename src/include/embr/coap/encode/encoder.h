@@ -6,6 +6,8 @@
 #include "../header/token.h"
 #include "../options/encode.h"
 
+#include <estd/ostream.h>
+
 namespace embr::coap {
 
 template <ESTD_CPP_CONCEPT(estd::concepts::OutStreambuf) Streambuf>

@@ -3,4 +3,4 @@ description: "embr::coap mk2"
 tags:
   - coap
 dependencies:
-  malachi-iot/estd: "0.8.12-alpha3"
+  malachi-iot/estd: "0.8.12"

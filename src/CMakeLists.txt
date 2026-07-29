@@ -7,7 +7,7 @@ project(embr-coap-mk2 VERSION 0.1.0 LANGUAGES CXX
 
 include(../tools/cmake/setvars.cmake)
 
-CPMAddPackage("gh:malachi-iot/estdlib@0.8.12-alpha3")
+CPMAddPackage("gh:malachi-iot/estdlib@0.8.12")
 
 # 23JUL26 MB Not uset yet, bringing in primarily for breadcrumb
 CPMAddPackage("gh:malachi-iot/embr@0.4.7")
