@@ -21,6 +21,12 @@ protected:
 
     void ref() { pbuf_ref(pbuf_); }
 
+    pbuf_base(const pbuf_base& copy_from) :
+        pbuf_{copy_from.pbuf_}
+    {
+        if(owning)  ref();
+    }
+
 public:
     pbuf_base(pbuf_base&& move_from) :
         pbuf_{move_from.pbuf_}
@@ -98,10 +104,10 @@ public:
 
     shared_pbuf() = delete;
 
-    shared_pbuf(const shared_pbuf& copy_from) :
-        base_type{copy_from.pbuf_}
+    // Takes either a shared_pbuf or unique_pbuf
+    shared_pbuf(const owning_pbuf& copy_from) :
+        base_type{copy_from}
     {
-        pbuf_ref(pbuf_);
     }
 
     shared_pbuf(shared_pbuf&& move_from) :
@@ -133,7 +139,7 @@ class weak_pbuf : public pbuf_base<false>
 
 public:
     weak_pbuf(const shared_pbuf& copy_from) :
-        base_type(copy_from.pbuf_)
+        base_type(copy_from)
     {
 
     }
@@ -148,6 +154,9 @@ public:
 
 }
 
+// DEBT: Getting there with naming.  This isn't truly taking ownership of pbuf though.
+// It's merely creating a shared_pbuf without bumping the ref ptr.  Still, it's more
+// clear than most of the other approaches I've taken
 inline embr::lwip::_pbuf::v1::shared_pbuf take_ownership(pbuf* p)
 {
     return embr::lwip::_pbuf::v1::shared_pbuf::take_ownership(p);
