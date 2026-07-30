@@ -32,6 +32,12 @@ TEST_CASE("top-level encoding", "[encode]")
         constexpr uint8_t expected[] { H_DATA3, 0xB5, 'H', 'e', 'l', 'l', 'o', 0xFF, 'x'};
 
         REQUIRE_THAT(estd::span(out_uint8, 12), Catch::Matchers::RangeEquals(estd::span(expected)));
+
+        // Works well for spanbuf, but non contiguous guys like lwip pbuf streambuf
+        // will prefer a different technique
+        int pos = encoder.out().pubseekoff(0, estd::ios_base::cur);
+
+        REQUIRE(pos == sizeof(expected));
     }
     SECTION("streambuf: stringbuf")
     {

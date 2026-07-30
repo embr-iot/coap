@@ -38,55 +38,68 @@ public:
     {
         if(owning && pbuf_)   pbuf_free(pbuf_);
     }
+
+    uint16_t length() const { return pbuf_->len; }
+    uint16_t total_length() const { return pbuf_->tot_len; }
 };
 
 using owning_pbuf = pbuf_base<true>;
 
-// EXPERIMENTAL
-class unique_pbuf : public owning_pbuf
+namespace mixin {
+
+template <class Derived>
+class pbuf_factory
 {
-    using base_type = owning_pbuf;
-
-protected:
-    unique_pbuf(pbuf* p) : owning_pbuf{p} {}
-
 public:
-    unique_pbuf() = delete;
-    unique_pbuf(const unique_pbuf&) = delete;
-
-    static unique_pbuf alloc(pbuf_layer layer, uint16_t length, pbuf_type type)
+    static Derived alloc(pbuf_layer layer, uint16_t length, pbuf_type type)
     {
         return { pbuf_alloc(layer, length, type) };
     }
 
-    static unique_pbuf alloc(uint16_t length, pbuf_type type = PBUF_RAM)
+    static Derived alloc(uint16_t length, pbuf_type type = PBUF_RAM)
     {
         return { pbuf_alloc(PBUF_TRANSPORT, length, type) };
     }
 };
 
+}
+
+// EXPERIMENTAL
+class unique_pbuf : public owning_pbuf,
+    public mixin::pbuf_factory<unique_pbuf>
+{
+    using base_type = owning_pbuf;
+
+    template <class>
+    friend class mixin::pbuf_factory;
+
+protected:
+    unique_pbuf(pbuf* p) : base_type{p} {}
+
+public:
+    unique_pbuf() = delete;
+    unique_pbuf(const unique_pbuf&) = delete;
+    unique_pbuf(unique_pbuf&& move_from) :
+        base_type(std::move(move_from))
+    {}
+};
+
 class weak_pbuf;
 
-class shared_pbuf : public owning_pbuf
+class shared_pbuf : public owning_pbuf,
+    public mixin::pbuf_factory<shared_pbuf>
 {
     using base_type = owning_pbuf;
 
     friend class weak_pbuf;
 
+    template <class>
+    friend class mixin::pbuf_factory;
+
 protected:
     shared_pbuf(pbuf* p) : base_type{p} {}
 
 public:
-    static shared_pbuf alloc(pbuf_layer layer, uint16_t length, pbuf_type type = PBUF_RAM)
-    {
-        return { pbuf_alloc(layer, length, type) };
-    }
-
-    static shared_pbuf alloc(uint16_t length, pbuf_type type = PBUF_RAM)
-    {
-        return { pbuf_alloc(PBUF_TRANSPORT, length, type) };
-    }
-
     static shared_pbuf take_ownership(pbuf* p)
     {
         return { p };

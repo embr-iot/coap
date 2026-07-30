@@ -35,6 +35,11 @@ void test3()
 }
 */
 
+void sanity_check1()
+{
+    auto a = lwip::shared_pbuf::alloc(16);
+}
+
 void udp_coap_recv(void* arg, 
     udp_pcb* pcb, pbuf* p,
     const ip_addr_t* addr, u16_t port)
