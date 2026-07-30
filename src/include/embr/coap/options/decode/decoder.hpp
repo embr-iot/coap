@@ -15,7 +15,10 @@ namespace embr::coap::options {
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 constexpr option<> make_option(Streambuf& in, numbers number, unsigned len)
 {
-    // DEBT: static_assert that gptr is present
+    using use = typename Streambuf::policy::use;
+    using rfc = estd::internal::rfc2119;
+
+    static_assert(use::gptr >= rfc::may);
 
     return { number, len, in.in_avail() < len ? nullptr : (const uint8_t*)in.gptr() };
 }
@@ -58,6 +61,7 @@ errc decoder<Streambuf, Traits>::emit(F&& f, unsigned len, const uint8_t* data)
     return {};
 }
 
+// NOT USED OR TESTED YET
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <numbers number, class F, class Retry2>
 errc decoder<Streambuf, Traits>::dispatch_sgetn_ll(F&& f, unsigned len, Retry2&& retry)
@@ -166,6 +170,7 @@ errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunct
 
 
 // Does not advance stream past value portion, thus the ll
+// This guy requires Presumptive or NonContiguous
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number)
 {
@@ -214,10 +219,10 @@ errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_numbe
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F>
-errc decoder<Streambuf, Traits>::decode(F&& f, bool* has_payload)
+errc decoder<Streambuf, Traits>::decode(F&& f)
 {
     uint16_t current_number = 0;
-    option o;
+    option o;   // NOLINT - uninitialized is OK here, decode_one does that
     errc err;
 
     while((err = decode_one(&o, &current_number)) == errc{})

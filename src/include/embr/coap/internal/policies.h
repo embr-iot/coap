@@ -7,6 +7,7 @@ namespace embr::coap::internal {
 struct policies_enum
 {
     // DEBT: I think this is something we can autodeduce
+    // See https://github.com/malachi-iot/estdlib/issues/219
     /// How we should treat an in or out Streambuf
     enum policies
     {
@@ -32,6 +33,9 @@ struct policies_enum
         using rfc = estd::internal::rfc::rfc2119;
         using use = typename Streambuf::policy::use;
 
+        // This isn't really gonna work out.  NonContiguous (such as lwip pbuf)
+        // and fully contiguous like spanbuf both are gonna report pptr >= should
+        // See https://github.com/malachi-iot/estdlib/issues/219
         return use::pptr >= rfc::should ? Presumptive : NonContiguous;
     }
 

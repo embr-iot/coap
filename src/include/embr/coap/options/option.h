@@ -38,14 +38,14 @@ struct option : option_base
 
     using traits = option_traits<n>;
 
-    constexpr estd::string_view string() const
+    [[nodiscard]] constexpr estd::string_view string() const
     {
         static_assert(traits::format == value_formats::String);
 
         return { string_, length };
     }
 
-    constexpr estd::span<const uint8_t> opaque() const
+    [[nodiscard]] constexpr estd::span<const uint8_t> opaque() const
     {
         static_assert(traits::format == value_formats::Opaque);
 
@@ -53,7 +53,7 @@ struct option : option_base
     }
 
     template <class Integer = unsigned>
-    constexpr Integer uint() const
+    [[nodiscard]] constexpr Integer uint() const
     {
         static_assert(traits::format == value_formats::Uint);
 

@@ -36,7 +36,7 @@ auto decoder<Streambuf>::operator>>(token& v) -> decoder&
 
     if(good_)
     {
-        // Just incase they go >> flavor
+        // Just in case they go >> flavor
         current_number_ = 0;
         state_ = Options;
     }

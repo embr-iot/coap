@@ -109,7 +109,7 @@ static_assert(sizeof(out_accumulator<8, 4>) == 9);
 static_assert(sizeof(out_accumulator<8, 16>) == 12);
 
 
-// NOT READY YET
+// NOT USED YET
 template <unsigned N, unsigned width = 8, bool with_ext = false>
 class __attribute__((packed)) in_accumulator
 {

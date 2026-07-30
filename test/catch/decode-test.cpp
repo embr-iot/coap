@@ -8,6 +8,9 @@
 
 using namespace embr::coap;
 
+static_assert(internal::policies_enum::deduce_in<estd::ispanbuf>() ==
+    internal::policies_enum::Presumptive);
+
 TEST_CASE("top-level decoding", "[decode]")
 {
     using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;

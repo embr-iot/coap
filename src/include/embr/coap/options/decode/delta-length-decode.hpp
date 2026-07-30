@@ -11,6 +11,9 @@ namespace embr::coap::options {
 ///     char_traits::eof - bad stream OR eof discovered (DEBT, disambiguate if we can)
 ///     -2 - bad data during decode
 ///     0xFF - payload discovered
+/// @remarks
+///     Presumptive or NonContiguous mode expected here.  Retry is undefined
+///     behavior.
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 estd::optional<int> delta_length_decode(delta_length_decoder& dld, Streambuf& in)
 {
@@ -18,8 +21,9 @@ estd::optional<int> delta_length_decode(delta_length_decoder& dld, Streambuf& in
 
     auto valid = [](int c)
     {
-        // Be advised, bug https://github.com/malachi-iot/estdlib/issues/220
-        // presents 0xFF AS -1
+        // In theory, https://github.com/malachi-iot/estdlib/issues/226 plus a retry
+        // mechanic could then deduce whether we should retry or error out thus supporting
+        // 'Retry' mode.
         // DEBT: End-of-current-data not same as EOL or maybe EOF
         return c != 0xFF && char_traits::not_eof(c);
     };

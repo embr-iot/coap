@@ -76,7 +76,7 @@ public:
     errc decode_one(option<>*, uint16_t* current_number);
 
     template <class F>
-    errc decode(F&&, bool* has_payload);
+    errc decode(F&&);
 
     // Route matched and unmatched options through the same functor
     template <class F>
