@@ -14,8 +14,8 @@ namespace embr {
 /// @param rhs_len
 /// @return 0 = equal, > 0 = lhs > rhs, < 0 = lhs < rhs
 constexpr int be_uintcmp(
-    const uint8_t* lhs, unsigned lhs_len,
-    const uint8_t* rhs, unsigned rhs_len)
+    const uint8_t* lhs, int lhs_len,
+    const uint8_t* rhs, int rhs_len)
 {
     int leading = lhs_len - rhs_len;
 

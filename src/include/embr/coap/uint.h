@@ -37,13 +37,12 @@ protected:
 
 public:
     constexpr T* data() const { return data_; }
-    constexpr unsigned size() const { return size_; }
+    [[nodiscard]] constexpr unsigned size() const { return size_; }
 
     // NOTE: This turns out to not be reliable for uint due to leading zeroes
     constexpr bool operator==(const deep_compare& compare_to) const
     {
-        // DEBT: Use estd once https://github.com/malachi-iot/estdlib/issues/221 is implemented
-        return std::equal(
+        return estd::equal(
             data_, data_ + size_,
             compare_to.data_,
             compare_to.data_ + compare_to.size_);
@@ -64,7 +63,7 @@ public:
     }
 
     template <unsigned N>
-    constexpr uint(Byte (&in)[N]) : uint(in, N) {}
+    constexpr explicit uint(Byte (&in)[N]) : uint(in, N) {}
 
     template <typename Integer>
     [[nodiscard]] constexpr Integer decode() const
@@ -73,20 +72,20 @@ public:
     }
 
     template <typename Integer>
-    void encode(Integer value)
+    constexpr void encode(Integer value)
     {
         uint8_t* out = coap::uint_encode(data_, data_ + base_type::max_size_, value);
         size_ = out - data_;
     }
 
     // DEBT: If c++20, do a requires/constraint to accept a wider range of unsigned
-    constexpr operator unsigned() const
+    constexpr operator unsigned() const     // NOLINT
     {
         return decode<unsigned>();
     }
 
     template <class T>
-    estd::enable_if_t<estd::numeric_limits<T>::is_integer, uint&> operator=(T v)
+    estd::enable_if_t<estd::numeric_limits<T>::is_integer, uint&> operator=(T v)    // NOLINT
     {
         encode(v);
         return *this;
