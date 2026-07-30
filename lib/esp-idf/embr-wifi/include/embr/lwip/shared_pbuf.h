@@ -41,6 +41,29 @@ public:
 
     uint16_t length() const { return pbuf_->len; }
     uint16_t total_length() const { return pbuf_->tot_len; }
+
+    unsigned use_count() const { return pbuf_->ref; }
+
+    constexpr bool valid() const { return pbuf_; }
+
+    uint8_t free()
+    {
+        uint8_t r = pbuf_free(pbuf_);
+
+        if(owning)  pbuf_ = nullptr;
+
+        return r;
+    }
+
+    // EXPERIMENTAL
+    template <class F>
+    void walk(F&& f)
+    {
+        for(pbuf* i = pbuf_; i != nullptr; i = i->next)
+        {
+            f(i->payload, i->len);
+        }
+    }
 };
 
 using owning_pbuf = pbuf_base<true>;
@@ -50,6 +73,10 @@ namespace mixin {
 template <class Derived>
 class pbuf_factory
 {
+    // IDEA: We might extend pbuf_base with pbuf_base<owning, temp> where
+    // temp acts like a non-owning but MUST get consumed by an owning flavor
+    // thus removing the need to null out pbuf_.  Alternatively, optimizer
+    // might just wipe that away anyway in which case we shouldn't bother.
 public:
     static Derived alloc(pbuf_layer layer, uint16_t length, pbuf_type type)
     {
@@ -115,6 +142,8 @@ public:
         return created;
     }
 
+    // Perhaps a default-value-init constructor would be OK here, just like
+    // shared_ptr
     shared_pbuf() = delete;
 
     // Takes either a shared_pbuf or unique_pbuf
@@ -123,26 +152,13 @@ public:
     {
     }
 
-    shared_pbuf(shared_pbuf&& move_from) :
+    // Takes either a shared_pbuf or unique_pbuf
+    shared_pbuf(owning_pbuf&& move_from) :
         base_type{std::move(move_from)}
     {
     }
 
-    unsigned use_count() const { return pbuf_->ref; }
-
-    constexpr bool valid() const { return pbuf_; }
-
     operator pbuf*() const { return pbuf_; }
-
-    // EXPERIMENTAL
-    template <class F>
-    void walk(F&& f)
-    {
-        for(pbuf* i = pbuf_; i != nullptr; i = i->next)
-        {
-            f(i->payload, i->len);
-        }
-    }
 };
 
 // EXPERIMENTAL
@@ -171,6 +187,11 @@ public:
 // It's merely creating a shared_pbuf without bumping the ref ptr.  Still, it's more
 // clear than most of the other approaches I've taken
 inline embr::lwip::_pbuf::v1::shared_pbuf take_ownership(pbuf* p)
+{
+    return embr::lwip::_pbuf::v1::shared_pbuf::take_ownership(p);
+}
+
+inline embr::lwip::_pbuf::v1::shared_pbuf move(pbuf* p)
 {
     return embr::lwip::_pbuf::v1::shared_pbuf::take_ownership(p);
 }

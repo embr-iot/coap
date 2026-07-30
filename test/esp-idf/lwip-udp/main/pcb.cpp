@@ -48,7 +48,7 @@ void udp_coap_recv(void* arg,
 
     using streambuf_type = lwip::ipbuf_streambuf;
 
-    lwip::shared_pbuf owned = take_ownership(p);
+    lwip::shared_pbuf owned(move(p));
 
     // NOTE: ipbuf_streambuf ownsership of pbuf is awkward,
     // while opbuf_streambuf feels natural.  See if we can displace the
