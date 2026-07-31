@@ -8,7 +8,6 @@
 namespace embr {
 
 esp_err_t simple_flash_init();
-esp_err_t simple_wifi_init(esp_netif_t** wifi_netif = nullptr);
 
 }
 
