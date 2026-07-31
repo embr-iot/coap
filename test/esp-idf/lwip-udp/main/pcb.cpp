@@ -2,6 +2,7 @@
 
 #include <embr/coap/encoder.h>
 #include <embr/coap/decoder.h>
+#include <embr/coap/internal/constants.h>
 #include <embr/lwip/shared_pbuf.h>
 
 #include <embr/platform/lwip/streambuf.h>
@@ -57,8 +58,9 @@ void udp_coap_recv(void* arg,
     coap::decoder<streambuf_type> decoder(owned);
 
     coap::header header;
+    coap::token token;
 
-    decoder >> header;
+    decoder >> header >> token;
 
     assert(decoder.good());
 
@@ -71,14 +73,10 @@ void udp_coap_recv(void* arg,
     header.type(header.ACK);
     header.code(header.OK);
 
-    encoder << header;
+    encoder << header << token;
 
+    encoder.out().shrink();
     pbuf* out = encoder.out().pbuf();
-
-    // DEBT: Really we expect this to happen in opbuf_streambuf, don't we?  Or
-    // do we use that shrink call?
-    out->len = 4;
-    out->tot_len = 4;
 
     udp_sendto(pcb, out, addr, port);
 }
@@ -88,7 +86,7 @@ void udp_setup()
     udp_pcb* pcb = udp_new();
     assert(pcb);
 
-    err_t err = udp_bind(pcb, IP_ADDR_ANY, 5683);
+    err_t err = udp_bind(pcb, IP_ADDR_ANY, coap::constants::ip::port);
     assert(err == ERR_OK);
 
     udp_recv(pcb, udp_coap_recv, NULL);    
