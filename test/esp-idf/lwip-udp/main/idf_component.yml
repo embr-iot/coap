@@ -1,4 +1,5 @@
 dependencies:
+  espressif/console_simple_init: ^1.1.0
   embr-coap:
     path: ../../../../tools/esp-idf/components/embr-coap
   embr-wifi:

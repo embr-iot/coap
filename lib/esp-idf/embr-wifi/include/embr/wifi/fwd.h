@@ -7,7 +7,5 @@
 
 namespace embr {
 
-esp_err_t simple_flash_init();
-
 }
 
