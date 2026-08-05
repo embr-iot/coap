@@ -1,14 +1,16 @@
 #include <wifi-console.h>
 
+#include <embr/net/console/args.h>
+
 #include <esp_console.h>
 
 #include <string>
 
-//using namespace embr;
+using namespace embr;
 
 using string = const std::string_view;
 
-static Args args;
+static console::Args args;
 
 static int coap_console(int argc, char *argv[])
 {

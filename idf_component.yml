@@ -6,7 +6,8 @@ dependencies:
   # 29JUL26 MB EXPERIMENTAL
   # Let's see if external consumers can make sense of this approach
   # See also PGESP-74
-  embr-coap:
-    path: tools/esp-idf/components/embr-coap
+  # 05AUG26 MB - so far, no. override_path has promise though
+  #embr-coap:
+  #  override_path: tools/esp-idf/components/embr-coap
   #embr-coap-meta:
   #  path: tools/esp-idf/components/embr-coap-meta
