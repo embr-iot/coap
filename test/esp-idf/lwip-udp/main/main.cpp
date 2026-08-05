@@ -15,7 +15,8 @@ using namespace embr;
 extern "C" void app_main(void)
 {
     ESP_ERROR_CHECK(simple_flash_init());
-    ESP_ERROR_CHECK(wifi::simple_init());
+    // Temporarily disabling this so wifi_console behaves better
+    //ESP_ERROR_CHECK(wifi::simple_init());
 
     ESP_ERROR_CHECK(console_cmd_init());
 
