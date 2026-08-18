@@ -16,6 +16,7 @@ constexpr uint8_t h_data3[] = { H_DATA3 };
 
 // op_ = option and payload
 
+// uri_host: "host" uri_path: "v1/t"
 #define O_DATA1     0x34, 'h', 'o', 's', 't', 0x82, 'v', '1', 0x01, 't'
 #define O_DATA2     0x34, 'h', 'o', 's', 't'
 #define P_DATA1     0xFF, 'h', 'e', 'l', 'l', 'o'

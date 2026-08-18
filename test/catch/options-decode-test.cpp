@@ -4,9 +4,32 @@
 #include <embr/coap/options/decode.h>
 #include <embr/coap/options/numbers.h>
 
+#include <cstring>  // DEBT: breadcrumb needs this
+#include <embr/internal/breadcrumb.h>
+
 #include <catch2/catch_all.hpp>
 
 using namespace embr;
+
+using bc = embr::internal::breadcrumb;
+
+namespace ids {
+
+enum nav_data1 : int
+{
+    top,
+    v1,
+    v1_t
+};
+
+}
+
+static const bc nav_data1[]
+{
+    { "top", ids::top },
+    { "v1",  ids::v1,   ids::top },
+    { "t",   ids::v1_t, ids::v1 },
+};
 
 TEST_CASE("options decoding", "[decode][options]")
 {
@@ -52,6 +75,8 @@ TEST_CASE("options decoding", "[decode][options]")
 
         decoder_type decoder(test::op_data1);
 
+        const bc* uri_path = nav_data1;
+
         coap::errc err = decoder.dispatch_combined([&](const auto o)
         {
             // This is not great, but serviceable
@@ -71,16 +96,27 @@ TEST_CASE("options decoding", "[decode][options]")
                 }
                 else if constexpr(number == numbers::UriPath)
                 {
+                    // NOTE: breadcrumb still under development and we need the 'search2' variety
+                    // but that guy doesn't accept a string_view
+                    uri_path = search(uri_path, o.string());
+
                     if(++counter == 2)
+                    {
                         REQUIRE(o.string() == "v1");
+                        REQUIRE(uri_path->id == ids::v1);
+                    }
                     else
+                    {
                         REQUIRE(o.string() == "t");
+                        //REQUIRE(uri_path->id == ids::v1_t);
+                    }
                 }
             }
         }, &has_payload);
 
         REQUIRE(err == coap::errc{});
         REQUIRE(counter == 3);
+        //REQUIRE(uri_path->id == ids::v1_t);
     }
     SECTION("decoder: decode_one")
     {
