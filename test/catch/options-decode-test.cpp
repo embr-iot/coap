@@ -45,32 +45,38 @@ public:
 
     constexpr bool at_end() const { return current_ && current_->id == -1; }
 
-    const bc* current() const { return current_; }
+    constexpr const bc* current() const { return current_; }
 
+    void reset() { current_ = nullptr; }
+
+    /// Investigate 'current' to see if its children match 'v'
+    /// @param v
+    /// @param top top-level node nav tree
+    /// @param current nullptr (for virtual root node) otherwise node whose children to search
+    /// @return
+    /// @remarks Remember, breadcrumbs specifically do not search grandchildren too.  It's one generation at a time.
     // Keep this in the helper to avoid ADL things
     template <class String>
-    ESTD_CPP_CONSTEXPR(17) static const bc* search(const String& v, const bc* top, const bc* current)
+    ESTD_CPP_CONSTEXPR(17) static const bc* search_children(const String& v, const bc* top, const bc* current)
     {
-        // Just starting out, pretend to have root node so search siblings without a child
-        // descent
-        if(current == nullptr)  return internal::search_siblings(top, v);
-
-        if(current->id == -1)  // End marker
-            return nullptr;
-
-        // DEBT: I believe first_child implicitly checks for end marker too, but don't
-        // rely on that just yet until embr has unit tests to prove it
-        const bc* child = first_child(current);
-
-        if(child)   return search_siblings(child, v);
-
-        return current;
+        // When just starting, pretend to have root node so search siblings without a child
+        current = current == nullptr ? top : first_child(current);
+        return internal::search_siblings(current, v);
     }
 
+    /// Investigate to see current node's children match 'v'
     template <class String>
     ESTD_CPP_CONSTEXPR(17) const bc* search(const String& v)
     {
-        return current_ = search(v, top_, current_);
+        // FIX: Non-match on a child here yields a nullptr which then resets us back to root.  Will
+        // create false positives.  Can't compare top_ == current_ either since that's a valid possibility
+        // (first child matched from virtual root).  Maybe we can cheat and set current_ to (top_ - 1)?
+        const bc* child = search_children(v, top_, current_);
+
+        //if(child != nullptr)
+            current_ = child;
+
+        return child;
     }
 };
 
@@ -139,11 +145,6 @@ TEST_CASE("options decoding", "[decode][options]")
                 }
                 else if constexpr(number == numbers::UriPath)
                 {
-                    // In the real world, top-level (nav_data1) you won't issue 'child' on
-                    // FIX: If a rogue o.string() comes along, search returns nullptr, which is OK,
-                    // but will then confuse this logic into going back to root which might create
-                    // a false match
-                    //uri_path = search(uri_path ? child(uri_path) : child(nav_data1), o.string());
                     const bc* uri_path = bch.search(o.string());
 
                     if(++counter == 2)
