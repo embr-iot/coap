@@ -30,40 +30,47 @@ static constexpr bc nav_data1[]
     bc::null()
 };
 
+template <class Breadcrumb = embr::internal::breadcrumb>
 class breadcrum_helper
 {
-    using bc = embr::internal::breadcrumb;
+    using bc = Breadcrumb;
 
     const bc* top_;
     const bc* current_;
+
+    using traits = embr::internal::breadcrumb_traits<bc>;
 
 public:
     constexpr breadcrum_helper(const bc* top) : top_{top}, current_{} {}
 
     constexpr bool at_end() const { return current_ && current_->id == -1; }
 
+    const bc* current() const { return current_; }
+
+    // Keep this in the helper to avoid ADL things
     template <class String>
-    const bc* search(const String& v)
+    ESTD_CPP_CONSTEXPR(17) static const bc* search(const String& v, const bc* top, const bc* current)
     {
-        // DEBT: This would be nice
-        //if(current_ == bc::null())
-        if(current_)
-        {
-            if(current_->id == -1)  // End marker
-                return nullptr;
+        // Just starting out, pretend to have root node so search siblings without a child
+        // descent
+        if(current == nullptr)  return internal::search_siblings(top, v);
 
-            current_ = child(current_);
-            if(current_)
-                // DEBT: searches siblings, which is just fine - but function ought to be documented as that.  It's
-                // also implied you are searching at the beginning of the sibling list
-                current_ = embr::internal::search(current_, v);
-        }
-        else
-        {
-            current_ = embr::internal::search(top_, v);
-        }
+        if(current->id == -1)  // End marker
+            return nullptr;
 
-        return current_;
+        // DEBT: I believe first_child implicitly checks for end marker too, but don't
+        // rely on that just yet until embr has unit tests to prove it
+        const bc* child = first_child(current);
+
+        if(child)   return search_siblings(child, v);
+
+        return current;
+    }
+
+    template <class String>
+    ESTD_CPP_CONSTEXPR(17) const bc* search(const String& v)
+    {
+        return current_ = search(v, top_, current_);
     }
 };
 
@@ -111,8 +118,6 @@ TEST_CASE("options decoding", "[decode][options]")
 
         decoder_type decoder(test::op_data1);
 
-        const bc* uri_path = nullptr;
-
         breadcrum_helper bch(nav_data1);
 
         coap::errc err = decoder.dispatch_combined([&](const auto o)
@@ -139,7 +144,7 @@ TEST_CASE("options decoding", "[decode][options]")
                     // but will then confuse this logic into going back to root which might create
                     // a false match
                     //uri_path = search(uri_path ? child(uri_path) : child(nav_data1), o.string());
-                    uri_path = bch.search(o.string());
+                    const bc* uri_path = bch.search(o.string());
 
                     if(++counter == 2)
                     {
@@ -159,7 +164,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         REQUIRE(err == coap::errc{});
         REQUIRE(counter == 3);
-        REQUIRE(uri_path->id == ids::v1_t);
+        REQUIRE(bch.current()->id == ids::v1_t);
     }
     SECTION("decoder: decode_one")
     {
