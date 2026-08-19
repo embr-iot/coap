@@ -10,7 +10,8 @@ include(../tools/cmake/setvars.cmake)
 CPMAddPackage("gh:malachi-iot/estdlib@0.8.12")
 
 # 23JUL26 MB Not uset yet, bringing in primarily for breadcrumb
-CPMAddPackage("gh:malachi-iot/embr@0.4.7")
+#CPMAddPackage("gh:malachi-iot/embr@0.4.7")
+CPMAddPackage("gh:malachi-iot/embr#791f4e4f431a540662331367c68676a2f4a01984")
 
 set(INTERFACE_NAME ${PROJECT_NAME})
 

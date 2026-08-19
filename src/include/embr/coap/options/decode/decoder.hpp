@@ -90,6 +90,10 @@ errc decoder<Streambuf, Traits>::dispatch_gptr_ll(F&& f, unsigned len, Retry2&& 
 
     static_assert(streambuf_policy::use::gptr >= rfc::may);
 
+    constexpr bool valid = policy == Presumptive ||
+        policy == Retry ||
+        policy == NonContiguous;
+
     if constexpr(policy == Presumptive)
     {
         if(avail < len)
@@ -103,8 +107,8 @@ errc decoder<Streambuf, Traits>::dispatch_gptr_ll(F&& f, unsigned len, Retry2&& 
         if(avail < len)
             return dispatch_sgetn_ll(std::forward<F>(f), len, std::forward<Retry2>(retry));
     }
-    else
-        static_assert(false, "Unrecognized policy");
+
+    static_assert(valid, "Unrecognized policy");
 
     return emit<number>(std::forward<F>(f), len, (const uint8_t*)in_.gptr());
 }

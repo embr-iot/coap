@@ -75,7 +75,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         decoder_type decoder(test::op_data1);
 
-        const bc* uri_path = nav_data1;
+        const bc* uri_path = nullptr;
 
         coap::errc err = decoder.dispatch_combined([&](const auto o)
         {
@@ -96,9 +96,11 @@ TEST_CASE("options decoding", "[decode][options]")
                 }
                 else if constexpr(number == numbers::UriPath)
                 {
-                    // NOTE: breadcrumb still under development and we need the 'search2' variety
-                    // but that guy doesn't accept a string_view
-                    uri_path = search(uri_path, o.string());
+                    // In the real world, top-level (nav_data1) you won't issue 'child' on
+                    // FIX: If a rogue o.string() comes along, search returns nullptr, which is OK,
+                    // but will then confuse this logic into going back to root which might create
+                    // a false match
+                    uri_path = search(uri_path ? child(uri_path) : child(nav_data1), o.string());
 
                     if(++counter == 2)
                     {
@@ -108,7 +110,7 @@ TEST_CASE("options decoding", "[decode][options]")
                     else
                     {
                         REQUIRE(o.string() == "t");
-                        //REQUIRE(uri_path->id == ids::v1_t);
+                        REQUIRE(uri_path->id == ids::v1_t);
                     }
                 }
             }
@@ -116,7 +118,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         REQUIRE(err == coap::errc{});
         REQUIRE(counter == 3);
-        //REQUIRE(uri_path->id == ids::v1_t);
+        REQUIRE(uri_path->id == ids::v1_t);
     }
     SECTION("decoder: decode_one")
     {

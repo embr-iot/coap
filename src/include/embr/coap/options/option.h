@@ -63,6 +63,10 @@ struct option : option_base
         return uint_;
     }
 
+    static constexpr bool is_assignable = traits::format == value_formats::Opaque ||
+        traits::format == value_formats::String ||
+        traits::format == value_formats::Uint;
+
     void value(const uint8_t* v)
     {
         if constexpr(traits::format == value_formats::Opaque)
@@ -77,8 +81,8 @@ struct option : option_base
         {
             uint_ = uint_decode<unsigned>(v, length);
         }
-        else
-            static_assert(false, "value not assignable for this option");
+
+        static_assert(is_assignable, "value not assignable for this option");
     }
 };
 
