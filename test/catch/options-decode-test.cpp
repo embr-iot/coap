@@ -17,18 +17,54 @@ namespace ids {
 
 enum nav_data1 : int
 {
-    top,
     v1,
     v1_t
 };
 
 }
 
-static const bc nav_data1[]
+static constexpr bc nav_data1[]
 {
-    { "top", ids::top },
-    { "v1",  ids::v1,   ids::top },
+    { "v1",  ids::v1 },
     { "t",   ids::v1_t, ids::v1 },
+    bc::null()
+};
+
+class breadcrum_helper
+{
+    using bc = embr::internal::breadcrumb;
+
+    const bc* top_;
+    const bc* current_;
+
+public:
+    constexpr breadcrum_helper(const bc* top) : top_{top}, current_{} {}
+
+    constexpr bool at_end() const { return current_ && current_->id == -1; }
+
+    template <class String>
+    const bc* search(const String& v)
+    {
+        // DEBT: This would be nice
+        //if(current_ == bc::null())
+        if(current_)
+        {
+            if(current_->id == -1)  // End marker
+                return nullptr;
+
+            current_ = child(current_);
+            if(current_)
+                // DEBT: searches siblings, which is just fine - but function ought to be documented as that.  It's
+                // also implied you are searching at the beginning of the sibling list
+                current_ = embr::internal::search(current_, v);
+        }
+        else
+        {
+            current_ = embr::internal::search(top_, v);
+        }
+
+        return current_;
+    }
 };
 
 TEST_CASE("options decoding", "[decode][options]")
@@ -77,6 +113,8 @@ TEST_CASE("options decoding", "[decode][options]")
 
         const bc* uri_path = nullptr;
 
+        breadcrum_helper bch(nav_data1);
+
         coap::errc err = decoder.dispatch_combined([&](const auto o)
         {
             // This is not great, but serviceable
@@ -100,16 +138,19 @@ TEST_CASE("options decoding", "[decode][options]")
                     // FIX: If a rogue o.string() comes along, search returns nullptr, which is OK,
                     // but will then confuse this logic into going back to root which might create
                     // a false match
-                    uri_path = search(uri_path ? child(uri_path) : child(nav_data1), o.string());
+                    //uri_path = search(uri_path ? child(uri_path) : child(nav_data1), o.string());
+                    uri_path = bch.search(o.string());
 
                     if(++counter == 2)
                     {
                         REQUIRE(o.string() == "v1");
+                        REQUIRE(uri_path);
                         REQUIRE(uri_path->id == ids::v1);
                     }
                     else
                     {
                         REQUIRE(o.string() == "t");
+                        REQUIRE(uri_path);
                         REQUIRE(uri_path->id == ids::v1_t);
                     }
                 }
