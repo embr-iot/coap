@@ -82,8 +82,10 @@ TEST_CASE("top-level decoding: DATA3", "[decode]")
     header h;
     token t;
 
-    decoder >> h;
-    decoder >> t;
+    decoder >> h >> t;
+
+    REQUIRE(decoder);
+    REQUIRE(t.size == 0);
 
     options::option opt;
 
@@ -115,10 +117,9 @@ TEST_CASE("top-level decoding: breadcrumb (DATA4)", "[decode]")
     decoder_type decoder(test::htop_data4);
 
     header h;
-    token t;
 
     decoder >> h;
-    decoder >> t;   // DEBT: Make reading token optional so that if we skip it below decoder >> opt doesn't flip out
+    //decoder >> token; // NOTE: It's in your best interest to retrieve token but technically you can ignore it
 
     REQUIRE(decoder.good());
 
@@ -130,6 +131,7 @@ TEST_CASE("top-level decoding: breadcrumb (DATA4)", "[decode]")
 
         decoder >> opt;
 
+        REQUIRE(decoder);
         REQUIRE(opt.number == options::numbers::UriHost);
 
         do
@@ -159,8 +161,7 @@ TEST_CASE("top-level decoding", "[decode][char]")
     auto h_expected = (const header*)test::h_data2;
     token t;
 
-    decoder >> h;
-    decoder >> t;
+    decoder >> h >> t;
 
     REQUIRE(decoder.good());
 

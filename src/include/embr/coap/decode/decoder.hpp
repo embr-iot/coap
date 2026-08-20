@@ -19,6 +19,14 @@ void decoder<Streambuf>::read_header()
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+auto decoder<Streambuf>::init_options() -> decoder&
+{
+    current_number_ = 0;
+    state_ = Options;
+    return *this;
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 auto decoder<Streambuf>::operator>>(token& v) -> decoder&
 {
     static_assert(policy == Presumptive);
@@ -29,17 +37,13 @@ auto decoder<Streambuf>::operator>>(token& v) -> decoder&
     // permit a 0-token just for ease of consumption
     v.size = tkl;
 
-    if(tkl == 0)    return *this;
+    if(tkl == 0)    return init_options();
 
     int read = in_.sgetn((pointer)&v, tkl);
     good_ = read == tkl;
 
-    if(good_)
-    {
-        // Just in case they go >> flavor
-        current_number_ = 0;
-        state_ = Options;
-    }
+    // Just in case they go >> flavor
+    if(good_)   init_options();
 
     return *this;
 }
@@ -48,7 +52,7 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 template <class F>
 errc decoder<Streambuf>::options_decode(F&& f)
 {
-    if(state_ == Token) state_ = Options;
+    if(state_ == Token) init_options();
 
     assert(state_ == Options);
 
@@ -66,10 +70,18 @@ errc decoder<Streambuf>::options_decode(F&& f)
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
 {
+    if(!good_)  return *this;
+
     if(state_ == Token)
     {
-        current_number_ = 0;
-        state_ = Options;
+        // Silently consume Token if that's what consumer really wants
+        // DEBT: Consider a policy where token MUST be read
+        // DEBT: Do a flavor of this which doesn't require a temporary token on the stack
+        token temp;
+        *this >> temp;
+        //good_ = header_.tkl() == 0;
+        //current_number_ = 0;
+        //state_ = Options;
     }
     else
         assert(state_ == Options);

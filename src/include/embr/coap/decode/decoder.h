@@ -42,6 +42,8 @@ private:
     // DEBT: Result of last read, ios style.  Expand on this
     bool good_ : 1;
 
+    decoder& init_options();
+
 public:
     template <class ...Args>
     explicit constexpr decoder(Args&&...args) :
