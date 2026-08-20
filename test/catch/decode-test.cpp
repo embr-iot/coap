@@ -2,6 +2,8 @@
 
 #include <embr/coap/decoder.h>
 
+#include <embr/coap/decode/breadcrumb.h>
+
 #include <catch2/catch_all.hpp>
 
 #include <estd/span.h>
@@ -10,6 +12,7 @@ using namespace embr::coap;
 
 static_assert(internal::policies_enum::deduce_in<estd::ispanbuf>() ==
     internal::policies_enum::Presumptive);
+static_assert(header::from(test::h_data3).code() == header::PUT);
 
 TEST_CASE("top-level decoding", "[decode]")
 {
@@ -67,6 +70,57 @@ TEST_CASE("top-level decoding", "[decode]")
         REQUIRE(opt.string() == "host");
 
         REQUIRE(decoder.state() == decoder_type::Payload);
+    }
+}
+
+namespace ids = test::ids;
+
+using bc = embr::internal::breadcrumb;
+
+static constexpr bc nav_data1[]
+{
+    { "v1",     ids::v1 },
+    { "t",      ids::v1_t,      ids::v1 },
+    { "v2",     ids::v2 },
+    { "yes",    ids::v2_yes,    ids::v2 },
+    { "id",     ids::v2_yes_id, ids::v2_yes },
+    bc::null()
+};
+
+TEST_CASE("top-level decoding: breadcrumb (DATA4)", "[decode]")
+{
+    using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
+
+    decoder_type decoder(test::htop_data4);
+
+    header h;
+    token t;
+
+    decoder >> h;
+    decoder >> t;   // DEBT: Make reading token optional so that if we skip it below decoder >> opt doesn't flip out
+
+    REQUIRE(decoder.good());
+
+    SECTION("options bit by bit")
+    {
+        embr::breadcrumb_matcher match(nav_data1);
+
+        options::option opt;
+
+        decoder >> opt;
+
+        REQUIRE(opt.number == options::numbers::UriHost);
+
+        /* FIX: apparently we flip over to Done right away
+        do
+        {
+            decoder >> opt;
+
+            match.search(opt.string());
+        }
+        while(decoder.state() == decoder_type::Options);
+
+        REQUIRE(match.current()->id == ids::v2_yes_id); */
     }
 }
 

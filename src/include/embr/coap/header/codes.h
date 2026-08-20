@@ -4,6 +4,8 @@
 
 namespace embr::coap::internal {
 
+// See https://datatracker.ietf.org/doc/html/rfc7252#section-12.1.1
+
 #define EMBR_COAP_RESPONSE_CODE(class, detail)  ( class << 5U | unsigned(detail) )
 
 struct header_base

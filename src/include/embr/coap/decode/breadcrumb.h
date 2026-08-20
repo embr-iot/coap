@@ -20,7 +20,7 @@ class breadcrumb_matcher
 public:
     constexpr breadcrumb_matcher(const bc* top) : top_{top}, current_{} {}
 
-    constexpr bool at_end() const { return current_ && traits::is_null(*current_); }
+    //constexpr bool at_end() const { return current_ && traits::is_null(*current_); }
 
     constexpr const bc* current() const { return current_; }
 
@@ -32,7 +32,7 @@ public:
     /// @param current nullptr (for virtual root node) otherwise node whose children to search
     /// @return
     /// @remarks Remember, breadcrumbs specifically do not search grandchildren too.  It's one generation at a time.
-    // Keep this in the helper to avoid ADL things
+    // Keep this in the helper to avoid ADL things.  Consider putting this up at embr proper
     template <class String>
     ESTD_CPP_CONSTEXPR(17) static const bc* search_children(const String& v, const bc* top, const bc* current)
     {
@@ -45,15 +45,23 @@ public:
     template <class String>
     ESTD_CPP_CONSTEXPR(17) const bc* search(const String& v)
     {
-        // FIX: Non-match on a child here yields a nullptr which then resets us back to root.  Will
-        // create false positives.  Can't compare top_ == current_ either since that's a valid possibility
-        // (first child matched from virtual root).  Maybe we can cheat and set current_ to (top_ - 1)?
         const bc* child = search_children(v, top_, current_);
 
-        //if(child != nullptr)
-        current_ = child;
+        // If we have a valid child, then retain that as the new current parent for next search.
+        // Otherwise, keep routing through same current_ over and over, thus always yielding nullptr
+        // indicating end of search.  This way it's not UB if someone calls search again and again
+        // even if match path is not available.
+        if(child != nullptr)    current_ = child;
 
         return child;
+    }
+
+    ESTD_CPP_CONSTEXPR(17) bool invariant() const
+    {
+        if(!top_)   return false;
+
+        // DEBT: Put an invariant() call into breadcrumb and traits itself, if practical
+        return current_ == nullptr || current_ >= top_;
     }
 };
 

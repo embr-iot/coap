@@ -12,15 +12,7 @@ using namespace embr;
 
 using bc = embr::internal::breadcrumb;
 
-namespace ids {
-
-enum nav_data1 : int
-{
-    v1,
-    v1_t
-};
-
-}
+namespace ids = test::ids;
 
 static constexpr bc nav_data1[]
 {
@@ -98,16 +90,16 @@ TEST_CASE("options decoding", "[decode][options]")
                 {
                     const bc* uri_path = bch.search(o.string());
 
+                    REQUIRE(uri_path);
+
                     if(++counter == 2)
                     {
                         REQUIRE(o.string() == "v1");
-                        REQUIRE(uri_path);
                         REQUIRE(uri_path->id == ids::v1);
                     }
                     else
                     {
                         REQUIRE(o.string() == "t");
-                        REQUIRE(uri_path);
                         REQUIRE(uri_path->id == ids::v1_t);
                     }
                 }

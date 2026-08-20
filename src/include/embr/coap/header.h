@@ -13,12 +13,19 @@ namespace embr::coap {
 
 #pragma pack(push, 1)
 
-// See https://datatracker.ietf.org/doc/html/rfc7252#section-12.1.1
+#if __GNUC__
+#define FEATURE_EMBR_TYPE_PUNNING 1
+#endif
+
 class header : public internal::header_base
 {
     static constexpr unsigned VER_MASK = 0b11000000;
     static constexpr unsigned TYPE_MASK = 0b00110000;
     static constexpr unsigned TKL_MASK = 0b00001111;
+
+    // Interesting!  Even though GCC does type punning, it still kicks back in a constexpr, so not unionizing these
+    //uint8_t raw_array[4];
+    //uint32_t raw_int;
 
     uint8_t ver_t_tkl_;
     codes code_;
@@ -35,6 +42,16 @@ class header : public internal::header_base
             return estd::byteswap(v);
         else
             return v;
+    }
+
+    constexpr explicit header(const uint8_t* raw) :
+        //raw_array{raw[0], raw[1], raw[2], raw[3]}
+        ver_t_tkl_{raw[0]},
+        code_{raw[1]},
+        // Remember mid_ is stored in its native byte order, despite being uint16_t
+        mid_{static_cast<uint16_t>(raw[2] << 8 | raw[3])}
+    {
+
     }
 
 public:
@@ -103,6 +120,16 @@ public:
     [[nodiscard]] constexpr bool invariant() const
     {
         return ver() == 1 && code_ > 0 && tkl() <= 8;
+    }
+
+    static constexpr header from(const uint8_t raw[4])
+    {
+        return header(raw);
+    }
+
+    static header from(uint32_t v)
+    {
+        return header(reinterpret_cast<uint8_t*>(&v));
     }
 };
 
