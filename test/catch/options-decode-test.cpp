@@ -4,8 +4,7 @@
 #include <embr/coap/options/decode.h>
 #include <embr/coap/options/numbers.h>
 
-#include <cstring>  // DEBT: breadcrumb needs this
-#include <embr/internal/breadcrumb.h>
+#include <embr/coap/decode/breadcrumb.h>
 
 #include <catch2/catch_all.hpp>
 
@@ -30,55 +29,7 @@ static constexpr bc nav_data1[]
     bc::null()
 };
 
-template <class Breadcrumb = embr::internal::breadcrumb>
-class breadcrum_helper
-{
-    using bc = Breadcrumb;
 
-    const bc* top_;
-    const bc* current_;
-
-    using traits = embr::internal::breadcrumb_traits<bc>;
-
-public:
-    constexpr breadcrum_helper(const bc* top) : top_{top}, current_{} {}
-
-    constexpr bool at_end() const { return current_ && current_->id == -1; }
-
-    constexpr const bc* current() const { return current_; }
-
-    void reset() { current_ = nullptr; }
-
-    /// Investigate 'current' to see if its children match 'v'
-    /// @param v
-    /// @param top top-level node nav tree
-    /// @param current nullptr (for virtual root node) otherwise node whose children to search
-    /// @return
-    /// @remarks Remember, breadcrumbs specifically do not search grandchildren too.  It's one generation at a time.
-    // Keep this in the helper to avoid ADL things
-    template <class String>
-    ESTD_CPP_CONSTEXPR(17) static const bc* search_children(const String& v, const bc* top, const bc* current)
-    {
-        // When just starting, pretend to have root node so search siblings without a child
-        current = current == nullptr ? top : first_child(current);
-        return internal::search_siblings(current, v);
-    }
-
-    /// Investigate to see current node's children match 'v'
-    template <class String>
-    ESTD_CPP_CONSTEXPR(17) const bc* search(const String& v)
-    {
-        // FIX: Non-match on a child here yields a nullptr which then resets us back to root.  Will
-        // create false positives.  Can't compare top_ == current_ either since that's a valid possibility
-        // (first child matched from virtual root).  Maybe we can cheat and set current_ to (top_ - 1)?
-        const bc* child = search_children(v, top_, current_);
-
-        //if(child != nullptr)
-            current_ = child;
-
-        return child;
-    }
-};
 
 TEST_CASE("options decoding", "[decode][options]")
 {
@@ -124,7 +75,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         decoder_type decoder(test::op_data1);
 
-        breadcrum_helper bch(nav_data1);
+        breadcrumb_matcher bch(nav_data1);
 
         coap::errc err = decoder.dispatch_combined([&](const auto o)
         {

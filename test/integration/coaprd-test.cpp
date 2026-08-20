@@ -59,7 +59,7 @@ TEST_CASE("coaprd.com")
 
     REQUIRE(in.good());
 
-    REQUIRE(header.valid());
+    REQUIRE(header.invariant());
     REQUIRE(header.tkl() == 2);
     REQUIRE(header.type() == coap::header::NON);
     REQUIRE(header.code() == coap::header::Content);
