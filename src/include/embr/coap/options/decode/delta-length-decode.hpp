@@ -6,11 +6,12 @@ namespace embr::coap::options {
 
 // DEBT: Be aware no extra help during retry (maybe you want a pubsync, delay, etc)
 // otherwise we would have used the more direct delta_length_decode call
+/// decodes the beginning of an option, what we will call the option header
 /// @returns
 ///     nullopt - happily finished decoding
 ///     char_traits::eof - bad stream OR eof discovered (DEBT, disambiguate if we can)
 ///     -2 - bad data during decode
-///     0xFF - payload discovered
+///     0xFF - payload discovered instead of option header
 /// @remarks
 ///     Presumptive or NonContiguous mode expected here.  Retry is undefined
 ///     behavior.
@@ -40,8 +41,14 @@ estd::optional<int> delta_length_decode(delta_length_decoder& dld, Streambuf& in
                 return {};
 
             case errc::bad:
-                // DEBT: Need better indicator
-                // EOF isn't guaranteed to be -1 (and therefore not -2) from streambuf
+                // DEBT: Need better indicator.  If consumer actually doesn't need char 'c' except as a state
+                // indicator, then we could return an errc here.  So far that is the case, and the only reason
+                // a consumer would want 'c' anyway is some kind of data recovery which is unlikely to be practical.
+                // Waiting on further refinement of bad stream vs eof -
+                // see https://github.com/malachi-iot/estdlib/issues/226
+                // EOF isn't guaranteed to be -1 (and therefore not -2) from streambuf.
+                // static_assert is a last-ditch effort and fixes nothing really, just lets us know this won't work
+                static_assert(char_traits::not_eof(-2));
                 return -2;
 
             case errc::again:   break;
