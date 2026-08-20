@@ -56,15 +56,14 @@ errc decoder<Streambuf>::options_decode(F&& f)
 
     assert(state_ == Options);
 
-    bool has_payload{};
     options::decoder<Streambuf&, traits> options(in_);
 
-    errc err = options.dispatch(std::forward<F>(f), &has_payload);
+    errc err = options.dispatch(std::forward<F>(f));
 
-    good_ = err == errc{};
-
+    const bool has_payload = err == errc::alternate;
+    good_ = err == errc{} || has_payload;
     state_ = has_payload ? Payload : Done;
-    return err;
+    return good_ ? errc{} : err;
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>

@@ -15,7 +15,8 @@ enum class errc
     //more = cycle,
     /// corrupt data OR stream error
     bad,
-    /// data was encountered which is recognized, but incorrect for the requested operation
+    /// recognized data encountered, but either incorrect for the current operation and/or marks
+    /// the start of data for the next operation
     alternate,
     //bad_data,
     //bad_stream,

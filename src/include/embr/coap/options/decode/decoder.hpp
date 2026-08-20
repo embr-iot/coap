@@ -144,7 +144,7 @@ errc decoder<Streambuf, Traits>::dispatch_ll(F&& f, NoMatchFunctor&& no_match, n
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <class F, class NoMatchFunctor>
-errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunctor&& no_match)
+errc decoder<Streambuf, Traits>::dispatch(F&& f, NoMatchFunctor&& no_match)
 {
     errc err{};
     unsigned current_number = 0;
@@ -165,9 +165,12 @@ errc decoder<Streambuf, Traits>::dispatch(F&& f, bool* has_payload, NoMatchFunct
     // no value means successful decode without seeing a payload
     while(!(c = delta_length_decode(in_, f2)).has_value())
     {
+        // DEBT: Consider retry/poll functor here
     }
 
-    *has_payload = c.value() == 0xFF;
+    const bool has_payload = c.value() == 0xFF;
+
+    if(err == errc{} && has_payload)    return errc::alternate;
 
     return err;
 }

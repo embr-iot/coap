@@ -68,7 +68,7 @@ public:
     explicit constexpr decoder(Args&&...args) : in_{std::forward<Args>(args)...} {}
 
     template <class F, class NoMatchFunctor = estd::monostate>
-    errc dispatch(F&&, bool* has_payload, NoMatchFunctor&& = {});
+    errc dispatch(F&&, NoMatchFunctor&& = {});
 
     /// @param current_number
     /// @return
@@ -83,9 +83,9 @@ public:
 
     // Route matched and unmatched options through the same functor
     template <class F>
-    errc dispatch_combined(F&& f, bool* has_payload)
+    errc dispatch_combined(F&& f)
     {
-        return dispatch(std::forward<F>(f), has_payload, std::forward<F>(f));
+        return dispatch(std::forward<F>(f), std::forward<F>(f));
     }
 };
 

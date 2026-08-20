@@ -104,9 +104,9 @@ TEST_CASE("options decoding", "[decode][options]")
                     }
                 }
             }
-        }, &has_payload);
+        });
 
-        REQUIRE(err == coap::errc{});
+        REQUIRE(err == coap::errc::alternate);
         REQUIRE(counter == 3);
         REQUIRE(bch.current()->id == ids::v1_t);
     }
