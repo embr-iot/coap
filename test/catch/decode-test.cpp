@@ -73,6 +73,27 @@ TEST_CASE("top-level decoding", "[decode]")
     }
 }
 
+TEST_CASE("top-level decoding: DATA3", "[decode]")
+{
+    using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
+
+    decoder_type decoder(test::htop_data3);
+
+    header h;
+    token t;
+
+    decoder >> h;
+    decoder >> t;
+
+    options::option opt;
+
+    decoder >> opt;
+
+    REQUIRE(opt.number == options::numbers::UriHost);
+
+    REQUIRE(decoder.state() == decoder_type::Done);
+}
+
 namespace ids = test::ids;
 
 using bc = embr::internal::breadcrumb;
@@ -111,16 +132,18 @@ TEST_CASE("top-level decoding: breadcrumb (DATA4)", "[decode]")
 
         REQUIRE(opt.number == options::numbers::UriHost);
 
-        /* FIX: apparently we flip over to Done right away
         do
         {
             decoder >> opt;
+
+            REQUIRE(decoder);
 
             match.search(opt.string());
         }
         while(decoder.state() == decoder_type::Options);
 
-        REQUIRE(match.current()->id == ids::v2_yes_id); */
+        REQUIRE(decoder.state() == decoder_type::Payload);
+        REQUIRE(match.current()->id == ids::v2_yes_id);
     }
 }
 

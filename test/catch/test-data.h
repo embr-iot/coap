@@ -42,15 +42,17 @@ constexpr uint8_t h_data4[] = { H_DATA4 };
 // uri_host: "host" uri_path: "v1/t"
 #define O_DATA1     0x34, 'h', 'o', 's', 't', 0x82, 'v', '1', 0x01, 't'
 #define O_DATA2     0x34, 'h', 'o', 's', 't'
+#define O_DATA3     0x31, 'h'
 #define O_DATA4     0x34, 'h', 'o', 's', 't', 0x82, 'v', '2', 0x03, 'y', 'e', 's', 0x02, 'i', 'd'
 #define P_DATA1     0xFF, 'h', 'e', 'l', 'l', 'o'
 #define P_DATA2     0xFF, 'x'
 #define P_DATA4     0xFF, 'o', 'h', 'a', 'y', 'o'
 
 // option and payload test data
-constexpr uint8_t op_data1[] = { O_DATA1, P_DATA1 };
-constexpr uint8_t op_data2[] = { O_DATA2, P_DATA2 };
-constexpr uint8_t op_data4[] = { O_DATA4, P_DATA4 };
+constexpr uint8_t op_data1[] { O_DATA1, P_DATA1 };
+constexpr uint8_t op_data2[] { O_DATA2, P_DATA2 };
+constexpr uint8_t op_data3[] { O_DATA3 };
+constexpr uint8_t op_data4[] { O_DATA4, P_DATA4 };
 
 // htop_ = header, token, option and payload
 
@@ -69,6 +71,11 @@ constexpr uint8_t htop_data2[] =
     P_DATA2     // payload
 };
 
+constexpr uint8_t htop_data3[] =
+{
+    H_DATA3,
+    O_DATA3
+};
 constexpr uint8_t htop_data4[] =
 {
     H_DATA4,

@@ -82,9 +82,32 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
     {
         case errc{}:  // NOLINT
         {
-            state_ = in_.sgetc() == 0xFF ? Payload : Done;
+            // Peek ahead to determine if we're EOF (Done) or seeing a payload marker
+            // DEBT: I wish we didn't have to peek, but this seems to be the best experience
+            switch(in_.sgetc())
+            {
+                case 0xFF:
+                    state_ = Payload;
+                    break;
+
+                case (int)char_traits::eof():
+                    state_ = Done;
+                    break;
+
+            }
             break;
         }
+
+        /*
+         * Since we lookahead, then encountering these is actually an error since state_
+         * should disallow it
+        case errc::warn:
+            state_ = Done;
+            break;
+
+        case errc::alternate:
+            state_ = Payload;
+            break;  */
 
         // 'alternate' means we unexpectedly hit payload, which we already should have
         // detected in errc{} above.
