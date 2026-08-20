@@ -74,9 +74,9 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
     else
         assert(state_ == Options);
 
-    options::decoder<Streambuf&, traits> options(in_);
+    using options_decoder = options::decoder<Streambuf&, traits>;
 
-    errc err = options.decode_one(&v, &current_number_);
+    errc err = options_decoder::decode_one(in_, &v, &current_number_);
 
     switch(err)
     {

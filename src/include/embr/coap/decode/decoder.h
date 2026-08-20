@@ -17,7 +17,7 @@ class decoder : public internal::policies_enum
 public:
     using streambuf_type = estd::remove_cvref_t<Streambuf>;
     using char_type = typename streambuf_type::char_type;
-    using char_traits = estd::char_traits<char_type>;   // DEBT: Lift this ought of streambuf directly
+    using char_traits = typename streambuf_type::traits_type;
     using pointer = estd::remove_const_t<char_type>*;
     using const_pointer = const char_type*;
 

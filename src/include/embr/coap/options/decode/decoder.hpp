@@ -203,9 +203,9 @@ errc decode_one_ll(Streambuf& in, option<>* opt, uint16_t* current_number)
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
-errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_number)
+errc decoder<Streambuf, Traits>::decode_one(Streambuf& in, option<>* o, uint16_t* current_number)
 {
-    errc err = decode_one_ll(in_, o, current_number);
+    errc err = decode_one_ll(in, o, current_number);
 
     if(err != errc{})   return err;
 
@@ -214,11 +214,17 @@ errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_numbe
         // NOTE: Presumptive it is safe to seek here, and decode_one_ll populates 'opaque' with any data
         // (event uint, etc) if it's present.  Retry/NonContiguous you are on your own
 
-        pos_type ret = in_.pubseekoff(o->length, estd::ios_base::cur);
+        pos_type ret = in.pubseekoff(o->length, estd::ios_base::cur);
 
         if(ret == -1) err = errc::bad;
     }
     return err;
+}
+
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
+errc decoder<Streambuf, Traits>::decode_one(option<>* o, uint16_t* current_number)
+{
+    return decode_one(in_, o, current_number);
 }
 
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>

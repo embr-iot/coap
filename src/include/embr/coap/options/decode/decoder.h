@@ -65,12 +65,15 @@ private:
 
 public:
     template <class ...Args>
-    constexpr decoder(Args&&...args) : in_{std::forward<Args>(args)...} {}
+    explicit constexpr decoder(Args&&...args) : in_{std::forward<Args>(args)...} {}
 
     template <class F, class NoMatchFunctor = estd::monostate>
     errc dispatch(F&&, bool* has_payload, NoMatchFunctor&& = {});
 
-    /// @brief decode_one
+    /// @param current_number
+    /// @return
+    static errc decode_one(Streambuf& in, option<>*, uint16_t* current_number);
+
     /// @param current_number
     /// @return
     errc decode_one(option<>*, uint16_t* current_number);
