@@ -28,7 +28,7 @@ public:
     constexpr block_trailing_byte(const block_trailing_byte&) = default;
     constexpr explicit block_trailing_byte(uint8_t raw) : v_{raw}   {};
     constexpr explicit block_trailing_byte(unsigned num, bool m, unsigned szx) :
-        v_{num << mask::num_pos | m << mask::m_pos || szx}
+        v_{static_cast<uint8_t>(num << mask::num_pos | m << mask::m_pos | szx)}
     {}
 
     void reset()
@@ -116,7 +116,7 @@ public:
     // DEBT: encode/decode probably ought to freestand
 
     // 'data' MUST be writable up to 3 bytes
-    unsigned encode(uint8_t* data)
+    ESTD_CPP_CONSTEXPR(14) unsigned encode(uint8_t* data) const
     {
         if(num_ == 0 && btb_ == 0)  return 0;
 

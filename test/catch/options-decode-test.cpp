@@ -55,7 +55,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
                 out1 = coap::options::delta_length_decode(out1 + 1, 0, &number, &length);
 
-                REQUIRE(number == numbers::Block2);
+                REQUIRE(number == numbers::Block1);
             }
         }
         SECTION("state machine")

@@ -1,7 +1,8 @@
 set(SOURCE_FILES
+    block-encode-test.cpp
+    block-decode-test.cpp
     decode-test.cpp
     encode-test.cpp
-    encode-block-test.cpp
     header-test.cpp
     options-decode-test.cpp
     options-encode-test.cpp

@@ -47,11 +47,12 @@ constexpr uint8_t h_data4[] = { H_DATA4 };
 #define O_DATA2     0x34, 'h', 'o', 's', 't'
 #define O_DATA3     0x31, 'h'
 #define O_DATA4     0x34, 'h', 'o', 's', 't', 0x82, 'v', '2', 0x03, 'y', 'e', 's', 0x02, 'i', 'd'
-// Block2 option
-#define O_DATA5     0x31, 'h', 0xD3, 0x0A, O_BLOCK_DATA1
+// Block1 option
+#define O_DATA5     0x31, 'h', 0xD3, 0x0E, O_BLOCK_DATA1
 #define P_DATA1     0xFF, 'h', 'e', 'l', 'l', 'o'
 #define P_DATA2     0xFF, 'x'
 #define P_DATA4     0xFF, 'o', 'h', 'a', 'y', 'o'
+// DEBT: Invalid size for Block1
 #define P_DATA5     0xFF, 'x'
 
 // option and payload test data
