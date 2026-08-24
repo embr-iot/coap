@@ -27,18 +27,36 @@ TEST_CASE("options decoding", "[decode][options]")
 {
     SECTION("numbers")
     {
+        using coap::options::numbers;
         constexpr uint8_t val1[] { 0x1E, 0x12, 0x34 };
-        coap::options::numbers number;
+        numbers number;
         namespace constants = coap::constants;
         unsigned length{3};
 
         SECTION("direct")
         {
-            const uint8_t* out1 = coap::options::delta_length_decode(val1, 0, &number, &length);
+            SECTION("simple case")
+            {
+                const uint8_t* out1 = coap::options::delta_length_decode(val1, 0, &number, &length);
 
-            REQUIRE(out1 == val1 + 3);
-            REQUIRE(number == 1);
-            REQUIRE(length == 0x1234 + constants::option_16_bit_offset);
+                REQUIRE(out1 == val1 + 3);
+                REQUIRE(number == 1);
+                REQUIRE(length == 0x1234 + constants::option_16_bit_offset);
+            }
+            SECTION("block option")
+            {
+                const uint8_t* data = test::op_data5;
+                length = sizeof(test::op_data5);
+                const uint8_t* out1 = coap::options::delta_length_decode(data, 0, &number, &length);
+
+                REQUIRE(out1 == data + 1);
+                REQUIRE(length == 1);
+                REQUIRE(number == numbers::UriHost);
+
+                out1 = coap::options::delta_length_decode(out1 + 1, 0, &number, &length);
+
+                REQUIRE(number == numbers::Block2);
+            }
         }
         SECTION("state machine")
         {

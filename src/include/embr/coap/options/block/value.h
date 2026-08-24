@@ -4,6 +4,7 @@
 #include "../../uint/encode.h"
 
 #include <estd/cstdint.h>
+#include <estd/cmath.h>
 
 #include "assert.h"
 
@@ -26,6 +27,9 @@ public:
     block_trailing_byte() = default;
     constexpr block_trailing_byte(const block_trailing_byte&) = default;
     constexpr explicit block_trailing_byte(uint8_t raw) : v_{raw}   {};
+    constexpr explicit block_trailing_byte(unsigned num, bool m, unsigned szx) :
+        v_{num << mask::num_pos | m << mask::m_pos || szx}
+    {}
 
     void reset()
     {
@@ -70,44 +74,72 @@ public:
 
 // Not wire format, although occasionally it overlaps with it.
 // Use encode/decode methods for that
+// DEBT: Rework so that num_ is a 'raw word' composed of a big-endian byte array.  In this way,
+// encode/decode become a matter of positioning into block_value
 class block_value
 {
     uint16_t num_;
     block_trailing_byte btb_;
 
+public:
     ESTD_CPP_CONSTEXPR(14) void reset()
     {
         num_ = 0;
         btb_ = block_trailing_byte(0);
     }
 
-public:
+    static constexpr bool valid_num(unsigned v)
+    {
+        return v <= 0xFFFFFF;
+    }
+
+    static constexpr bool valid_szx(unsigned v)
+    {
+        return v < 8;
+    }
+
     block_value() = default;
     constexpr block_value(const block_value&) = default;
+
+    constexpr explicit block_value(unsigned num, bool m, unsigned szx) :
+        num_{static_cast<uint16_t>(num >> 4)},
+        btb_{num & 0x0F, m, szx}
+    {
+        // Truth is I can't think of a non-synthetic use case where this constructor is useful as a constexpr.
+        // But, I did it anyway
+#if __cpp_constexpr >= 201304L
+        assert(valid_num(num));
+        assert(valid_szx(szx));
+#endif
+    }
 
     // DEBT: encode/decode probably ought to freestand
 
     // 'data' MUST be writable up to 3 bytes
     unsigned encode(uint8_t* data)
     {
-        data = uint_encode(data, data + 3, num_);
-        *data = btb_;
+        if(num_ == 0 && btb_ == 0)  return 0;
 
-        return 0;
+        uint8_t* v = uint_encode(data, data + 2, num_);
+        *v = btb_;
+
+        return 1 + v - data;
     }
 
-    void decode(const uint8_t* data, unsigned len)
+    bool decode(const uint8_t* data, unsigned len)
     {
         if(len == 0)
         {
             reset();
-            return;
+            return true;
         }
 
-        --len;
+        if(--len > 2)   return false;
 
         num_ = uint_decode(data, len);
         btb_ = block_trailing_byte(data[len]);
+
+        return true;
     }
 
     constexpr bool more() const
@@ -122,14 +154,21 @@ public:
 
     ESTD_CPP_CONSTEXPR(14) void num(unsigned v)
     {
+        assert(valid_num(v));
+
         num_ = v >> 4;
-        btb_.num(v & 0xF);
+        btb_.num(v & 0x0F);
+    }
+
+    constexpr unsigned szx() const
+    {
+        return btb_.szx();
     }
 
     // "raw" block size (no precalculation)
     ESTD_CPP_CONSTEXPR(14) void szx(unsigned v)
     {
-        assert(v < 8);
+        assert(valid_szx(v));
 
         btb_.szx(v);
     }
@@ -138,8 +177,7 @@ public:
     // the "body", just the current block.
     ESTD_CPP_CONSTEXPR(14) unsigned size() const
     {
-        const unsigned v = btb_.szx() + 4;
-        return v * v;
+        return estd::pow(2, btb_.szx() + 4);
     }
 };
 

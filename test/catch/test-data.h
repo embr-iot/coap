@@ -39,20 +39,27 @@ constexpr uint8_t h_data4[] = { H_DATA4 };
 
 // op_ = option and payload
 
+// num = 0x1234, more = 0, szx = 1
+#define O_BLOCK_DATA1   0x01, 0x23, 0x41
+
 // uri_host: "host" uri_path: "v1/t"
 #define O_DATA1     0x34, 'h', 'o', 's', 't', 0x82, 'v', '1', 0x01, 't'
 #define O_DATA2     0x34, 'h', 'o', 's', 't'
 #define O_DATA3     0x31, 'h'
 #define O_DATA4     0x34, 'h', 'o', 's', 't', 0x82, 'v', '2', 0x03, 'y', 'e', 's', 0x02, 'i', 'd'
+// Block2 option
+#define O_DATA5     0x31, 'h', 0xD3, 0x0A, O_BLOCK_DATA1
 #define P_DATA1     0xFF, 'h', 'e', 'l', 'l', 'o'
 #define P_DATA2     0xFF, 'x'
 #define P_DATA4     0xFF, 'o', 'h', 'a', 'y', 'o'
+#define P_DATA5     0xFF, 'x'
 
 // option and payload test data
 constexpr uint8_t op_data1[] { O_DATA1, P_DATA1 };
 constexpr uint8_t op_data2[] { O_DATA2, P_DATA2 };
 constexpr uint8_t op_data3[] { O_DATA3 };
 constexpr uint8_t op_data4[] { O_DATA4, P_DATA4 };
+constexpr uint8_t op_data5[] { O_DATA5, P_DATA5 };
 
 // htop_ = header, token, option and payload
 
