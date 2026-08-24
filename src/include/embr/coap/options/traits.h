@@ -38,7 +38,7 @@ struct uint_traits_base : options_traits_base<n>
 };
 
 template <>
-struct option_traits<numbers::Accept> : uint_traits_base<numbers::Accept>
+struct traits<numbers::Accept> : uint_traits_base<numbers::Accept>
 {
     static constexpr const char* name = "Accept";
 
@@ -46,19 +46,23 @@ struct option_traits<numbers::Accept> : uint_traits_base<numbers::Accept>
 };
 
 template <>
-struct option_traits<numbers::Block1> : uint_traits_base<numbers::Block1>
+struct traits<numbers::Block1> : uint_traits_base<numbers::Block1>
 {
     static constexpr const char* name = "Block1";
+
+    static constexpr unsigned max_length = 3;
 };
 
 template <>
-struct option_traits<numbers::Block2> : uint_traits_base<numbers::Block2>
+struct traits<numbers::Block2> : uint_traits_base<numbers::Block2>
 {
     static constexpr const char* name = "Block2";
+
+    static constexpr unsigned max_length = 3;
 };
 
 template <>
-struct option_traits<numbers::ContentFormat> : uint_traits_base<numbers::ContentFormat>
+struct traits<numbers::ContentFormat> : uint_traits_base<numbers::ContentFormat>
 {
     static constexpr const char* name = "Content-Format";
 
@@ -66,7 +70,7 @@ struct option_traits<numbers::ContentFormat> : uint_traits_base<numbers::Content
 };
 
 template <>
-struct option_traits<numbers::Echo> : opaque_traits_base<numbers::Echo>
+struct traits<numbers::Echo> : opaque_traits_base<numbers::Echo>
 {
     static constexpr const char* name = "Echo";
 
@@ -75,7 +79,7 @@ struct option_traits<numbers::Echo> : opaque_traits_base<numbers::Echo>
 };
 
 template <>
-struct option_traits<numbers::ETag> : opaque_traits_base<numbers::ETag>
+struct traits<numbers::ETag> : opaque_traits_base<numbers::ETag>
 {
     static constexpr const char* name = "ETag";
 
@@ -85,19 +89,19 @@ struct option_traits<numbers::ETag> : opaque_traits_base<numbers::ETag>
 
 
 template <>
-struct option_traits<numbers::LocationPath> : string_traits_base<numbers::LocationPath>
+struct traits<numbers::LocationPath> : string_traits_base<numbers::LocationPath>
 {
     static constexpr const char* name = "Location-Path";
 };
 
 template <>
-struct option_traits<numbers::LocationQuery> : string_traits_base<numbers::LocationQuery>
+struct traits<numbers::LocationQuery> : string_traits_base<numbers::LocationQuery>
 {
     static constexpr const char* name = "Location-Query";
 };
 
 template <>
-struct option_traits<numbers::MaxAge> : uint_traits_base<numbers::MaxAge>
+struct traits<numbers::MaxAge> : uint_traits_base<numbers::MaxAge>
 {
     static constexpr const char* name = "Max-Age";
 
@@ -105,20 +109,28 @@ struct option_traits<numbers::MaxAge> : uint_traits_base<numbers::MaxAge>
 };
 
 template <>
-struct option_traits<numbers::ProxyUri> : string_traits_base<numbers::ProxyUri>
+struct traits<numbers::ProxyUri> : string_traits_base<numbers::ProxyUri>
 {
     static constexpr const char* name = "Proxy-Uri";
 };
 
 
 template <>
-struct option_traits<numbers::Size1> : uint_traits_base<numbers::Size1>
+struct traits<numbers::Size1> : uint_traits_base<numbers::Size1>
 {
     static constexpr const char* name = "Size1";
+
+    static constexpr unsigned max_length = 4;
 };
 
 template <>
-struct option_traits<numbers::UriPath> : string_traits_base<numbers::UriPath>
+struct traits<numbers::Size2> : uint_traits_base<numbers::Size2>
+{
+    static constexpr const char* name = "Size2";
+};
+
+template <>
+struct traits<numbers::UriPath> : string_traits_base<numbers::UriPath>
 {
     static constexpr const char* name = "Uri-Path";
 
@@ -126,7 +138,7 @@ struct option_traits<numbers::UriPath> : string_traits_base<numbers::UriPath>
 };
 
 template <>
-struct option_traits<numbers::UriPort> : uint_traits_base<numbers::UriPort>
+struct traits<numbers::UriPort> : uint_traits_base<numbers::UriPort>
 {
     static constexpr const char* name = "Uri-Port";
 
@@ -134,13 +146,13 @@ struct option_traits<numbers::UriPort> : uint_traits_base<numbers::UriPort>
 };
 
 template <>
-struct option_traits<numbers::UriHost> : string_traits_base<numbers::UriHost>
+struct traits<numbers::UriHost> : string_traits_base<numbers::UriHost>
 {
     static constexpr const char* name = "Uri-Host";
 };
 
 template <>
-struct option_traits<numbers::UriQuery> : string_traits_base<numbers::UriQuery>
+struct traits<numbers::UriQuery> : string_traits_base<numbers::UriQuery>
 {
     static constexpr const char* name = "Uri-Query";
 

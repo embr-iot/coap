@@ -9,6 +9,6 @@
 namespace embr::coap::options {
 
 template <numbers n>
-struct option_traits;
+struct traits;
 
 }

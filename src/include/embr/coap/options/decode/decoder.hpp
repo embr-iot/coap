@@ -40,7 +40,7 @@ template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, class Traits>
 template <numbers number, class F>
 errc decoder<Streambuf, Traits>::emit(F&& f, unsigned len, const uint8_t* data)
 {
-    using traits = option_traits<number>;
+    using traits = options::traits<number>;
     option<number> o;
 
     o.length = len;

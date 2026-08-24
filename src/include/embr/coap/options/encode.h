@@ -47,7 +47,7 @@ template <numbers n, class Parent>
 class single_encoder
 {
 public:
-    using traits = option_traits<n>;
+    using traits = options::traits<n>;
     using parent_type = Parent;
     using streambuf_type = typename parent_type::streambuf_type;
     using char_type = typename streambuf_type::char_type;

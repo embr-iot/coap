@@ -36,7 +36,7 @@ struct option : option_base
 {
     static constexpr numbers number = n;
 
-    using traits = option_traits<n>;
+    using traits = options::traits<n>;
 
     [[nodiscard]] constexpr estd::string_view string() const
     {
