@@ -3,9 +3,16 @@
 #include <estd/cstdint.h>
 #include <estd/cstdlib.h>
 
+#include <embr/internal/word/packer.h>
+
 namespace embr::coap {
 
 namespace internal {
+
+// TODO: Once embr runtime flavor of packer is present, try using this instead
+// of explicit uint_decode (and maybe uint_encode).
+template <typename Integer>
+using packer = embr::internal::packer<Integer, 0, estd::endian::big>;
 
 template <typename Integer>
 constexpr Integer uint_decode(const uint8_t* in, const uint8_t* end)
