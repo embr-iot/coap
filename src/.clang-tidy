@@ -1,6 +1,5 @@
-# Auxiliary clang-tidy
-# We have 2nd one here to augment stock-standard one in / with additional
-# things that only coap library wants
+# Malachi clang-tidy convention: embedded v0.1.0
+# Hosted at https://gitlab.com/malachi-linux/useful-scripts.git
 Checks:
   # Low level library, this can't be helped
   - '-bugprone-easily-swappable-parameters'

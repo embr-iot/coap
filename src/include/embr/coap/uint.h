@@ -10,7 +10,6 @@
 #include <estd/cstdlib.h>
 #include <estd/limits.h>
 
-#include "assert.h"
 #if __cpp_impl_three_way_comparison
 #include <compare>
 #endif
