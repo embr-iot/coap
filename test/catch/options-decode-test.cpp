@@ -182,7 +182,7 @@ TEST_CASE("options decoding", "[decode][options]")
         stateful_decoder decoder;
         int counter = 0;
 
-        coap::errc err = decoder.decode(in, [&](option<> o)
+        coap::errc err = decoder.decode(in, [&](const option<>& o)
             {
                 switch(o.number)
                 {
@@ -203,7 +203,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         REQUIRE(counter == 3);
         // NOTE: 'again' indicates payload present.  Otherwise we see
-        // 'done'.  Kinda clulnky, since 'again' misleads one into thinking
+        // 'done'.  Kinda clunky, since 'again' misleads one into thinking
         // more options might be available
         REQUIRE(err == coap::errc::again);
     }

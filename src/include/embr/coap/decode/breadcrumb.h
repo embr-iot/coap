@@ -26,24 +26,9 @@ public:
 
     void reset() { current_ = nullptr; }
 
-    /// Investigate 'current' to see if its children match 'v'
-    /// @param v
-    /// @param top top-level node nav tree
-    /// @param current nullptr (for virtual root node) otherwise node whose children to search
-    /// @return
-    /// @remarks Remember, breadcrumbs specifically do not search grandchildren too.  It's one generation at a time.
-    // Keep this in the helper to avoid ADL things.  Consider putting this up at embr proper
-    template <class String>
-    ESTD_CPP_CONSTEXPR(17) static const bc* search_children(const String& v, const bc* top, const bc* current)
-    {
-        // When just starting, pretend to have root node so search siblings without a child
-        current = current == nullptr ? top : first_child(current);
-        return internal::search_siblings(current, v);
-    }
-
     /// Investigate to see current node's children match 'v'
     template <class String>
-    ESTD_CPP_CONSTEXPR(17) const bc* search(const String& v)
+    ESTD_CPP_CONSTEXPR(14) const bc* search(const String& v)
     {
         const bc* child = search_children(v, top_, current_);
 
@@ -62,6 +47,11 @@ public:
 
         // DEBT: Put an invariant() call into breadcrumb and traits itself, if practical
         return current_ == nullptr || current_ >= top_;
+    }
+
+    estd::optional<int> id() const
+    {
+        return current_ ? current_->id() : estd::nullopt;
     }
 };
 
