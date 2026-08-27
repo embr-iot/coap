@@ -13,12 +13,13 @@ class breadcrumb_matcher
     using bc = Breadcrumb;
 
     const bc* top_;
-    const bc* current_;
+    const bc* current_{};
 
     using traits = embr::internal::breadcrumb_traits<bc>;
+    using int_type = typename traits::int_type;
 
 public:
-    constexpr breadcrumb_matcher(const bc* top) : top_{top}, current_{} {}
+    constexpr explicit breadcrumb_matcher(const bc* top) : top_{top} {}
 
     //constexpr bool at_end() const { return current_ && traits::is_null(*current_); }
 
@@ -41,7 +42,7 @@ public:
         return child;
     }
 
-    ESTD_CPP_CONSTEXPR(17) bool invariant() const
+    ESTD_CPP_CONSTEXPR(14) bool invariant() const
     {
         if(!top_)   return false;
 
@@ -49,9 +50,17 @@ public:
         return current_ == nullptr || current_ >= top_;
     }
 
-    estd::optional<int> id() const
+    //ESTD_CPP_CONSTEXPR(14)    // DEBT: CLion flips out on this in protest to estd::optional
+    estd::optional<int_type> id() const
     {
-        return current_ ? current_->id() : estd::nullopt;
+        if(!current_)   return estd::nullopt;
+
+        return traits::id(*current_);
+    }
+
+    constexpr explicit operator bool() const
+    {
+        return current_ != nullptr;
     }
 };
 

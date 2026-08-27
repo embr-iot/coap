@@ -85,7 +85,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         decoder_type decoder(test::op_data1);
 
-        breadcrumb_matcher bch(nav_data1);
+        breadcrumb_matcher uri(nav_data1);
 
         coap::errc err = decoder.dispatch_combined([&](const auto o)
         {
@@ -106,19 +106,19 @@ TEST_CASE("options decoding", "[decode][options]")
                 }
                 else if constexpr(number == numbers::UriPath)
                 {
-                    const bc* uri_path = bch.search(o.string());
+                    uri.search(o.string());
 
-                    REQUIRE(uri_path);
+                    REQUIRE(uri);
 
                     if(++counter == 2)
                     {
                         REQUIRE(o.string() == "v1");
-                        REQUIRE(uri_path->id == ids::v1);
+                        REQUIRE(uri.id() == ids::v1);
                     }
                     else
                     {
                         REQUIRE(o.string() == "t");
-                        REQUIRE(uri_path->id == ids::v1_t);
+                        REQUIRE(uri.id() == ids::v1_t);
                     }
                 }
             }
@@ -126,7 +126,7 @@ TEST_CASE("options decoding", "[decode][options]")
 
         REQUIRE(err == coap::errc::alternate);
         REQUIRE(counter == 3);
-        REQUIRE(bch.current()->id == ids::v1_t);
+        REQUIRE(uri.id() == ids::v1_t);
     }
     SECTION("decoder: decode_one")
     {
