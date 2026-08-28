@@ -10,3 +10,8 @@ Checks:
   - '-modernize-deprecated-headers'
   # nodiscard is not a bad idea, but I personally find it annoying
   - '-modernize-use-nodiscard'
+  # Embedded space undefined/uninitialized variables are more common
+  - '-cppcoreguidelines-init-variables'
+  - '-cppcoreguidelines-pro-type-member-init'
+  # Not *that* bad
+  - '-cppcoreguidelines-avoid-do-while'

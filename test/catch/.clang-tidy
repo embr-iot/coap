@@ -10,6 +10,7 @@ Checks:
   - '-readability-function-cognitive-complexity'
   # Unit Testing has unusual data hiding behavior
   - '-misc-non-private-member-variables-in-classes'
+  - '-misc-include-cleaner'
   - '-readability-redundant-access-specifiers'
   # Cross c++ version testing makes room for static_assert(bool, "")
   - '-*-unary-static-assert'

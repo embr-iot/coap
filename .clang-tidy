@@ -56,3 +56,11 @@ Checks:
   - '-readability-named-parameter'
   - '-readability-trailing-comma'
   - '-readability-implicit-bool-conversion'
+
+  # Const correctness is so great.  Yet, receiving a warning EVERY
+  # time is just too much.
+  - '-misc-const-correctness'
+
+  # No thank you
+  - '-google-readability-todo'
+  - '-readability-qualified-auto'
