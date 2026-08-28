@@ -26,13 +26,17 @@ struct header_base
         PUT,
         DELETE,
 
-        OK                      = EMBR_COAP_RESPONSE_CODE(Success, 00),
-        Created                 = EMBR_COAP_RESPONSE_CODE(Success, 01),
-        Content                 = EMBR_COAP_RESPONSE_CODE(Success, 05),
-        NotFound                = EMBR_COAP_RESPONSE_CODE(Success, 04),
-        NotAcceptable           = EMBR_COAP_RESPONSE_CODE(ClientError, 06),
+        OK                      = EMBR_COAP_RESPONSE_CODE(Success, 0),
+        Created                 = EMBR_COAP_RESPONSE_CODE(Success, 1),
+        Content                 = EMBR_COAP_RESPONSE_CODE(Success, 5),
+        // https://datatracker.ietf.org/doc/html/rfc7959#section-6
+        Continue                = EMBR_COAP_RESPONSE_CODE(Success, 31),
+        NotFound                = EMBR_COAP_RESPONSE_CODE(ClientError, 4),
+        NotAcceptable           = EMBR_COAP_RESPONSE_CODE(ClientError, 6),
+        // https://datatracker.ietf.org/doc/html/rfc7959#section-6
+        RequestEntityIncomplete = EMBR_COAP_RESPONSE_CODE(ClientError, 8),
         UnsupportedContentFormat    = EMBR_COAP_RESPONSE_CODE(ClientError, 15),
-        InternalServerError     = EMBR_COAP_RESPONSE_CODE(ServerError, 00),
+        InternalServerError     = EMBR_COAP_RESPONSE_CODE(ServerError, 0),
     };
 
     enum types : unsigned

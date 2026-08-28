@@ -3,6 +3,8 @@
 #include "decode/decoder.hpp"
 #include "decode/stateful.hpp"
 
+#include "../decode/breadcrumb.h"   // EXPERIMENTAL
+
 #include "fwd.h"
 #include "markers.h"
 
@@ -12,6 +14,27 @@
 
 namespace embr::coap::options {
 
+// EXPERIMENTAL
+class cooked_decoder
+{
+    estd::layer1::optional<content_formats, (content_formats)0xFFFF> accept_;
+    estd::layer1::optional<content_formats, (content_formats)0xFFFF> content_format_;
+    breadcrumb_matcher<> uri_;
+
+public:
+    constexpr explicit cooked_decoder(const embr::internal::breadcrumb* nav) :
+        uri_(nav)
+    {}
+
+    template <numbers n>
+    void investigate(const option<n>& option)
+    {
+        if constexpr(option.number == numbers::UriPath)
+        {
+
+        }
+    }
+};
 
 /*
 template <numbers n, ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf, bool has_grandparent = false>

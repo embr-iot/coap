@@ -9,7 +9,6 @@ struct options_traits_base
 {
     static constexpr numbers number = n;
     static constexpr const char* name = "N/A";
-    static constexpr bool multi = false;
     static constexpr unsigned min_length = 0;
     static constexpr unsigned max_length = 0;
     static constexpr auto format = value_formats::Empty;
@@ -17,6 +16,8 @@ struct options_traits_base
     // As per https://datatracker.ietf.org/doc/html/rfc7252#section-5.4.6
     static constexpr bool critical = n & 1;
     static constexpr bool unsafe = n & 2;
+    static constexpr bool no_cache_key = ((n & 0x1e) == 0x1c);
+    static constexpr bool repeatable = false;
 };
 
 template <numbers n>
@@ -85,6 +86,8 @@ struct traits<numbers::ETag> : opaque_traits_base<numbers::ETag>
 
     static constexpr unsigned min_length = 1;
     static constexpr unsigned max_length = 8;
+
+    static constexpr bool repeatable = true;
 };
 
 
@@ -112,8 +115,19 @@ template <>
 struct traits<numbers::ProxyUri> : string_traits_base<numbers::ProxyUri>
 {
     static constexpr const char* name = "Proxy-Uri";
+
+    static constexpr unsigned min_length = 1;
+    static constexpr unsigned max_length = 1034;
 };
 
+template <>
+struct traits<numbers::ProxyScheme> : string_traits_base<numbers::ProxyScheme>
+{
+    static constexpr const char* name = "Proxy-Scheme";
+
+    static constexpr unsigned min_length = 1;
+    static constexpr unsigned max_length = 255;
+};
 
 template <>
 struct traits<numbers::Size1> : uint_traits_base<numbers::Size1>
@@ -134,7 +148,7 @@ struct traits<numbers::UriPath> : string_traits_base<numbers::UriPath>
 {
     static constexpr const char* name = "Uri-Path";
 
-    static constexpr bool multi = true;
+    static constexpr bool repeatable = true;
 };
 
 template <>
@@ -156,7 +170,7 @@ struct traits<numbers::UriQuery> : string_traits_base<numbers::UriQuery>
 {
     static constexpr const char* name = "Uri-Query";
 
-    static constexpr bool multi = true;
+    static constexpr bool repeatable = true;
 };
 
 }
