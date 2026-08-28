@@ -7,6 +7,15 @@
 
 namespace embr {
 
+template <class Node, size_t N>
+static constexpr bool invariant_node(const Node (&nodes)[N])
+{
+    using traits = embr::internal::breadcrumb_traits<Node>;
+
+    return traits::is_null(nodes[N - 1]);
+}
+
+
 template <class Breadcrumb = embr::internal::breadcrumb>
 class breadcrumb_matcher
 {
@@ -20,6 +29,13 @@ class breadcrumb_matcher
 
 public:
     constexpr explicit breadcrumb_matcher(const bc* top) : top_{top} {}
+
+    template <estd::size_t N>
+    constexpr explicit breadcrumb_matcher(const bc (&nodes)[N]) :
+        top_{nodes}
+    {
+        static_assert(invariant_node(nodes), "Null termination required");
+    }
 
     //constexpr bool at_end() const { return current_ && traits::is_null(*current_); }
 

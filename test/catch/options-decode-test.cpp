@@ -22,7 +22,6 @@ static constexpr bc nav_data1[]
 };
 
 
-
 TEST_CASE("options decoding", "[decode][options]")
 {
     SECTION("numbers")
@@ -245,5 +244,26 @@ TEST_CASE("options decoding", "[decode][options]")
             REQUIRE(r);
             REQUIRE(counter == 2);
         }
+    }
+    SECTION("cooked (EXPERIMENTAL)")
+    {
+        using namespace coap::options;
+        using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
+
+        int counter = 0;
+        bool has_payload;
+
+        decoder_type decoder(test::op_data1);
+        cooked_decoder cooked(nav_data1);
+
+        decoder.dispatch([&](const auto& option)
+            {
+                cooked.investigate(option);
+            });
+
+        REQUIRE(cooked.uri() == ids::v1_t);
+        // DEBT: Document why this flavor of optional has a has_value(bool)
+        REQUIRE(cooked.accept().has_value() == false);
+        REQUIRE(cooked.content_format().has_value() == false);
     }
 }

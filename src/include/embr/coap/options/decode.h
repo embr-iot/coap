@@ -17,23 +17,49 @@ namespace embr::coap::options {
 // EXPERIMENTAL
 class cooked_decoder
 {
-    estd::layer1::optional<content_formats, (content_formats)0xFFFF> accept_;
-    estd::layer1::optional<content_formats, (content_formats)0xFFFF> content_format_;
-    breadcrumb_matcher<> uri_;
+    using bc = embr::internal::breadcrumb;
+    using bc_traits = embr::internal::breadcrumb_traits<bc>;
+
+    using optional_type = estd::layer1::optional<content_formats, (content_formats)0xFFFF>;
+
+    optional_type accept_;
+    optional_type content_format_;
+    breadcrumb_matcher<bc> uri_;
 
 public:
-    constexpr explicit cooked_decoder(const embr::internal::breadcrumb* nav) :
+    constexpr explicit cooked_decoder(const bc* nav) :
         uri_(nav)
     {}
+
+    template <estd::size_t N>
+    constexpr explicit cooked_decoder(const bc (&nav)[N]) :
+        uri_{nav}
+    {
+    }
 
     template <numbers n>
     void investigate(const option<n>& option)
     {
         if constexpr(option.number == numbers::UriPath)
         {
-
+            uri_.search(option.string());
+        }
+        else if constexpr(option.number == numbers::Accept)
+        {
+            accept_ = static_cast<content_formats>(option.uint());
+        }
+        else if constexpr(option.number == numbers::ContentFormat)
+        {
+            content_format_ = static_cast<content_formats>(option.uint());
         }
     }
+
+    const optional_type& accept() const { return accept_; }
+    const optional_type& content_format() const { return content_format_; }
+
+    // DEBT: This would be better, not there yet
+    //const estd::layer1::optional<int, -1> uri() { return uri_.id(); }
+    const estd::optional<int> uri() { return uri_.id(); }
 };
 
 /*

@@ -23,6 +23,8 @@ enum nav_data1 : int
 #define H_DATA2     0x42, 1, 0, 0
 #define H_DATA3     0x50, 3, 0, 0
 #define H_DATA4     0x43, 4, 0, 0
+#define H_DATA5     H_DATA1
+#define H_DATA6     H_DATA1
 
 // Header: https://datatracker.ietf.org/doc/html/rfc7252#section-3
 
@@ -49,6 +51,8 @@ constexpr uint8_t h_data4[] = { H_DATA4 };
 #define O_DATA4     0x34, 'h', 'o', 's', 't', 0x82, 'v', '2', 0x03, 'y', 'e', 's', 0x02, 'i', 'd'
 // Block1 option
 #define O_DATA5     0x31, 'h', 0xD3, 0x0E, O_BLOCK_DATA1
+// TBD include Max-Age, Accept and Content-Format here
+#define O_DATA6
 #define P_DATA1     0xFF, 'h', 'e', 'l', 'l', 'o'
 #define P_DATA2     0xFF, 'x'
 #define P_DATA4     0xFF, 'o', 'h', 'a', 'y', 'o'

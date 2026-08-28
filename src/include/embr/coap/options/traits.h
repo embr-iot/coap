@@ -18,6 +18,9 @@ struct options_traits_base
     static constexpr bool unsafe = n & 2;
     static constexpr bool no_cache_key = ((n & 0x1e) == 0x1c);
     static constexpr bool repeatable = false;
+
+    // EXPERIMENTAL
+    static constexpr bool has_default = false;
 };
 
 template <numbers n>
@@ -95,12 +98,18 @@ template <>
 struct traits<numbers::LocationPath> : string_traits_base<numbers::LocationPath>
 {
     static constexpr const char* name = "Location-Path";
+
+    static constexpr unsigned max_length = 255;
+    static constexpr bool repeatable = true;
 };
 
 template <>
 struct traits<numbers::LocationQuery> : string_traits_base<numbers::LocationQuery>
 {
     static constexpr const char* name = "Location-Query";
+
+    static constexpr unsigned max_length = 255;
+    static constexpr bool repeatable = true;
 };
 
 template <>
@@ -109,6 +118,9 @@ struct traits<numbers::MaxAge> : uint_traits_base<numbers::MaxAge>
     static constexpr const char* name = "Max-Age";
 
     static constexpr unsigned max_length = 4;
+
+    // EXPERIMENTAL
+    static constexpr uint32_t default_value = 60;
 };
 
 template <>
