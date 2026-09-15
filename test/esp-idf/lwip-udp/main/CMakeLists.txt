@@ -1,5 +1,5 @@
 idf_component_register(SRCS
-    console.cpp "main.cpp" pcb.cpp
+    console.cpp lvgl.cpp "main.cpp" pcb.cpp
     INCLUDE_DIRS "include"
-    REQUIRES embr-net esp_wifi
+    REQUIRES gen_bmgr_codes embr-net esp_wifi
     )

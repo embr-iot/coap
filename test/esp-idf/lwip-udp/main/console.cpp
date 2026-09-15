@@ -4,7 +4,7 @@
 
 #include <esp_console.h>
 
-#include <from_chars>
+#include <charconv>
 #include <string>
 
 using namespace embr;
@@ -20,7 +20,7 @@ static int coap_console(int argc, char *argv[])
     if(nerrors) return -1;
 
     string command = args.command->sval[0];
-    string arg1 = args.command->arg1[0];
+    string arg1 = args.arg1->sval[0];
 
     if(command == "send")
     {

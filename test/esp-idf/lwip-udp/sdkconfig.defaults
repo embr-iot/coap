@@ -1,0 +1,2 @@
+# Incase LVGL activates, combined with WiFi that gets big
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
