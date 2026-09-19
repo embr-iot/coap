@@ -8,11 +8,17 @@
 
 #include <console_simple_init.h>
 
+using namespace embr;
+
 extern "C" void app_main(void)
 {
+    ESP_ERROR_CHECK(simple_flash_init());
+
     ESP_ERROR_CHECK(esp_board_manager_init());
 
-    ESP_ERROR_CHECK(embr::simple_flash_init());
+    ESP_ERROR_CHECK(wifi::preinit());
+    ESP_ERROR_CHECK(wifi::esp_now_init());
+    ESP_ERROR_CHECK(wifi::esp_now_start(1));
 
     ESP_ERROR_CHECK(console_cmd_init());
 
