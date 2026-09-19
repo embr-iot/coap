@@ -6,5 +6,5 @@ dependencies:
     path: ../../../../lib/esp-idf/embr-wifi
   embr-bmgr-lvgl:
     git: git@github.com:embr-iot/esp-bmgr
-    path: lib/embr-bmgr
+    path: lib/embr-bmgr-lvgl
     version: dev
