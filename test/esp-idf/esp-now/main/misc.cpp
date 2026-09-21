@@ -1,6 +1,6 @@
 #include "devtool/color.h"
 
-namespace devtool {
+namespace devtool::inline core {
 
 color mac_to_color(const uint8_t* mac)
 {

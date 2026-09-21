@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <tuple>
 
-namespace devtool {
+namespace devtool::inline core {
 
 struct color
 {

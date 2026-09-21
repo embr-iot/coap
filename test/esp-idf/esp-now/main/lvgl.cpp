@@ -1,35 +1,66 @@
 #include "devtool/color.h"
 #include "devtool/lvgl.h"
 
+#include <embr/esp-idf/wifi/fwd.h>
+
+#include <esp_log.h>
+
 #if EMBR_BMGR_LVGL
 namespace devtool::inline lvgl {
 
+app app::singleton;
+
+static const char* TAG = "devtool::lvgl";
+
 lv_color_t mac_to_color(const uint8_t* mac)
 {
-    color c = devtool::mac_to_color;
+    color c = devtool::core::mac_to_color(mac);
+
+    //ESP_LOGI(TAG, "mac_to_color: rgb = %f %f %f", c.r, c.g, c.b);
 
     return lv_color_make(c.r * 255, c.g * 255, c.b * 255);
 }
 
-void on_button_down()
+void app::on_button_down()
 {
-
+    lv_obj_set_style_bg_color(us_box_, lv_color_make(128, 0, 128), 0);
 }
 
-void on_button_up()
+void app::on_button_up()
 {
+    uint8_t mac[6];
 
+    ESP_ERROR_CHECK(esp_wifi_get_mac(WIFI_IF_STA, mac));
+
+    lv_obj_set_style_bg_color(us_box_, mac_to_color(mac), 0);
 }
 
-void screen::init()
+void app::init()
 {
+    uint8_t mac[6];
+
     lv_obj_t* screen = lv_screen_active();
+
+    ESP_ERROR_CHECK(esp_wifi_get_mac(WIFI_IF_STA, mac));
+
+    lv_obj_set_style_bg_color(screen, lv_color_hex(0x202020), 0);
+    lv_obj_set_style_text_color(screen, lv_color_white(), 0);
 
     // "Our" color
     us_box_ = lv_obj_create(screen);
+    lv_obj_set_size(us_box_, 100, 50);
+    lv_obj_set_style_bg_color(us_box_, mac_to_color(mac), 0);
+    lv_obj_set_align(us_box_, LV_ALIGN_LEFT_MID);
 
     // "Their" color (incoming MAC)
     them_box_ = lv_obj_create(screen);
+    lv_obj_set_size(them_box_, 100, 50);
+    lv_obj_set_align(them_box_, LV_ALIGN_RIGHT_MID);
+
+    lv_obj_t* label = lv_label_create(them_box_);
+    lv_obj_set_align(label, LV_ALIGN_CENTER);
+    lv_label_set_text(label, "Hello world");
+    them_label_ = label;
 }
 
 }
