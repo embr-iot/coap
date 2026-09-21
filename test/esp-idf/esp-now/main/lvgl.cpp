@@ -1,3 +1,4 @@
+#include "devtool/color.h"
 #include "devtool/lvgl.h"
 
 #if EMBR_BMGR_LVGL
@@ -5,11 +6,9 @@ namespace devtool::inline lvgl {
 
 lv_color_t mac_to_color(const uint8_t* mac)
 {
-    unsigned r = mac[0] * mac[1],
-        g = mac[2] * mac[3],
-        b = mac[4] * mac[5];
+    color c = devtool::mac_to_color;
 
-    return lv_color_make(r >> 8, g >> 8, b >> 8);
+    return lv_color_make(c.r * 255, c.g * 255, c.b * 255);
 }
 
 void on_button_down()

@@ -4,6 +4,8 @@ dependencies:
     path: ../../../../tools/esp-idf/components/embr-coap
   embr-wifi:
     path: ../../../../lib/esp-idf/embr-wifi
+  embr-coap-synthetic:
+    path: ../../../../lib/esp-idf/embr-coap-synthetic
   embr-bmgr:
     git: git@github.com:embr-iot/esp-bmgr
     path: lib/embr-bmgr
