@@ -18,13 +18,13 @@ const char* TAG = "embr::coap: main";
 
 uint8_t mac[6];
 
-lv_color_t mac_to_color() { return devtool::lvgl::mac_to_color(mac); }
-
 }
 
 using namespace embr;
 
 #ifdef CONFIG_ESP_BOARD_DEV_DISPLAY_LCD_SUPPORT
+lv_color_t mac_to_color() { return devtool::lvgl::mac_to_color(mac); }
+
 void lvgl_setup()
 {
     ESP_LOGI(TAG, "lvgl_setup: entry");

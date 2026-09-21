@@ -1,8 +1,8 @@
 #pragma once
 
+#ifdef CONFIG_ESP_BOARD_DEV_DISPLAY_LCD_SUPPORT
 #include <embr/bmgr/lvgl.h>
 
-#if EMBR_BMGR_LVGL
 namespace devtool::inline lvgl {
 
 void on_button_down();

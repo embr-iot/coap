@@ -1,5 +1,6 @@
 #include "devtool/lvgl.h"
 
+#if EMBR_BMGR_LVGL
 namespace devtool::inline lvgl {
 
 lv_color_t mac_to_color(const uint8_t* mac)
@@ -33,3 +34,4 @@ void screen::init()
 }
 
 }
+#endif
