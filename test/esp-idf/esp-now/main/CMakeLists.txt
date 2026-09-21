@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS button.cpp lvgl.cpp main.cpp
+    SRCS button.cpp lvgl.cpp main.cpp misc.cpp
     INCLUDE_DIRS "include"
     REQUIRES
         embr-bmgr
