@@ -45,7 +45,7 @@ void callback(void* arg, void* usr_data)
             using namespace embr::coap;
 
             encoder << header(header::NON, header::PUT);
-            encoder << payload << ++send_counter;
+            encoder << payload << 1 << ++send_counter;
 
             // DEBT: Still need more elegant solution than this
             int pos = encoder.out().pubseekoff(0, estd::ios_base::cur);
@@ -66,6 +66,11 @@ void callback(void* arg, void* usr_data)
 
         case BUTTON_PRESS_UP:
         {
+            using namespace embr::coap;
+
+            encoder << header(header::NON, header::PUT);
+            encoder << payload << 0;
+
             [[maybe_unused]]
             const devtool::color c = devtool::mac_to_color(wifi::get_mac().data());
 

@@ -2,6 +2,8 @@
 #include "devtool/fwd.h"
 #include "devtool/lvgl.h"
 
+#include <embr/coap/decoder.h>
+
 #include <embr/wifi/fwd.h>
 #include <embr/esp-idf/net/fwd.h>
 #include <embr/esp-idf/wifi/fwd.h>
@@ -34,6 +36,19 @@ static void _esp_now_init()
         const esp_now_recv_info_t* esp_now_info,
         const uint8_t* data, int data_len)
     {
+        using namespace coap;
+        using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
+
+        decoder_type decoder(data, data_len);
+
+        header h;
+        token t;
+
+        decoder >> h >> t;
+
+        // Probably need to move through options too
+        //assert(decoder.state() == decoder_type::Payload);
+
         using namespace devtool;
         
         if constexpr(led_strip.supported)
