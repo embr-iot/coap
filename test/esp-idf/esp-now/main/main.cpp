@@ -1,3 +1,4 @@
+#include "devtool/color.h"
 #include "devtool/fwd.h"
 #include "devtool/lvgl.h"
 
@@ -33,7 +34,22 @@ static void _esp_now_init()
         const esp_now_recv_info_t* esp_now_info,
         const uint8_t* data, int data_len)
     {
+        using namespace devtool;
+        
+        if constexpr(led_strip.supported)
+        {
+            // Works-ish
+            // We need an OFF signal over CoAP too now
+            const devtool::color c = devtool::mac_to_color(esp_now_info->src_addr);
 
+            ESP_ERROR_CHECK(led_strip.set_pixel(0, c.r * 255, c.g * 255, c.b * 255));
+            ESP_ERROR_CHECK(led_strip.refresh());
+        }
+
+#if EMBR_BMGR_LVGL
+        // TBD
+        lvgl::async_call([] { });
+#endif
     }));
 
     esp_now_peer_info_t peer{};

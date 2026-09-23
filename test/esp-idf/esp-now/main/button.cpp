@@ -1,4 +1,5 @@
 #include "devtool/fwd.h"
+#include "devtool/color.h"
 #include "devtool/lvgl.h"
 
 #include <embr/coap/encoder.h>
@@ -65,11 +66,14 @@ void callback(void* arg, void* usr_data)
 
         case BUTTON_PRESS_UP:
         {
+            [[maybe_unused]]
+            const devtool::color c = devtool::mac_to_color(wifi::get_mac().data());
+
             using namespace devtool;
 
             if constexpr(led_strip.supported)
             {
-                ESP_ERROR_CHECK(led_strip.set_pixel(0, 0, 0, 0));
+                ESP_ERROR_CHECK(led_strip.set_pixel(0, c.r * 255, c.g * 255,  c.b * 255));
                 ESP_ERROR_CHECK(led_strip.refresh());
             }
 
