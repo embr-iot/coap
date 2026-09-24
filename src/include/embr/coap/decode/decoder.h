@@ -6,8 +6,32 @@
 
 namespace embr::coap {
 
+namespace internal {
+
+class decoder
+{
+public:
+    enum states
+    {
+        Header,
+        Token,
+        Options,
+        Payload,
+        Done
+    };
+
+protected:
+    states state_{Header};
+};
+
+const char* to_string(decoder::states);
+
+}
+
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
-class decoder : public internal::policies_enum
+class decoder :
+    public internal::policies_enum,
+    public internal::decoder
 {
     using traits = options::presumptive_decoder_traits;
     static constexpr policies policy = traits::policy;
@@ -21,23 +45,12 @@ public:
     using pointer = estd::remove_const_t<char_type>*;
     using const_pointer = const char_type*;
 
-    enum states
-    {
-        Header,
-        Token,
-        Options,
-        Payload,
-        Done
-    };
-
 private:
     union
     {
         coap::header header_;
         uint16_t current_number_;
     };
-
-    states state_{Header};
 
     // DEBT: Result of last read, ios style.  Expand on this
     bool good_ : 1;

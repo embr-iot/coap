@@ -43,8 +43,15 @@ static void _esp_now_init()
 
         header h;
         token t;
+        options::option opt;
 
         decoder >> h >> t;
+        decoder >> opt;
+
+        assert(h.type() == header::NON);
+        assert(h.code() == header::PUT);
+
+        ESP_LOGI(TAG, "decoder.state() = %s", to_string(decoder.state()));
 
         // Probably need to move through options too
         //assert(decoder.state() == decoder_type::Payload);

@@ -1,5 +1,7 @@
 #include "embr/coap/header.h"
 
+// 24SEP26 MB DEBT: Move these out to to_string
+
 #define CASE(x) case header::x: return #x;
 
 namespace embr::coap {

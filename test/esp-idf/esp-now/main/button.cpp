@@ -50,6 +50,8 @@ void callback(void* arg, void* usr_data)
             // DEBT: Still need more elegant solution than this
             int pos = encoder.out().pubseekoff(0, estd::ios_base::cur);
 
+            ESP_LOGI(TAG, "callback: pos=%d", pos);
+
             ESP_ERROR_CHECK(esp_now_send(wifi::broadcast_mac, out_u, pos));
 
             if constexpr(led_strip.supported)
@@ -70,6 +72,13 @@ void callback(void* arg, void* usr_data)
 
             encoder << header(header::NON, header::PUT);
             encoder << payload << 0;
+
+            // DEBT: Still need more elegant solution than this
+            int pos = encoder.out().pubseekoff(0, estd::ios_base::cur);
+
+            ESP_LOGI(TAG, "callback: pos=%d", pos);
+
+            ESP_ERROR_CHECK(esp_now_send(wifi::broadcast_mac, out_u, pos));
 
             [[maybe_unused]]
             const devtool::color c = devtool::mac_to_color(wifi::get_mac().data());
