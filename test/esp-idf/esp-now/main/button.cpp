@@ -56,7 +56,7 @@ void callback(void* arg, void* usr_data)
 
             if constexpr(led_strip.supported)
             {
-                ESP_ERROR_CHECK(led_strip.set_pixel(0, 0, 255, 0));
+                ESP_ERROR_CHECK(led_strip.set_pixel(0, 0, 255 * led_intensity, 0));
                 ESP_ERROR_CHECK(led_strip.refresh());
             }
 
@@ -87,7 +87,7 @@ void callback(void* arg, void* usr_data)
 
             if constexpr(led_strip.supported)
             {
-                ESP_ERROR_CHECK(led_strip.set_pixel(0, c.r * 255, c.g * 255,  c.b * 255));
+                ESP_ERROR_CHECK(set_pixel(c));
                 ESP_ERROR_CHECK(led_strip.refresh());
             }
 

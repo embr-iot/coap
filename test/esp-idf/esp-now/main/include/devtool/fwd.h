@@ -35,7 +35,14 @@ using namespace embr::esp_idf::wifi;
 
 namespace devtool::inline core {
 
+struct color;
+
 extern embr::bmgr::dev_led_strip led_strip;
+
+// DEBT: Make this configurable.  These dudes can be bright!
+static constexpr float led_intensity = 0.2;
+
+esp_err_t set_pixel(const color&);
 
 }
 

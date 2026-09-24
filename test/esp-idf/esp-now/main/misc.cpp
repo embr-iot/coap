@@ -24,6 +24,17 @@ color mac_to_color(const uint8_t* mac)
 
 embr::bmgr::dev_led_strip led_strip;
 
+#ifdef CONFIG_ESP_BOARD_DEV_LED_STRIP_SUPPORT
+esp_err_t set_pixel(const color& c)
+{
+    return led_strip.set_pixel(0,
+        c.r * led_intensity * 255,
+        c.g * led_intensity * 255,
+        c.b * led_intensity * 255);
+}
+#endif
+
+
 }
 
 void rgb_init()
@@ -44,7 +55,7 @@ void rgb_init()
 
         ESP_LOGI(TAG, "mac_to_color: rgb = %f %f %f", c.r, c.g, c.b);
 
-        ESP_ERROR_CHECK(it->set_pixel(0, c.r * 255, c.g * 255, c.b * 255));
+        ESP_ERROR_CHECK(set_pixel(c));
         ESP_ERROR_CHECK(it->refresh());
     }
 }

@@ -83,15 +83,11 @@ static void _esp_now_init()
         
         if constexpr(led_strip.supported)
         {
-            // Works-ish
-            // We need an OFF signal over CoAP too now
-            devtool::color c;
-
-            c = pressed ?
+            const devtool::color c = pressed ?
                 devtool::mac_to_color(esp_now_info->src_addr) :
                 devtool::mac_to_color(wifi::get_mac());
 
-            ESP_ERROR_CHECK(led_strip.set_pixel(0, c.r * 255, c.g * 255, c.b * 255));
+            ESP_ERROR_CHECK(set_pixel(c));
             ESP_ERROR_CHECK(led_strip.refresh());
         }
 
