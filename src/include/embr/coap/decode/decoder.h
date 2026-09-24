@@ -2,6 +2,7 @@
 
 #include "../header.h"
 #include "../header/token.h"
+#include "../internal/fwd.h"
 #include "../options/decode.h"
 
 #if FEATURE_STD_OSTREAM
@@ -112,6 +113,8 @@ public:
     {
         return { &options_ };
     }   */
+
+    decoder& operator>>(payload_marker);
 };
 
 }

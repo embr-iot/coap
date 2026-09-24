@@ -115,18 +115,51 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
         case errc::warn:
             state_ = Done;
             break;
+        */
 
+        // 'alternate' means we unexpectedly hit payload - in particular at first call to options when
+        // no options exist.
         case errc::alternate:
             state_ = Payload;
-            break;  */
+            break;
 
-        // 'alternate' means we unexpectedly hit payload, which we already should have
-        // detected in errc{} above.
-        // 'bad' is just how it sounds
         default:
             good_ = false;
             break;
     }
+
+    return *this;
+}
+
+// Fast forward to/verify payload state
+template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
+auto decoder<Streambuf>::operator>>(payload_marker) -> decoder&
+{
+    // NOT READY YET
+
+    union
+    {
+        token t;    // FIX: Won't compile, non-trivial... ??  I guess that value-init portion screws it up
+        options::option<> o;
+    };
+
+    if(state_ == Payload)
+    {
+        return *this;
+    }
+    else if(state_ == Token)
+    {
+        *this >> t;
+    }
+    else
+        assert(state_ == Options);
+
+    while(good_ && state_ == Options)
+        *this >> o;
+
+    // DEBT: Make this a good_ state not an assert, crashing the whole program due to a mismatched payload
+    // at this level isn't right
+    assert(state_ == Payload);
 
     return *this;
 }

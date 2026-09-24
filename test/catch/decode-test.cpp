@@ -164,14 +164,17 @@ TEST_CASE("top-level decoding: DATA7", "[decode]")
     REQUIRE(decoder);
     REQUIRE(t.size == 0);
 
+    // DEBT: We always have an options phase, even if none are present.  This is not awful,
+    // but we need a provision to say fast forward to payload
     REQUIRE(decoder.state() == decoder_type::Options);
+
+    //decoder >> payload;
 
     options::option opt;
 
     decoder >> opt;
 
-    // FIX: Should be Payload but is still Options
-    //REQUIRE(decoder.state() == decoder_type::Payload);
+    REQUIRE(decoder.state() == decoder_type::Payload);
 }
 
 TEST_CASE("top-level decoding", "[decode][char]")
