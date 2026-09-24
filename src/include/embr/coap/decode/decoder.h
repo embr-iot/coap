@@ -4,6 +4,10 @@
 #include "../header/token.h"
 #include "../options/decode.h"
 
+#if FEATURE_STD_OSTREAM
+#include <ostream>
+#endif
+
 namespace embr::coap {
 
 namespace internal {
@@ -25,6 +29,14 @@ protected:
 };
 
 const char* to_string(decoder::states);
+
+#if FEATURE_STD_OSTREAM
+inline std::ostream& operator<<(std::ostream& out, decoder::states state)
+{
+    out << to_string(state);
+    return out;
+}
+#endif
 
 }
 

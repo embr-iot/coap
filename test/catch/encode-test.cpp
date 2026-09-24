@@ -55,6 +55,22 @@ TEST_CASE("top-level encoding", "[encode]")
 
         REQUIRE_THAT(estd::span(char_out, 4), Catch::Matchers::RangeEquals(estd::span(test::h_data3)));
     }
+    SECTION("parity")
+    {
+        SECTION("DATA7")
+        {
+            using encoder_type = encoder<estd::ospanbuf>;
+
+            encoder_type encoder(char_out);
+
+            encoder << header(header::NON, header::PUT);
+            encoder << payload << 1 << 1;
+
+            REQUIRE(encoder.out().pos() == 7);
+
+            REQUIRE_THAT(estd::span(out_uint8, 7), Catch::Matchers::RangeEquals(estd::span(test::htop_data7)));
+        }
+    }
     SECTION("stateful")
     {
         restrained_ospanbuf out(char_out);

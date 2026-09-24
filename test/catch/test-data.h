@@ -25,6 +25,7 @@ enum nav_data1 : int
 #define H_DATA4     0x43, 4, 0, 0
 #define H_DATA5     H_DATA1
 #define H_DATA6     H_DATA1
+#define H_DATA7     H_DATA3
 
 // Header: https://datatracker.ietf.org/doc/html/rfc7252#section-3
 
@@ -38,6 +39,8 @@ constexpr uint8_t h_data2[] = { H_DATA2 };
 constexpr uint8_t h_data3[] = { H_DATA3 };
 // POST CON header with 3 tkl, 0 mid
 constexpr uint8_t h_data4[] = { H_DATA4 };
+// PUT NON header with 0 tkl, 0 mid
+constexpr uint8_t h_data7[] = { H_DATA7 };
 
 // op_ = option and payload
 
@@ -53,11 +56,13 @@ constexpr uint8_t h_data4[] = { H_DATA4 };
 #define O_DATA5     0x31, 'h', 0xD3, 0x0E, O_BLOCK_DATA1
 // TBD include Max-Age, Accept and Content-Format here
 #define O_DATA6
+// O_DATA7 omitted on purpose, data7 has no options
 #define P_DATA1     0xFF, 'h', 'e', 'l', 'l', 'o'
 #define P_DATA2     0xFF, 'x'
 #define P_DATA4     0xFF, 'o', 'h', 'a', 'y', 'o'
 // DEBT: Invalid size for Block1
 #define P_DATA5     0xFF, 'x'
+#define P_DATA7     0xFF, '1', '1'
 
 // option and payload test data
 constexpr uint8_t op_data1[] { O_DATA1, P_DATA1 };
@@ -88,12 +93,19 @@ constexpr uint8_t htop_data3[] =
     H_DATA3,
     O_DATA3
 };
+
 constexpr uint8_t htop_data4[] =
 {
     H_DATA4,
     3, 2, 1,    // token
     O_DATA4,    // option
     P_DATA4     // payload
+};
+
+constexpr uint8_t htop_data7[] =
+{
+    H_DATA7,
+    P_DATA7
 };
 
 }

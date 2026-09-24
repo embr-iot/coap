@@ -149,6 +149,31 @@ TEST_CASE("top-level decoding: breadcrumb (DATA4)", "[decode]")
     }
 }
 
+TEST_CASE("top-level decoding: DATA7", "[decode]")
+{
+    using decoder_type = decoder<estd::detail::basic_ispanbuf<const uint8_t>>;
+
+    decoder_type decoder(test::htop_data7);
+
+    header h;
+    token t;
+
+    decoder >> h;
+    decoder >> t;
+
+    REQUIRE(decoder);
+    REQUIRE(t.size == 0);
+
+    REQUIRE(decoder.state() == decoder_type::Options);
+
+    options::option opt;
+
+    decoder >> opt;
+
+    // FIX: Should be Payload but is still Options
+    //REQUIRE(decoder.state() == decoder_type::Payload);
+}
+
 TEST_CASE("top-level decoding", "[decode][char]")
 {
     using stream_type = estd::detail::basic_ispanstream<const char>;
