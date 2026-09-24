@@ -51,10 +51,33 @@ static void _esp_now_init()
         assert(h.type() == header::NON);
         assert(h.code() == header::PUT);
 
-        ESP_LOGI(TAG, "decoder.state() = %s", to_string(decoder.state()));
+        if(decoder.state() != decoder_type::Payload)
+        {
+            ESP_LOGW(TAG, "decoder.state() = %s", to_string(decoder.state()));
+            return;
+        }
 
-        // Probably need to move through options too
-        //assert(decoder.state() == decoder_type::Payload);
+        int c = decoder.in().sbumpc();
+
+        ESP_LOGI(TAG, "c = %c", c);
+
+        bool pressed;
+
+        switch(c)
+        {
+            case '0':
+                pressed = false;
+                break;
+
+            case '1':
+                pressed = true;
+                break;
+
+            default:
+                pressed = false;    // FIX: Annoying, compiler warning -> err demands this
+                ESP_LOGW(TAG, "Unknown pressed state, results may vary");
+                break;
+        }
 
         using namespace devtool;
         
@@ -62,7 +85,11 @@ static void _esp_now_init()
         {
             // Works-ish
             // We need an OFF signal over CoAP too now
-            const devtool::color c = devtool::mac_to_color(esp_now_info->src_addr);
+            devtool::color c;
+
+            c = pressed ?
+                devtool::mac_to_color(esp_now_info->src_addr) :
+                devtool::mac_to_color(wifi::get_mac());
 
             ESP_ERROR_CHECK(led_strip.set_pixel(0, c.r * 255, c.g * 255, c.b * 255));
             ESP_ERROR_CHECK(led_strip.refresh());

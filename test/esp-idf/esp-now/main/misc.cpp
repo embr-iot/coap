@@ -40,7 +40,7 @@ void rgb_init()
 
         devtool::led_strip = *it;
 
-        const devtool::color c = devtool::mac_to_color(wifi::get_mac().data());
+        const devtool::color c = devtool::mac_to_color(wifi::get_mac());
 
         ESP_LOGI(TAG, "mac_to_color: rgb = %f %f %f", c.r, c.g, c.b);
 
