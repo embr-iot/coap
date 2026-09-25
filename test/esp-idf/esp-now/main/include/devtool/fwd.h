@@ -1,11 +1,11 @@
 #pragma once
 
+#include "ethernet.h"
+
 #include <embr/bmgr/fwd.h>  // DEBT: dev_led_strip should include this themself
 #include <embr/bmgr/dev_led_strip.h>
 
 #include <esp_wifi.h>
-
-#include <array>
 
 // DEBT: Consider embr::inline esp_idf::wifi - however that may collide with legacy
 // embr things.  Perhaps put it all into embr::esp_idf::wifi then alias it in?
@@ -14,7 +14,7 @@
 
 namespace embr::esp_idf::wifi {
 
-using mac_type = std::array<uint8_t, 6>;
+using mac_type = net::mac_type;
 
 inline mac_type get_mac(wifi_interface_t interface = WIFI_IF_STA)
 {
@@ -28,6 +28,8 @@ inline mac_type get_mac(wifi_interface_t interface = WIFI_IF_STA)
 }
 
 namespace embr::wifi {
+
+using net::make_mac;
 
 constexpr uint8_t broadcast_mac[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 

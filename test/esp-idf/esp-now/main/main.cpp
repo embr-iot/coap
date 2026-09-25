@@ -92,8 +92,11 @@ static void _esp_now_init()
         }
 
 #if EMBR_BMGR_LVGL
-        // TBD
-        lvgl::async_call([] { });
+        wifi::mac_type src_addr = wifi::make_mac(esp_now_info->src_addr);
+        lvgl::async_call([src_addr, pressed]
+            {
+                devtool::lvgl::app::singleton.on_coap_recv(src_addr, pressed);
+            });
 #endif
     }));
 

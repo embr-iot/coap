@@ -25,6 +25,7 @@ public:
     void init();
     void on_button_down();
     void on_button_up();
+    void on_coap_recv(const embr::wifi::mac_type&, bool pressed);
 };
 
 }
