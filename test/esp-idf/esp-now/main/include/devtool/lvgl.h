@@ -3,11 +3,15 @@
 #include <sdkconfig.h>
 
 #ifdef CONFIG_ESP_BOARD_DEV_DISPLAY_LCD_SUPPORT
+#include "fwd.h"
+
 #include <embr/bmgr/lvgl.h>
+
+#include <array>
 
 namespace devtool::inline lvgl {
 
-lv_color_t mac_to_color(const uint8_t* mac);
+lv_color_t mac_to_color(const embr::wifi::mac_type&);
 
 class app
 {

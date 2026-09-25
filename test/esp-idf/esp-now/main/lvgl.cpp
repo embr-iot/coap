@@ -1,4 +1,5 @@
 #include "devtool/color.h"
+#include "devtool/fwd.h"
 #include "devtool/lvgl.h"
 
 #include <embr/esp-idf/wifi/fwd.h>
@@ -8,13 +9,16 @@
 #if EMBR_BMGR_LVGL
 namespace devtool::inline lvgl {
 
+using namespace embr;
+
 app app::singleton;
 
+[[maybe_unused]]
 static const char* TAG = "devtool::lvgl";
 
-lv_color_t mac_to_color(const uint8_t* mac)
+lv_color_t mac_to_color(const wifi::mac_type& mac)
 {
-    color c = devtool::core::mac_to_color(mac);
+    const color c = core::mac_to_color(mac);
 
     //ESP_LOGI(TAG, "mac_to_color: rgb = %f %f %f", c.r, c.g, c.b);
 
@@ -28,20 +32,12 @@ void app::on_button_down()
 
 void app::on_button_up()
 {
-    uint8_t mac[6];
-
-    ESP_ERROR_CHECK(esp_wifi_get_mac(WIFI_IF_STA, mac));
-
-    lv_obj_set_style_bg_color(us_box_, mac_to_color(mac), 0);
+    lv_obj_set_style_bg_color(us_box_, mac_to_color(wifi::get_mac()), 0);
 }
 
 void app::init()
 {
-    uint8_t mac[6];
-
     lv_obj_t* screen = lv_screen_active();
-
-    ESP_ERROR_CHECK(esp_wifi_get_mac(WIFI_IF_STA, mac));
 
     lv_obj_set_style_bg_color(screen, lv_color_hex(0x202020), 0);
     lv_obj_set_style_text_color(screen, lv_color_white(), 0);
@@ -49,7 +45,7 @@ void app::init()
     // "Our" color
     us_box_ = lv_obj_create(screen);
     lv_obj_set_size(us_box_, 100, 50);
-    lv_obj_set_style_bg_color(us_box_, mac_to_color(mac), 0);
+    lv_obj_set_style_bg_color(us_box_, mac_to_color(wifi::get_mac()), 0);
     lv_obj_set_align(us_box_, LV_ALIGN_LEFT_MID);
 
     // "Their" color (incoming MAC)

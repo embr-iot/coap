@@ -14,9 +14,11 @@
 
 namespace embr::esp_idf::wifi {
 
-inline std::array<uint8_t, 6> get_mac(wifi_interface_t interface = WIFI_IF_STA)
+using mac_type = std::array<uint8_t, 6>;
+
+inline mac_type get_mac(wifi_interface_t interface = WIFI_IF_STA)
 {
-    std::array<uint8_t, 6> mac;
+    mac_type mac;
 
     ESP_ERROR_CHECK(esp_wifi_get_mac(interface, mac.data()));
 

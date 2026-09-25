@@ -79,13 +79,13 @@ static void _esp_now_init()
                 break;
         }
 
-        using namespace devtool;
-        
-        if constexpr(led_strip.supported)
+        if constexpr(devtool::led_strip.supported)
         {
-            const devtool::color c = pressed ?
-                devtool::mac_to_color(esp_now_info->src_addr) :
-                devtool::mac_to_color(wifi::get_mac());
+            using namespace devtool;
+        
+            const color c = pressed ?
+                core::mac_to_color(esp_now_info->src_addr) :
+                core::mac_to_color(wifi::get_mac());
 
             ESP_ERROR_CHECK(set_pixel(c));
             ESP_ERROR_CHECK(led_strip.refresh());

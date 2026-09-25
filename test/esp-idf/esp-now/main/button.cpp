@@ -60,11 +60,11 @@ void callback(void* arg, void* usr_data)
                 ESP_ERROR_CHECK(led_strip.refresh());
             }
 
-#if EMBR_BMGR_LVGL
-            lvgl::async_call([] { devtool::app::singleton.on_button_down(); });
-#endif
-            break;
         }
+#if EMBR_BMGR_LVGL
+        lvgl::async_call([] { devtool::app::singleton.on_button_down(); });
+#endif
+        break;
 
         case BUTTON_PRESS_UP:
         {
@@ -80,22 +80,22 @@ void callback(void* arg, void* usr_data)
 
             ESP_ERROR_CHECK(esp_now_send(wifi::broadcast_mac, out_u, pos));
 
-            [[maybe_unused]]
-            const devtool::color c = devtool::mac_to_color(wifi::get_mac().data());
-
             using namespace devtool;
+
+            [[maybe_unused]]
+            const color c = core::mac_to_color(wifi::get_mac().data());
 
             if constexpr(led_strip.supported)
             {
                 ESP_ERROR_CHECK(set_pixel(c));
                 ESP_ERROR_CHECK(led_strip.refresh());
             }
+        }
 
 #if EMBR_BMGR_LVGL
-            lvgl::async_call([] { devtool::app::singleton.on_button_up(); });
+        lvgl::async_call([] { devtool::app::singleton.on_button_up(); });
 #endif
-            break;
-        }
+        break;
 
         default:
             abort();
