@@ -1,2 +1,13 @@
 # Incase LVGL activates, combined with WiFi that gets big
 CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# Just because it's convenient to run off batteries
+CONFIG_PM_ENABLE=y
+CONFIG_PM_DFS_INIT_AUTO=y
+
+# 26SEP26 MB DEBT: These are supposed to flow down from my bmgr but doesn't seem to.
+# Also if not using my own bmgr it won't anyway.  However, will create warnings for non
+# LVGL situations
+CONFIG_LV_FONT_MONTSERRAT=10
+CONFIG_LV_BUILD_EXAMPLES=n
+CONFIG_LV_BUILD_DEMOS=n

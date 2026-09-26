@@ -4,6 +4,9 @@
 
 #include <embr/esp-idf/wifi/fwd.h>
 
+#include <estd/sstream.h>
+#include <estd/iomanip.h>   // FIX: Can't place above due to incomplete dependencies
+
 #include <esp_log.h>
 
 #if EMBR_BMGR_LVGL
@@ -37,13 +40,25 @@ void app::on_button_up()
 
 void app::on_coap_recv(const ethernet::mac& source, bool pressed)
 {
+    using namespace estd;
+
     if(pressed)
     {
+        estd::layer1::ostringstream<32> out;
+
+        out << "MAC:\n" << hex << setw(2);
+        out << source[0] << ':';
+        for(int i = 1; i < 6; ++i)  out << ':' << source[i];
+
         lv_obj_set_style_bg_color(us_box_, mac_to_color(source), 0);
+
+        lv_label_set_text(them_label_, out.rdbuf()->str().c_str());
     }
     else
     {
         lv_obj_set_style_bg_color(us_box_, mac_to_color(wifi::get_mac()), 0);
+
+        lv_label_set_text(them_label_, "Incoming");
     }
 }
 
@@ -53,6 +68,8 @@ void app::init()
 
     lv_obj_set_style_bg_color(screen, lv_color_hex(0x202020), 0);
     lv_obj_set_style_text_color(screen, lv_color_white(), 0);
+
+    constexpr bool small_mode = true;
 
     // "Our" color
     us_box_ = lv_obj_create(screen);
@@ -67,8 +84,12 @@ void app::init()
 
     lv_obj_t* label = lv_label_create(them_box_);
     lv_obj_set_align(label, LV_ALIGN_CENTER);
-    lv_label_set_text(label, "Incoming");
+
+    if(small_mode)
+        lv_obj_set_style_text_font(label, &lv_font_montserrat_10, LV_PART_MAIN);
+
     them_label_ = label;
+    on_coap_recv({}, false);    // Dogfood our "Incoming"
 }
 
 }

@@ -26,6 +26,8 @@ void callback(void* arg, void* usr_data)
         char out[32];
         uint8_t out_u[32];
     };
+
+    using namespace coap;
     using encoder_type = coap::encoder<estd::ospanbuf>;
     encoder_type encoder(out);
     
@@ -37,20 +39,21 @@ void callback(void* arg, void* usr_data)
 
     ESP_LOGV(TAG, "callback: %s", name);
 
+    // For the time being, we broadcast only.  So NON
+    encoder << header(header::NON, header::PUT);
+
     switch(event)
     {
         case BUTTON_PRESS_DOWN:
         {
             using namespace devtool;
-            using namespace embr::coap;
 
-            encoder << header(header::NON, header::PUT);
             encoder << payload << 1 << ++send_counter;
 
             // DEBT: Still need more elegant solution than this
             int pos = encoder.out().pubseekoff(0, estd::ios_base::cur);
 
-            ESP_LOGI(TAG, "callback: pos=%d", pos);
+            ESP_LOGD(TAG, "callback: pos=%d", pos);
 
             ESP_ERROR_CHECK(esp_now_send(wifi::broadcast_mac, out_u, pos));
 
@@ -72,7 +75,6 @@ void callback(void* arg, void* usr_data)
         {
             using namespace embr::coap;
 
-            encoder << header(header::NON, header::PUT);
             encoder << payload << 0;
 
             // DEBT: Still need more elegant solution than this
