@@ -11,7 +11,7 @@
 
 namespace devtool::inline lvgl {
 
-lv_color_t mac_to_color(const embr::wifi::mac_type&);
+lv_color_t mac_to_color(const embr::ethernet::mac&);
 
 class app
 {
@@ -25,7 +25,7 @@ public:
     void init();
     void on_button_down();
     void on_button_up();
-    void on_coap_recv(const embr::wifi::mac_type&, bool pressed);
+    void on_coap_recv(const embr::ethernet::mac&, bool pressed);
 };
 
 }

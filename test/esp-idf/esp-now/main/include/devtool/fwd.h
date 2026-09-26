@@ -1,22 +1,18 @@
 #pragma once
 
-#include <embr/bmgr/fwd.h>  // DEBT: dev_led_strip should include this themself
 #include <embr/bmgr/dev_led_strip.h>
 
 #include <embr/esp-idf/wifi/fwd.h>
 
 #include <esp_wifi.h>
 
+// DEBT: Named this folder 'devtool' out of habit, but that's inaccurate for this ESP-NOW
+// specific test
+
 // DEBT: Consider embr::inline esp_idf::wifi - however that may collide with legacy
 // embr things.  Perhaps put it all into embr::esp_idf::wifi then alias it in?
 // experimenting with that
 // DEBT: Put this into embr::net
-
-namespace embr::esp_idf::wifi {
-
-using mac_type = ethernet::mac;
-
-}
 
 namespace embr::wifi {
 
@@ -37,6 +33,13 @@ extern embr::bmgr::dev_led_strip led_strip;
 static constexpr float led_intensity = 0.2;
 
 esp_err_t set_pixel(const color&);
+
+}
+
+inline namespace test {
+
+// 26SEP26 DEBT: Part of debt where we misused 'devtool' as described above
+using namespace devtool::core;
 
 }
 

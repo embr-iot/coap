@@ -16,7 +16,7 @@ app app::singleton;
 [[maybe_unused]]
 static const char* TAG = "devtool::lvgl";
 
-lv_color_t mac_to_color(const wifi::mac_type& mac)
+lv_color_t mac_to_color(const ethernet::mac& mac)
 {
     const color c = core::mac_to_color(mac);
 
@@ -35,7 +35,7 @@ void app::on_button_up()
     lv_obj_set_style_bg_color(us_box_, mac_to_color(wifi::get_mac()), 0);
 }
 
-void app::on_coap_recv(const embr::wifi::mac_type& source, bool pressed)
+void app::on_coap_recv(const ethernet::mac& source, bool pressed)
 {
     if(pressed)
     {
