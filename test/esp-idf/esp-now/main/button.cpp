@@ -54,11 +54,13 @@ void callback(void* arg, void* usr_data)
 
             ESP_ERROR_CHECK(esp_now_send(wifi::broadcast_mac, out_u, pos));
 
-            if constexpr(led_strip.supported)
+#ifdef CONFIG_ESP_BOARD_DEV_LED_STRIP_SUPPORT
+            //if constexpr(led_strip.supported)
             {
                 ESP_ERROR_CHECK(led_strip.set_pixel(0, 0, 255 * led_intensity, 0));
                 ESP_ERROR_CHECK(led_strip.refresh());
             }
+#endif
 
         }
 #if EMBR_BMGR_LVGL
@@ -85,11 +87,13 @@ void callback(void* arg, void* usr_data)
             [[maybe_unused]]
             const color c = core::mac_to_color(wifi::get_mac());
 
-            if constexpr(led_strip.supported)
+#ifdef CONFIG_ESP_BOARD_DEV_LED_STRIP_SUPPORT
+            //if constexpr(led_strip.supported)
             {
                 ESP_ERROR_CHECK(set_pixel(c));
                 ESP_ERROR_CHECK(led_strip.refresh());
             }
+#endif
         }
 
 #if EMBR_BMGR_LVGL

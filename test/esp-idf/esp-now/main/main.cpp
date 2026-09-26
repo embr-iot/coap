@@ -79,7 +79,8 @@ static void _esp_now_init()
                 break;
         }
 
-        if constexpr(devtool::led_strip.supported)
+#ifdef CONFIG_ESP_BOARD_DEV_LED_STRIP_SUPPORT
+        //if constexpr(devtool::led_strip.supported)
         {
             using namespace devtool;
         
@@ -90,6 +91,7 @@ static void _esp_now_init()
             ESP_ERROR_CHECK(set_pixel(c));
             ESP_ERROR_CHECK(led_strip.refresh());
         }
+#endif
 
 #if EMBR_BMGR_LVGL
         ethernet::mac src_addr = wifi::make_mac(esp_now_info->src_addr);

@@ -39,6 +39,11 @@ esp_err_t set_pixel(const color& c)
 
 void rgb_init()
 {
+    // 26SEP26 DEBT: I guess if constexpr doesn't help here as much as I thought.
+    // reminds me of SFINAE type of things.
+#ifdef CONFIG_ESP_BOARD_DEV_LED_STRIP_SUPPORT
+    static_assert(bmgr::dev_led_strip::supported);
+
     if constexpr(bmgr::dev_led_strip::supported)
     {
         ESP_LOGI(TAG, "rgb_init: entry");
@@ -58,4 +63,5 @@ void rgb_init()
         ESP_ERROR_CHECK(set_pixel(c));
         ESP_ERROR_CHECK(it->refresh());
     }
+#endif
 }
