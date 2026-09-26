@@ -3,7 +3,7 @@
 #include <embr/bmgr/fwd.h>  // DEBT: dev_led_strip should include this themself
 #include <embr/bmgr/dev_led_strip.h>
 
-#include <embr/net/ethernet.h>
+#include <embr/esp-idf/wifi/fwd.h>
 
 #include <esp_wifi.h>
 
@@ -16,20 +16,12 @@ namespace embr::esp_idf::wifi {
 
 using mac_type = ethernet::mac;
 
-inline mac_type get_mac(wifi_interface_t interface = WIFI_IF_STA)
-{
-    mac_type mac;
-
-    ESP_ERROR_CHECK(esp_wifi_get_mac(interface, mac.data()));
-
-    return mac; // RVO we're relying on you buddy
-}
-
 }
 
 namespace embr::wifi {
 
-constexpr uint8_t broadcast_mac[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+// 26SEP26 DEBT: Kinda crude
+constexpr const uint8_t* broadcast_mac = ethernet::addr::broadcast.data();
 
 using namespace embr::esp_idf::wifi;
 

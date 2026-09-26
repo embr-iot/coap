@@ -103,7 +103,7 @@ static void _esp_now_init()
     esp_now_peer_info_t peer{};
     //peer->channel = CONFIG_ESPNOW_CHANNEL;
     peer.ifidx = WIFI_IF_STA;
-    memcpy(peer.peer_addr, wifi::broadcast_mac, ESP_NOW_ETH_ALEN);
+    memcpy(peer.peer_addr, ethernet::addr::broadcast.data(), ESP_NOW_ETH_ALEN);
     ESP_ERROR_CHECK(esp_now_add_peer(&peer));
 }
 

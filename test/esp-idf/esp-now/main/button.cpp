@@ -83,7 +83,7 @@ void callback(void* arg, void* usr_data)
             using namespace devtool;
 
             [[maybe_unused]]
-            const color c = core::mac_to_color(wifi::get_mac().data());
+            const color c = core::mac_to_color(wifi::get_mac());
 
             if constexpr(led_strip.supported)
             {
