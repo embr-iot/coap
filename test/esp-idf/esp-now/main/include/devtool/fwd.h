@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ethernet.h"
-
 #include <embr/bmgr/fwd.h>  // DEBT: dev_led_strip should include this themself
 #include <embr/bmgr/dev_led_strip.h>
+
+#include <embr/net/ethernet.h>
 
 #include <esp_wifi.h>
 
@@ -14,7 +14,7 @@
 
 namespace embr::esp_idf::wifi {
 
-using mac_type = net::mac_type;
+using mac_type = ethernet::mac;
 
 inline mac_type get_mac(wifi_interface_t interface = WIFI_IF_STA)
 {
@@ -28,8 +28,6 @@ inline mac_type get_mac(wifi_interface_t interface = WIFI_IF_STA)
 }
 
 namespace embr::wifi {
-
-using net::make_mac;
 
 constexpr uint8_t broadcast_mac[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 

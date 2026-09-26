@@ -111,7 +111,7 @@ extern "C" void app_main(void)
 {
     esp_board_manager_print_board_info();
 
-    ESP_ERROR_CHECK(simple_flash_init());
+    ESP_ERROR_CHECK(esp_idf::simple_flash_init());
 
     ESP_ERROR_CHECK(esp_board_manager_init());
 

@@ -21,7 +21,7 @@ extern "C" void app_main(void)
 {
     ESP_ERROR_CHECK(esp_board_manager_init());
 
-    ESP_ERROR_CHECK(simple_flash_init());
+    ESP_ERROR_CHECK(esp_idf::simple_flash_init());
 
 #ifdef CONFIG_ESP_BOARD_DEV_DISPLAY_LCD_SUPPORT
     embr_lvgl_init("display_lcd");
