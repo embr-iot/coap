@@ -125,7 +125,7 @@ TEST_CASE("top-level decoding: breadcrumb (DATA4)", "[decode]")
 
     SECTION("options bit by bit")
     {
-        embr::breadcrumb_matcher match(nav_data1);
+        embr::breadcrumb_matcher<> match(nav_data1);
 
         options::option opt;
 
@@ -164,17 +164,24 @@ TEST_CASE("top-level decoding: DATA7", "[decode]")
     REQUIRE(decoder);
     REQUIRE(t.size == 0);
 
-    // DEBT: We always have an options phase, even if none are present.  This is not awful,
-    // but we need a provision to say fast forward to payload
-    REQUIRE(decoder.state() == decoder_type::Options);
+    SECTION("options path")
+    {
+        // DEBT: We always have an options phase, even if none are present.  This is not awful,
+        // but we need a provision to say fast forward to payload
+        REQUIRE(decoder.state() == decoder_type::Options);
 
-    //decoder >> payload;
+        options::option opt;
 
-    options::option opt;
+        decoder >> opt;
 
-    decoder >> opt;
+        REQUIRE(decoder.state() == decoder_type::Payload);
+    }
+    SECTION("payload fast forward")
+    {
+        //decoder >> payload;
 
-    REQUIRE(decoder.state() == decoder_type::Payload);
+        //REQUIRE(decoder.state() == decoder_type::Payload);
+    }
 }
 
 TEST_CASE("top-level decoding", "[decode][char]")
