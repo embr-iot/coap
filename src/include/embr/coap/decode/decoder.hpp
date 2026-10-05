@@ -135,11 +135,9 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 auto decoder<Streambuf>::operator>>(payload_marker) -> decoder&
 {
-    // NOT READY YET
-
     union
     {
-        token t;    // FIX: Won't compile, non-trivial... ??  I guess that value-init portion screws it up
+        token t;
         options::option<> o;
     };
 

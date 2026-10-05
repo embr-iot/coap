@@ -166,8 +166,8 @@ TEST_CASE("top-level decoding: DATA7", "[decode]")
 
     SECTION("options path")
     {
-        // DEBT: We always have an options phase, even if none are present.  This is not awful,
-        // but we need a provision to say fast forward to payload
+        // We always have an options phase, even if none are present.  Use >> payload to fast
+        // forward if you really don't care about options
         REQUIRE(decoder.state() == decoder_type::Options);
 
         options::option opt;
@@ -178,9 +178,9 @@ TEST_CASE("top-level decoding: DATA7", "[decode]")
     }
     SECTION("payload fast forward")
     {
-        //decoder >> payload;
+        decoder >> payload;
 
-        //REQUIRE(decoder.state() == decoder_type::Payload);
+        REQUIRE(decoder.state() == decoder_type::Payload);
     }
 }
 

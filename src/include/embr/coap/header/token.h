@@ -10,10 +10,12 @@ namespace embr::coap {
 
 struct token
 {
-    uint8_t value[8];
+    static constexpr unsigned max_size = 8;
+
+    uint8_t value[max_size];
 
     // Size of 0 means auto-deduce from header
-    uint8_t size{};
+    uint8_t size;
 };
 
 #pragma pack(pop)
