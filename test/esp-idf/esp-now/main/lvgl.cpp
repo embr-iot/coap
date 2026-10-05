@@ -1,8 +1,9 @@
-#include "devtool/color.h"
 #include "devtool/fwd.h"
 #include "devtool/lvgl.h"
 
 #include <embr/esp-idf/wifi/fwd.h>
+
+#include <embr/test/color.h>
 
 #include <estd/sstream.h>
 #include <estd/iomanip.h>   // FIX: Can't place above due to incomplete dependencies

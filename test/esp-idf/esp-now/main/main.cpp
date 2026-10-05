@@ -1,8 +1,9 @@
-#include "devtool/color.h"
 #include "devtool/fwd.h"
 #include "devtool/lvgl.h"
 
 #include <embr/coap/decoder.h>
+
+#include <embr/test/color.h>
 
 #include <embr/esp-idf/net/fwd.h>
 #include <embr/esp-idf/wifi/fwd.h>

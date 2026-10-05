@@ -1,0 +1,8 @@
+version: "0.1.0"
+description: "embr::coap mk2 synthetic/test support"
+tags:
+  - coap
+dependencies:
+  embr-net:
+    git: https://github.com/embr-iot/net
+    version: dev

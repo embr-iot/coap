@@ -1,5 +1,6 @@
-#include "devtool/color.h"
 #include "devtool/fwd.h"
+
+#include <embr/test/color.h>
 
 #include <embr/bmgr/dev_button.h>
 #include <embr/bmgr/dev_led_strip.h>
@@ -12,15 +13,6 @@ using namespace embr;
 static const char* TAG = "devtool::misc";
 
 namespace embr::inline test {
-
-color mac_to_color(const uint8_t* mac)
-{
-    float r = mac[0] * mac[1],
-        g = mac[2] * mac[3],
-        b = mac[4] * mac[5];
-
-    return { r / 0xFFFF, g / 0xFFFF, b / 0xFFFF };
-}
 
 embr::bmgr::dev_led_strip led_strip;
 

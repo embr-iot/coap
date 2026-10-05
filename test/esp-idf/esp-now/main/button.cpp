@@ -1,9 +1,10 @@
 #include "devtool/fwd.h"
-#include "devtool/color.h"
 #include "devtool/lvgl.h"
 
 #include <embr/coap/encoder.h>
 #include <embr/coap/options/encode.h>
+
+#include <embr/test/color.h>
 
 #include <embr/bmgr/dev_button.h>
 #include <embr/bmgr/iterator.h>
