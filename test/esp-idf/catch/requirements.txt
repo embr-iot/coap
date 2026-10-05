@@ -1,0 +1,5 @@
+# IDF 5.4/5.5 ship esptool 4.x (merge_bin); pytest-embedded 2.9 calls merge-bin
+esptool~=5.0
+pytest-embedded-idf~=2.9
+pytest-embedded-qemu~=2.9
+pytest-timeout~=2.4

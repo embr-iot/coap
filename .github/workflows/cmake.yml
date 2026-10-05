@@ -1,0 +1,47 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "feat/**", "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx_std: [17, 20, 23]
+        build_type: [Debug]
+        compiler:
+          - { cc: gcc, cxx: g++ }
+
+    env:
+      CC: ${{ matrix.compiler.cc }}
+      CXX: ${{ matrix.compiler.cxx }}
+      CPM_SOURCE_CACHE: ~/.cache/cpm
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 1000
+        fetch-tags: true
+
+    - uses: actions/cache@v5
+      with:
+        path: ${{ env.CPM_SOURCE_CACHE }}
+        key: ${{ runner.os }}-cpm-${{ hashFiles('src/CMakeLists.txt', 'test/catch/CMakeLists.txt', 'tools/cmake/CPM.cmake') }}
+
+    - id: cmake-build
+      uses: threeal/cmake-action@v2.1.0
+      with:
+        source-dir: ${{ github.workspace }}/test/catch
+        options: |
+          CMAKE_CXX_STANDARD=${{ matrix.cxx_std }}
+          CMAKE_CXX_STANDARD_REQUIRED=ON
+          CMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+    - name: Test
+      uses: threeal/ctest-action@v1.1.0
+      with:
+        test-dir: ${{ steps.cmake-build.outputs.build-dir }}

@@ -20,3 +20,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Makes concepts-related failures easier to read
     target_compile_options(${PROJECT_NAME} PUBLIC -fconcepts-diagnostics-depth=2)
 endif()
+
+
+list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
+
+include(CTest)
+include(Catch)
+catch_discover_tests(${PROJECT_NAME})
