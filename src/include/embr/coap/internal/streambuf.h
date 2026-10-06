@@ -4,6 +4,7 @@
 
 namespace embr::coap::internal {
 
+// 06OCT26 DEBT: Refactor to be rdbuf_ not out_ so we can reuse this elsewhere
 template <class Streambuf>
 class streambuf_provider
 {
@@ -17,6 +18,7 @@ public:
     {}
 
     using streambuf_type = estd::remove_cvref_t<Streambuf>;
+    using int_type = typename streambuf_type::int_type;
     using pos_type = typename streambuf_type::pos_type;
     using char_type = typename streambuf_type::char_type;
     using const_pointer = const char_type*;
@@ -27,6 +29,10 @@ public:
 
     streambuf_type& out() { return out_; }
     const Streambuf& out() const { return out_; }
+
+    // EXPERIMENTAL
+    streambuf_type& rdbuf() { return out_; }
+    const streambuf_type& rdbuf() const { return out_; }
 };
 
-}
+}   // namespace embr::coap::internal

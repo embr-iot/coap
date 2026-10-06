@@ -79,7 +79,7 @@ public:
         // DEBT: Do 'bad' bit rather than assert/assume.  Unless we decide that
         // Presumptious mode is really that strict
         assert(parent_->write_header(n, string.size()));
-        parent_->provider_.out().xsputn(reinterpret_cast<const_pointer>(string.data()), string.size());
+        parent_->provider_.rdbuf().xsputn(reinterpret_cast<const_pointer>(string.data()), string.size());
         return *this;
     }
 
@@ -163,7 +163,7 @@ public:
 
         current_number_ = number;
 
-        provider_.out().pubseekoff(end - out, estd::ios_base::cur);
+        provider_.rdbuf().pubseekoff(end - out, estd::ios_base::cur);
 
         return true;
     }

@@ -35,9 +35,30 @@ TEST_CASE("top-level encoding", "[encode]")
 
         // Works well for spanbuf, but non contiguous guys like lwip pbuf streambuf
         // will prefer a different technique
-        int pos = encoder.out().pubseekoff(0, estd::ios_base::cur);
+        int pos = encoder.rdbuf().pubseekoff(0, estd::ios_base::cur);
 
         REQUIRE(pos == sizeof(expected));
+    }
+    SECTION("streambuf: spanbuf (uint8_t)")
+    {
+        using encoder_type = encoder<estd::detail::basic_ospanbuf<uint8_t>>;
+        encoder_type encoder(out_uint8);
+
+        encoder << header(header::CON, header::GET);
+        // Not ready yet, since header doesn't explicitly indicate tkl
+        //encoder << token{{1, 2}, 2};
+        encoder << options::uri_path << "host";
+        encoder_type::payload_type& p = encoder << payload;
+
+        // Not available yet due to
+        // https://github.com/malachi-iot/estdlib/issues/240
+        //p << "x";
+        //p << p.widen('x');
+        p << (const uint8_t*)"x";
+
+        static_assert(sizeof(test::htop_data2) == 13);
+        //REQUIRE(encoder.out().pos() == 13);
+        //REQUIRE_THAT(estd::span(out_uint8, 13), Catch::Matchers::RangeEquals(test::htop_data2));
     }
     SECTION("streambuf: stringbuf")
     {

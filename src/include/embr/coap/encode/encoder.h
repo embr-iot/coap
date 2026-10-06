@@ -4,6 +4,7 @@
 
 #include "../header.h"
 #include "../header/token.h"
+#include "../internal/constants.h"
 #include "../options/encode.h"
 
 #include <estd/ostream.h>
@@ -20,6 +21,8 @@ class encoder :
     using this_type = encoder;
 
     using base_type::out_;
+
+    using typename base_type::int_type;
 
     // DEBT: Temporarily exposing these guys
 public:
@@ -99,9 +102,11 @@ public:
     {
         assert(state_ == Options);
         state_ = Payload;
-        out_.sputc(0xFF);
+        int_type r = out_.sputc(constants::payload_marker);
+        // DEBT: We need a 'good' flag or similar, not an assert
+        assert(r == constants::payload_marker);
         return payload_;
     }
 };
     
-}
+}   // namespace embr::coap

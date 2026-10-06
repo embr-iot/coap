@@ -108,4 +108,4 @@ constexpr uint8_t htop_data7[] =
     P_DATA7
 };
 
-}
+}   // namespace test
