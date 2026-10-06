@@ -135,25 +135,21 @@ auto decoder<Streambuf>::operator>>(options::option<>& v) -> decoder&
 template <ESTD_CPP_CONCEPT(estd::concepts::InStreambuf) Streambuf>
 auto decoder<Streambuf>::operator>>(payload_marker) -> decoder&
 {
-    union
+    if(state_ == Payload)   return *this;
+
+    if(state_ == Token)
     {
         token t;
-        options::option<> o;
-    };
-
-    if(state_ == Payload)
-    {
-        return *this;
-    }
-    else if(state_ == Token)
-    {
         *this >> t;
     }
     else
         assert(state_ == Options);
 
     while(good_ && state_ == Options)
+    {
+        options::option<> o;
         *this >> o;
+    }
 
     // DEBT: Make this a good_ state not an assert, crashing the whole program due to a mismatched payload
     // at this level isn't right
