@@ -44,10 +44,9 @@ TEST_CASE("top-level encoding", "[encode]")
         using encoder_type = encoder<estd::detail::basic_ospanbuf<uint8_t>>;
         encoder_type encoder(out_uint8);
 
-        encoder << header(header::CON, header::GET);
-        // Not ready yet, since header doesn't explicitly indicate tkl
-        //encoder << token{{1, 2}, 2};
-        encoder << options::uri_path << "host";
+        encoder << header(header::CON, header::GET, 0, 2);
+        encoder << token{{1, 2}};
+        encoder << options::uri_host << "host";
         encoder_type::payload_type& p = encoder << payload;
 
         // Not available yet due to
@@ -57,8 +56,9 @@ TEST_CASE("top-level encoding", "[encode]")
         p << (const uint8_t*)"x";
 
         static_assert(sizeof(test::htop_data2) == 13);
-        //REQUIRE(encoder.out().pos() == 13);
-        //REQUIRE_THAT(estd::span(out_uint8, 13), Catch::Matchers::RangeEquals(test::htop_data2));
+        REQUIRE(encoder.out().pos() == 13);
+        REQUIRE_THAT(estd::span(out_uint8, 13),
+            Catch::Matchers::RangeEquals(estd::span(test::htop_data2)));
     }
     SECTION("streambuf: stringbuf")
     {
@@ -102,7 +102,7 @@ TEST_CASE("top-level encoding", "[encode]")
 
         stateful_encoder encoder;
 
-        bool r = encoder.header(out, header(header::CON, header::GET, 5, 0));
+        bool r = encoder.header(out, header(header::CON, header::GET, 0, 5));
         REQUIRE(!r);
         r = encoder.header(out);
         REQUIRE(r);
