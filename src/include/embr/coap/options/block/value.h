@@ -8,6 +8,8 @@
 
 #include "assert.h"
 
+// NOLINTBEGIN(*-signed-bitwise)
+
 namespace embr::coap::options {
 
 class block_trailing_byte
@@ -17,7 +19,7 @@ class block_trailing_byte
     struct mask
     {
         static constexpr unsigned m_pos =   3;  // 0-based
-        static constexpr uint8_t m =        1 << m_pos;
+        static constexpr uint8_t m =        1U << m_pos;
         static constexpr uint8_t szx =      0x07;
         static constexpr unsigned num_pos = 4;
         static constexpr unsigned num = 0xF0;
@@ -185,5 +187,7 @@ public:
         return estd::pow(2, btb_.szx() + 4);
     }
 };
+
+// NOLINTEND(*-signed-bitwise)
 
 }

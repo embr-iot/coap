@@ -35,8 +35,12 @@ struct header_base
         NotAcceptable           = EMBR_COAP_RESPONSE_CODE(ClientError, 6),
         // https://datatracker.ietf.org/doc/html/rfc7959#section-6
         RequestEntityIncomplete = EMBR_COAP_RESPONSE_CODE(ClientError, 8),
+        PreconditionFailed      = EMBR_COAP_RESPONSE_CODE(ClientError, 12),
+        RequestEntityTooLarge   = EMBR_COAP_RESPONSE_CODE(ClientError, 13),
         UnsupportedContentFormat    = EMBR_COAP_RESPONSE_CODE(ClientError, 15),
         InternalServerError     = EMBR_COAP_RESPONSE_CODE(ServerError, 0),
+        NotImplemented          = EMBR_COAP_RESPONSE_CODE(ServerError, 1),
+        ServiceUnavailable      = EMBR_COAP_RESPONSE_CODE(ServerError, 3),
     };
 
     enum types : unsigned
