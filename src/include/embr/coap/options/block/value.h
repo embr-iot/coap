@@ -78,10 +78,14 @@ public:
 // encode/decode become a matter of positioning into block_value
 class block_value
 {
+    // NUM missing its 4 lsb bits, which are tracked in btb_
     uint16_t num_;
     block_trailing_byte btb_;
 
 public:
+    static constexpr unsigned num_max = 0xFFFFFF;
+    static constexpr unsigned szx_max = 6;
+
     ESTD_CPP_CONSTEXPR(14) void reset()
     {
         num_ = 0;
@@ -90,19 +94,20 @@ public:
 
     static constexpr bool valid_num(unsigned v)
     {
-        return v <= 0xFFFFFF;
+        return v <= num_max;
     }
 
     static constexpr bool valid_szx(unsigned v)
     {
-        return v < 8;
+        return v <= szx_max;
     }
 
+
     block_value() = default;
-    constexpr block_value(const block_value&) = default;
+    ESTD_CPP_DEFAULT_RULE_OF_5(block_value)
 
     constexpr explicit block_value(unsigned num, bool m, unsigned szx) :
-        num_{static_cast<uint16_t>(num >> 4)},
+        num_{static_cast<uint16_t>(num >> 4U)},
         btb_{num & 0x0F, m, szx}
     {
         // Truth is I can't think of a non-synthetic use case where this constructor is useful as a constexpr.
@@ -116,7 +121,7 @@ public:
     // DEBT: encode/decode probably ought to freestand
 
     // 'data' MUST be writable up to 3 bytes
-    ESTD_CPP_CONSTEXPR(14) unsigned encode(uint8_t* data) const
+    ESTD_CPP_CONSTEXPR(14) unsigned encode(uint8_t* const data) const
     {
         if(num_ == 0 && btb_ == 0)  return 0;
 
@@ -156,7 +161,7 @@ public:
     {
         assert(valid_num(v));
 
-        num_ = v >> 4;
+        num_ = v >> 4U;
         btb_.num(v & 0x0F);
     }
 
