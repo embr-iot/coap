@@ -190,4 +190,4 @@ public:
 
 // NOLINTEND(*-signed-bitwise)
 
-}
+}   // namespace embr::coap::options

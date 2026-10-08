@@ -92,7 +92,7 @@ struct option_enum_base
     };
 };
 
-}
+}   // namespace embr::coap::internal
 
 namespace embr::coap::options {
 
