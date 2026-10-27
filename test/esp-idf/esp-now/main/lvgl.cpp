@@ -68,17 +68,33 @@ void app::on_coap_recv(const ethernet::mac& source, bool pressed)
 }
 
 template <class F, class Context>
-void add_event_cb(lv_obj_t* obj, F&&, lv_event_code_t event_code, Context* context)
+lv_event_dsc_t* add_event_cb(lv_obj_t* obj, F&&, lv_event_code_t event_code, Context* context)
 {
     static_assert(std::is_empty_v<F>);
 
-    lv_obj_add_event_cb(obj, [](lv_event_t* event)
-    {
-        auto self = static_cast<Context*>(lv_event_get_user_data(event));
+    return lv_obj_add_event_cb(obj, [](lv_event_t* event)
+        {
+            auto self = static_cast<Context*>(lv_event_get_user_data(event));
 
-        F{}(event, self);
-    },
-    event_code, context);
+            F{}(event, self);
+        },
+        event_code, context);
+}
+
+
+template <auto Method, class Context>
+lv_event_dsc_t* add_event_cb(lv_obj_t* obj, lv_event_code_t event_code, Context* context)
+{
+    static_assert(std::is_member_function_pointer_v<decltype(Method)>,
+        "Method must be a pointer to a non-static member function");
+
+    return lv_obj_add_event_cb(obj, [](lv_event_t* event)
+        {
+            auto self = static_cast<Context*>(lv_event_get_user_data(event));
+
+            (self->*Method)(event);
+        },
+        event_code, context);
 }
 
 void app::init()
@@ -95,28 +111,11 @@ void app::init()
     embr::lvgl::add_touch(display, *touch);
 #endif
 
-    /*
-     * Compiles, holding off using it until we can do a runtime test
-    add_event_cb(screen, [](lv_event_t*, app*)
-    {},
-    LV_EVENT_PRESSED, this);
-    */
-
-    lv_obj_add_event_cb(screen,
-        [](lv_event_t* event)
-        {
-            auto self = static_cast<app*>(lv_event_get_user_data(event));
-            self->on_touch_pressed(event);
-        },
-        LV_EVENT_PRESSED, this);
-
-    lv_obj_add_event_cb(screen,
-        [](lv_event_t* event)
-        {
-            auto self = static_cast<app*>(lv_event_get_user_data(event));
-            self->on_touch_released(event);
-        },
+    add_event_cb<&app::on_touch_pressed>(screen, LV_EVENT_PRESSED, this);
+    add_event_cb(screen, 
+        [](lv_event_t*, app* self) { self->on_button_up(); },
         LV_EVENT_RELEASED, this);
+
     #endif
 
     lv_obj_set_style_bg_color(screen, lv_color_hex(0x202020), 0);

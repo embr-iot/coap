@@ -13,6 +13,7 @@ namespace devtool::inline lvgl {
 std::optional<lv_point_t> get_point(lv_event_t* event)
 {
     lv_indev_t* indev = lv_event_get_indev(event);
+    if(indev == nullptr)    return std::nullopt;
     lv_point_t point;
     lv_indev_get_point(indev, &point);
     return point;
