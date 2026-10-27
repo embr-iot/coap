@@ -67,16 +67,40 @@ void app::on_coap_recv(const ethernet::mac& source, bool pressed)
     }
 }
 
+template <class F, class Context>
+void add_event_cb(lv_obj_t* obj, F&&, lv_event_code_t event_code, Context* context)
+{
+    static_assert(std::is_empty_v<F>);
+
+    lv_obj_add_event_cb(obj, [](lv_event_t* event)
+    {
+        auto self = static_cast<Context*>(lv_event_get_user_data(event));
+
+        F{}(event, self);
+    },
+    event_code, context);
+}
+
 void app::init()
 {
     lv_obj_t* screen = lv_screen_active();
 
 #ifdef CONFIG_ESP_BOARD_DEV_LCD_TOUCH_SUPPORT
+#ifndef CONFIG_EMBR_LVGL_INIT_TOUCH
+    ESP_LOGW(TAG, "Initializing touch manually - expected embr::bmgr::lvgl to do it")
     lv_display_t* display = lv_display_get_default();
     using iterator = bmgr::device_iterator<bmgr::constants::device_type_lcd_touch>;
 
     iterator touch = iterator::begin();
     embr::lvgl::add_touch(display, *touch);
+#endif
+
+    /*
+     * Compiles, holding off using it until we can do a runtime test
+    add_event_cb(screen, [](lv_event_t*, app*)
+    {},
+    LV_EVENT_PRESSED, this);
+    */
 
     lv_obj_add_event_cb(screen,
         [](lv_event_t* event)

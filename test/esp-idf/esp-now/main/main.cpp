@@ -112,7 +112,7 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(esp_idf::esp_now::add_broadcast_peer());
 
 #ifdef CONFIG_ESP_BOARD_DEV_DISPLAY_LCD_SUPPORT
-    ESP_ERROR_CHECK_WITHOUT_ABORT(embr_lvgl_init());
+    ESP_ERROR_CHECK_WITHOUT_ABORT(embr::lvgl::init());
 
     lvgl::async_call([] { devtool::lvgl::app::singleton.init(); });
 #endif

@@ -14,6 +14,4 @@ dependencies:
   embr-bmgr-lvgl:
     git: git@github.com:embr-iot/esp-bmgr
     path: lib/embr-bmgr-lvgl
-    matches:
-      - if: '$CONFIG{ESP_BOARD_DEV_DISPLAY_LCD_SUPPORT} == True'
     version: dev

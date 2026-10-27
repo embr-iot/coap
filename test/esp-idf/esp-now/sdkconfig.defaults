@@ -9,10 +9,4 @@ CONFIG_ESP_WIFI_SOFTAP_SUPPORT=n
 # EXPERIMENTAL
 CONFIG_ESP_WIFI_SLP_BEACON_LOST_OPT=y
 
-# 26SEP26 MB DEBT: These are supposed to flow down from my bmgr but doesn't seem to.
-# Also if not using my own bmgr it won't anyway.  However, will create warnings for non
-# LVGL situations
-# 27OCT26 MB FIX: Font#10 not getting picked up here, but used to.  bmgr regression?
-CONFIG_LV_FONT_MONTSERRAT=10
-CONFIG_LV_BUILD_EXAMPLES=n
-CONFIG_LV_BUILD_DEMOS=n
+CONFIG_LV_FONT_MONTSERRAT_10=y
