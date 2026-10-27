@@ -13,6 +13,6 @@ CONFIG_ESP_WIFI_SLP_BEACON_LOST_OPT=y
 # Also if not using my own bmgr it won't anyway.  However, will create warnings for non
 # LVGL situations
 # 27OCT26 MB FIX: Font#10 not getting picked up here, but used to.  bmgr regression?
-CONFIG_LV_FONT_MONTSERRAT=10
+CONFIG_LV_FONT_MONTSERRAT_10=y
 CONFIG_LV_BUILD_EXAMPLES=n
 CONFIG_LV_BUILD_DEMOS=n
