@@ -4,7 +4,5 @@ tags:
   - coap
 dependencies:
   malachi-iot/estd: "0.8.12"
-  embr:
-    git: https://github.com/malachi-iot/embr.git
-    version: v0.4.9
+  embr-iot/embr: ^0.4
 

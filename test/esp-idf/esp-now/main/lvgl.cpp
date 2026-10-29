@@ -2,6 +2,7 @@
 #include "devtool/lvgl.h"
 
 #include <embr/esp-idf/wifi/fwd.h>
+#include <embr/lvgl/obj_event.h>
 
 #ifdef CONFIG_ESP_BOARD_DEV_LCD_TOUCH_SUPPORT
 #include <embr/bmgr/dev/lcd_touch.h>
@@ -51,6 +52,7 @@ void app::on_coap_recv(const ethernet::mac& source, bool pressed)
     {
         estd::layer1::ostringstream<32> out;
 
+        // DEBT: See https://github.com/embr-iot/net/issues/1
         out << "MAC:\n" << hex << setw(2);
         out << source[0] << ':';
         for(int i = 1; i < 6; ++i)  out << ':' << source[i];
@@ -67,56 +69,17 @@ void app::on_coap_recv(const ethernet::mac& source, bool pressed)
     }
 }
 
-template <class F, class Context>
-lv_event_dsc_t* add_event_cb(lv_obj_t* obj, F&&, lv_event_code_t event_code, Context* context)
-{
-    static_assert(std::is_empty_v<F>);
-
-    return lv_obj_add_event_cb(obj, [](lv_event_t* event)
-        {
-            auto self = static_cast<Context*>(lv_event_get_user_data(event));
-
-            F{}(event, self);
-        },
-        event_code, context);
-}
-
-
-template <auto Method, class Context>
-lv_event_dsc_t* add_event_cb(lv_obj_t* obj, lv_event_code_t event_code, Context* context)
-{
-    static_assert(std::is_member_function_pointer_v<decltype(Method)>,
-        "Method must be a pointer to a non-static member function");
-
-    return lv_obj_add_event_cb(obj, [](lv_event_t* event)
-        {
-            auto self = static_cast<Context*>(lv_event_get_user_data(event));
-
-            (self->*Method)(event);
-        },
-        event_code, context);
-}
 
 void app::init()
 {
-    lv_obj_t* screen = lv_screen_active();
+    object screen = lv_screen_active();
 
-#ifdef CONFIG_ESP_BOARD_DEV_LCD_TOUCH_SUPPORT
-#ifndef CONFIG_EMBR_LVGL_INIT_TOUCH
-    ESP_LOGW(TAG, "Initializing touch manually - expected embr::bmgr::lvgl to do it")
-    lv_display_t* display = lv_display_get_default();
-    using iterator = bmgr::device_iterator<bmgr::constants::device_type_lcd_touch>;
-
-    iterator touch = iterator::begin();
-    embr::lvgl::add_touch(display, *touch);
-#endif
-
+#ifdef CONFIG_EMBR_LVGL_INIT_TOUCH
     add_event_cb<&app::on_touch_pressed>(screen, LV_EVENT_PRESSED, this);
     add_event_cb(screen, 
         [](lv_event_t*, app* self) { self->on_button_up(); },
         LV_EVENT_RELEASED, this);
-
-    #endif
+#endif
 
     lv_obj_set_style_bg_color(screen, lv_color_hex(0x202020), 0);
     lv_obj_set_style_text_color(screen, lv_color_white(), 0);
@@ -124,13 +87,13 @@ void app::init()
     constexpr bool small_mode = true;
 
     // "Our" color
-    us_box_ = lv_obj_create(screen);
-    lv_obj_set_size(us_box_, 100, 50);
+    us_box_ = screen.create();
+    us_box_.set_size(100, 50);
     lv_obj_set_style_bg_color(us_box_, mac_to_color(wifi::get_mac()), 0);
     lv_obj_set_align(us_box_, LV_ALIGN_LEFT_MID);
 
     // "Their" color (incoming MAC)
-    them_box_ = lv_obj_create(screen);
+    them_box_ = screen.create();
     lv_obj_set_size(them_box_, 100, 50);
     lv_obj_set_align(them_box_, LV_ALIGN_RIGHT_MID);
 

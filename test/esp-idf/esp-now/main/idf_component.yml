@@ -15,3 +15,7 @@ dependencies:
     git: git@github.com:embr-iot/esp-bmgr
     path: lib/embr-bmgr-lvgl
     version: dev
+  embr-lvgl:
+    git: git@github.com:embr-iot/esp-bmgr
+    path: lib/embr-lvgl
+    version: dev

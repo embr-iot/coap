@@ -6,6 +6,12 @@
 #include "fwd.h"
 
 #include <embr/bmgr/lvgl.h>
+#include <embr/lvgl/obj.h>
+
+// DEBT: Consider doing this up in embr/lvgl/fwd.h as a Kconfig option,
+// though maybe better to do this one-liner for when we really
+// want it
+using namespace embr::lvgl::wrapper;
 
 namespace devtool::inline lvgl {
 
@@ -13,12 +19,11 @@ lv_color_t mac_to_color(const embr::ethernet::mac&);
 
 class app
 {
-    lv_obj_t* us_box_{};
+    object us_box_{};
     lv_obj_t* them_box_{};
     lv_obj_t* them_label_{};
 
     void on_touch_pressed(lv_event_t*);
-    void on_touch_released(lv_event_t*);
 
 public:
     static app singleton;
